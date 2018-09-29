@@ -1,40 +1,11 @@
 const { app, BrowserWindow } = require('electron');
-const AWS = require('aws-sdk');
-const fetch = require('node-fetch');
-const queryString = require('query-string');
 const util = require('util');
 const ini = require('ini');
 const fs = require('fs');
 
-const federationURL = search => util.format('https://signin.aws.amazon.com/federation?%s', search);
-const consoleURL = 'https://console.aws.amazon.com';
+const getConsoleURL = require('./getConsoleURL');
 
 const profile = process.argv[2];
-
-const sessionJson = credentials => {
-    return {
-        sessionId: credentials.AccessKeyId,
-        sessionKey: credentials.SecretAccessKey,
-        sessionToken: credentials.SessionToken
-    };
-}
-
-const signinTokenRequest = sessionJson => {
-    return {
-        Action: 'getSigninToken',
-        DurationSeconds: 900,
-        SessionType: 'json',
-        Session: sessionJson
-    };
-};
-
-const consoleURLRequest = token => {
-    return {
-        Action: 'login',
-        SigninToken: token,
-        Destination: consoleURL
-    };
-}
 
 const getAWSConfig = () => {
     const awsConfigFile = util.format('%s/.aws/config', process.env.HOME);
@@ -54,34 +25,6 @@ const getAWSConfig = () => {
         return target;
     }, {});
 };
-
-const getConsoleURL = config => {
-    const role = config.role_arn;
-    // Create the browser window.
-
-    const awsConfigOptions = { profile: config.source_profile };
-    AWS.config.credentials = new AWS.SharedIniFileCredentials(awsConfigOptions);
-    const sts = new AWS.STS();
-
-    const assumeRoleParams = {
-        RoleArn: role,
-        RoleSessionName: 'foo'
-    };
-    return sts.assumeRole(assumeRoleParams).promise()
-        .then(result => result.Credentials)
-        .then(sessionJson)
-        .then(JSON.stringify)
-        .then(signinTokenRequest)
-        .then(queryString.stringify)
-        .then(federationURL)
-        .then(fetch)
-        .then(response => response.json())
-        .then(json => json.SigninToken)
-        .then(consoleURLRequest)
-        .then(queryString.stringify)
-        .then(federationURL)
-};
-
 
 app.on('ready', () => {
     const config = getAWSConfig()[profile];
