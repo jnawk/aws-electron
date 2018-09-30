@@ -42,7 +42,10 @@ app.on('ready', () => {
     var win = new BrowserWindow(options);
 
     getConsoleURL(config)
-        .then(url => win.loadURL(url))
+        // .then(url => win.loadURL(url))
+        .then(() => {
+            win.loadURL(`file://${__dirname}/index.html`);
+        })
         .catch(error => {
             console.error(error, error.stack);
             app.quit();
