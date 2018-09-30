@@ -12,7 +12,7 @@ const sessionJson = credentials => {
         sessionKey: credentials.SecretAccessKey,
         sessionToken: credentials.SessionToken
     };
-}
+};
 
 const signinTokenRequest = sessionJson => {
     return {
@@ -29,7 +29,7 @@ const consoleURLRequest = token => {
         SigninToken: token,
         Destination: consoleURL
     };
-}
+};
 
 const getConsoleURL = config => {
     const role = config.role_arn;
@@ -55,7 +55,7 @@ const getConsoleURL = config => {
         .then(json => json.SigninToken)
         .then(consoleURLRequest)
         .then(queryString.stringify)
-        .then(federationURL)
+        .then(federationURL);
 };
 
 module.exports = getConsoleURL;
