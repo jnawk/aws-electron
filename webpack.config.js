@@ -10,6 +10,7 @@ const config = {
         path: BUILD_DIR,
         filename: 'aws-console.js'
     },
+    target: 'electron-renderer',
     module: {
         rules: [
             {
