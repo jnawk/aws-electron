@@ -1,15 +1,17 @@
 import React from 'react';
-//import {Grid,Row,Col,Button} from 'react-bootstrap';
+import {Container,Row,Col,Button} from 'reactstrap';
+import 'bootstrap/dist/css/bootstrap.css';
 const remote = require('electron').remote;
 
 const getAWSConfig = remote.require('./AWSConfigReader');
 const getConsoleURL = remote.require('./getConsoleURL');
-const launchConsole = (profileName) => {
+const launchConsole = profileName => {
     const options = {
         width: 1280,
         height: 1024,
         webPreferences: {
-            partition: profileName
+            partition: profileName,
+            nodeIntegration: false
         }
     };
 
@@ -22,7 +24,6 @@ const launchConsole = (profileName) => {
             //app.quit();
         });
 };
-
 
 class AWSConsole extends React.Component {
     constructor(props) {
@@ -40,19 +41,23 @@ class AWSConsole extends React.Component {
     }
 
     render() {
-
-        return <div>
-            {this.usableProfiles.map(profileName => {
-                return <p>
-                    <a onClick={() => {
-                        console.log(profileName);
-                        console.log(launchConsole);
-                        console.log(remote);
-                        launchConsole(profileName);
-                    }}>{profileName}</a>
-                </p>;
-            })}
-        </div>;
+        return <Container>
+            <Row>
+                <Col sm={3}>Profile Name</Col>
+                <Col className='d-none d-sm-block' sm={7}>Role ARN</Col>
+                <Col className='d-none d-sm-none d-md-block' sm={2}>MFA ARN or Serial Number</Col>
+                <Col className='d-none d-sm-none d-md-block' sm={2}>Credentials Profile</Col>
+            </Row>
+            {this.usableProfiles.map(profileName => <Row>
+                <Col sm={3}>{profileName}</Col>
+                <Col className='d-none d-sm-block' sm={7}>{this.awsConfig[profileName].role_arn}</Col>
+                <Col className='d-none d-sm-none d-md-block' sm={2}>{this.awsConfig[profileName].mfa_serial}</Col>
+                <Col className='d-none d-sm-none d-md-block' sm={2}>{this.awsConfig[profileName].source_profile}</Col>
+                <Col sm={2}>
+                    <Button onClick={() => launchConsole(profileName)}>Launch</Button>
+                </Col>
+            </Row>)}
+        </Container>;
     }
 }
 

@@ -10,3 +10,10 @@ app.on('ready', () => {
     win.loadURL(`file://${__dirname}/index.html`);
     win.toggleDevTools();
 });
+
+app.on('web-contents-created', (event, contents) => {
+    contents.on('new-window', (event, navigationUrl) => {
+        console.log(navigationUrl);
+        // TODO open in a new tab
+    });
+});
