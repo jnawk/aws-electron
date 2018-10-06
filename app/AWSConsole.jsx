@@ -7,7 +7,7 @@ const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
 const getAWSConfig = remote.require('./AWSConfigReader');
 const getConsoleURL = remote.require('./getConsoleURL');
-const launchConsole = profileName => {
+const launchConsole = (profileName, mfaCode) => {
     const options = {
         width: 1280,
         height: 1024,
@@ -19,7 +19,7 @@ const launchConsole = profileName => {
 
     var win = new remote.BrowserWindow(options);
     const config = getAWSConfig()[profileName];
-    getConsoleURL(config)
+    getConsoleURL(config, mfaCode)
         .then(url => win.loadURL(url))
         .catch(error => {
             console.error(error, error.stack);
@@ -69,7 +69,7 @@ class AWSConsole extends React.Component {
                 const profile = this.awsConfig[profileName];
                 const roleRegexResult = roleRegex.exec(profile.role_arn);
                 const shouldDisable = profile.mfa_serial != undefined && this.state.mfaCode.length != 6;
-                const launchProfile = () => launchConsole(profileName);
+                const launchProfile = () => launchConsole(profileName, this.state.mfaCode);
 
                 const profileLaunchButton = <Button onClick={launchProfile}
                     disabled={shouldDisable}

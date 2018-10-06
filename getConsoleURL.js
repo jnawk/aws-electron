@@ -31,7 +31,7 @@ const consoleURLRequest = token => {
     };
 };
 
-const getConsoleURL = config => {
+const getConsoleURL = (config, tokenCode) => {
     const role = config.role_arn;
     // Create the browser window.
 
@@ -41,8 +41,14 @@ const getConsoleURL = config => {
 
     const assumeRoleParams = {
         RoleArn: role,
-        RoleSessionName: 'foo'
+        RoleSessionName: 'AWS'
     };
+
+    if(config.mfa_serial) {
+        assumeRoleParams.SerialNumber = config.mfa_serial;
+        assumeRoleParams.TokenCode = tokenCode;
+    }
+
     return sts.assumeRole(assumeRoleParams).promise()
         .then(result => result.Credentials)
         .then(sessionJson)
