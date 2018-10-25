@@ -69,7 +69,10 @@ class AWSConsole extends React.Component {
                 const profile = this.awsConfig[profileName];
                 const roleRegexResult = roleRegex.exec(profile.role_arn);
                 const shouldDisable = profile.mfa_serial != undefined && this.state.mfaCode.length != 6;
-                const launchProfile = () => launchConsole(profileName, this.state.mfaCode);
+                const launchProfile = () => {
+                    launchConsole(profileName, this.state.mfaCode);
+                    this.setState({mfaCode: ''});
+                }
 
                 const profileLaunchButton = <Button onClick={launchProfile}
                     disabled={shouldDisable}
