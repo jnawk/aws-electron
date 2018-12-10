@@ -74,39 +74,43 @@ class AWSConsole extends React.Component {
                     this.setState({mfaCode: ''});
                 }
 
-                const profileLaunchButton = <Button onClick={launchProfile}
-                    disabled={shouldDisable}
-                    title={shouldDisable ? 'Enter your 6-digit MFA code first!' : null}>
-                    {profileName}
-                </Button>;
+                const fullRoleName = roleRegexResult[2].replace(/-/g, String.fromCharCode(0x2011));
+                var shortRoleName;
+                if(fullRoleName.length > 45) {
+                    shortRoleName = fullRoleName.substring(0, 20) + '...' + fullRoleName.substring(fullRoleName.length - 20);
+                } else {
+                    shortRoleName = fullRoleName;
+                }
 
-                const launchButton = <Button onClick={launchProfile}
-                    disabled={shouldDisable}
-                    title={shouldDisable ? 'Enter your 6-digit MFA code first!' : null}>
-                    Launch
-                </Button>;
+                const launchButton = buttonText => {
+                    return <Button onClick={launchProfile}
+                        disabled={shouldDisable}
+                        title={shouldDisable ? 'Enter your 6-digit MFA code first!' : null}>
+                        {buttonText ? buttonText : 'Launch'}
+                    </Button>;
+                }
 
                 return <Row className='d-table-row'>
                     <Col className='d-none d-sm-table-cell' sm={2} md={3}>
                         {profileName.replace(/-/g, String.fromCharCode(0x2011))}
                     </Col>
                     <Col className='d-none d-md-table-cell' md={3}>
-                        {roleRegexResult[1]}
+                        {roleRegexResult[1]} {/*role account*/}
                     </Col>
                     <Col className='d-none d-md-table-cell' md={2}>
-                        {roleRegexResult[2].replace(/-/g, String.fromCharCode(0x2011))}
+                        <div title={fullRoleName == shortRoleName ? null : fullRoleName}>{shortRoleName}</div>
                     </Col>
                     <Col className='d-none d-lg-table-cell' lg={2}>
-                        {profile.mfa_serial}
+                        {profile.mfa_serial ? profile.mfa_serial.replace(/arn:aws:iam::/, '') : ''}
                     </Col>
                     <Col className='d-none d-md-table-cell' md={2}>
                         {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
                     </Col>
                     <Col className='d-table-cell d-sm-none'>
-                        {profileLaunchButton}
+                        {launchButton(profileName)}
                     </Col>
                     <Col className='d-none d-sm-table-cell' sm={2} md={2}>
-                        {launchButton}
+                        {launchButton()}
                     </Col>
                 </Row>;
             })}
