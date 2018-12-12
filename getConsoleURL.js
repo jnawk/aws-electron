@@ -28,13 +28,12 @@ const consoleURLRequest = token => {
         Action: 'login',
         SigninToken: token,
         Destination: consoleURL,
-	SessionDuration: 43200
+	      SessionDuration: 43200
     };
 };
 
 const getConsoleURL = (config, tokenCode) => {
     const role = config.role_arn;
-    // Create the browser window.
 
     const awsConfigOptions = { profile: config.source_profile };
     AWS.config.credentials = new AWS.SharedIniFileCredentials(awsConfigOptions);
@@ -42,7 +41,7 @@ const getConsoleURL = (config, tokenCode) => {
 
     const assumeRoleParams = {
         RoleArn: role,
-        RoleSessionName: 'AWS'
+        RoleSessionName: config.source_profile
     };
 
     if(config.mfa_serial) {
