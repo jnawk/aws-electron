@@ -19,7 +19,7 @@ const launchConsole = (profileName, mfaCode) => {
 
     var win = new remote.BrowserWindow(options);
     const config = getAWSConfig()[profileName];
-    getConsoleURL(config, mfaCode)
+    getConsoleURL(config, mfaCode, profileName)
         .then(url => win.loadURL(url))
         .catch(error => {
             console.error(error, error.stack);

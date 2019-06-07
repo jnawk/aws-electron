@@ -32,7 +32,7 @@ const consoleURLRequest = token => {
     };
 };
 
-const getConsoleURL = (config, tokenCode) => {
+const getConsoleURL = (config, tokenCode, profileName) => {
     const role = config.role_arn;
 
     const awsConfigOptions = { profile: config.source_profile };
@@ -41,7 +41,7 @@ const getConsoleURL = (config, tokenCode) => {
 
     const assumeRoleParams = {
         RoleArn: role,
-        RoleSessionName: config.source_profile
+        RoleSessionName: profileName
     };
 
     if(config.mfa_serial) {
