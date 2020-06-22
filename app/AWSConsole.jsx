@@ -5,7 +5,6 @@ const remote = require('electron').remote;
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
-const getAWSConfig = remote.require('./AWSConfigReader');
 const getConsoleURL = remote.require('./getConsoleURL');
 const launchConsole = (profileName, mfaCode) => {
     const options = {
@@ -36,6 +35,7 @@ const launchConsole = (profileName, mfaCode) => {
             //app.quit();
         });
 };
+const getAWSConfig = remote.getGlobal('getAWSConfig');
 
 class AWSConsole extends React.Component {
     constructor(props) {

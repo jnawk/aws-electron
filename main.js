@@ -1,5 +1,7 @@
 const { app, BrowserWindow } = require('electron');
 
+const getAWSConfig = require('./AWSConfigReader');
+global.getAWSConfig = getAWSConfig;
 app.on('ready', () => {
     const options = {
         width: 1280,
