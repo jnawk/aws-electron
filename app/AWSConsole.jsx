@@ -82,7 +82,7 @@ class AWSConsole extends React.Component {
                 const launchProfile = () => {
                     launchConsole(profileName, this.state.mfaCode);
                     this.setState({mfaCode: ''});
-                }
+                };
 
                 const fullRoleName = roleRegexResult[2].replace(/-/g, String.fromCharCode(0x2011));
                 var shortRoleName;
@@ -98,7 +98,7 @@ class AWSConsole extends React.Component {
                         title={shouldDisable ? 'Enter your 6-digit MFA code first!' : null}>
                         {buttonText ? buttonText : 'Launch'}
                     </Button>;
-                }
+                };
 
                 return <Row className='d-table-row'>
                     <Col className='d-none d-sm-table-cell' sm={2} md={3}>

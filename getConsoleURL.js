@@ -28,7 +28,7 @@ const consoleURLRequest = token => {
         Action: 'login',
         SigninToken: token,
         Destination: consoleURL,
-	      SessionDuration: 43200
+        SessionDuration: 43200
     };
 };
 
