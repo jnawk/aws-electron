@@ -13,8 +13,11 @@ app.on('ready', () => {
     win.toggleDevTools();
 });
 
-app.on('web-contents-created', (event, contents) => {
-    contents.on('new-window', (event, navigationUrl) => {
+app.on('web-contents-created', (wccEvent, contents) => {
+    contents.on('new-window', (nwEvent, navigationUrl) => {
+        if(nwEvent) {
+            nwEvent.preventDefault();
+        }
         console.log(navigationUrl);
         // TODO open in a new tab
     });
