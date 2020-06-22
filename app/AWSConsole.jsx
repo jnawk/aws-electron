@@ -5,37 +5,8 @@ const remote = require('electron').remote;
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
-const getConsoleURL = remote.require('./getConsoleURL');
-const launchConsole = (profileName, mfaCode) => {
-    const options = {
-        width: 1280,
-        height: 1024,
-        webPreferences: {
-            partition: profileName,
-            nodeIntegration: false
-        }
-    };
-
-    var win = new remote.BrowserWindow(options);
-    const config = getAWSConfig()[profileName];
-
-    const nw = (e, url) => {
-        if(e) {
-            e.preventDefault();
-        }
-        var win = new remote.BrowserWindow(options);
-        win.loadURL(url);
-        win.webContents.on('new-window', nw)
-    };
-
-    getConsoleURL(config, mfaCode, profileName)
-        .then(url => nw(null, url))
-        .catch(error => {
-            console.error(error, error.stack);
-            //app.quit();
-        });
-};
 const getAWSConfig = remote.getGlobal('getAWSConfig');
+const launchConsole = remote.getGlobal('launchConsole');
 
 class AWSConsole extends React.Component {
     constructor(props) {
