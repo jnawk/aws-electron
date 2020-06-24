@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AWS Console</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="node_modules/electron-tabs/electron-tabs.css">
+    <style>
+        body{
+            margin: 0;
+        }
+        webview {
+          visibility: visible
+        }
+    </style>
+</head>
+
+<body>
+  <div class="etabs-tabgroup">
+      <div class="etabs-tabs"></div>
+      <div class="etabs-buttons"></div>
+  </div>
+  <div class="etabs-views"></div>
+  <script>
+    // TODO extract this ... webpack it ...
+    const TabGroup = require("electron-tabs");
+    const tabGroup = new TabGroup({});
+    const { remote, ipcRenderer } = require('electron');
+    ipcRenderer.on('openTab', (event, url) => {
+      tabGroup.addTab({
+        title: 'AWS Console',
+        src: url,
+        active: true,
+        visible: true,
+        webviewAttributes: {
+            nodeintegration: false
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -4,6 +4,8 @@ const getAWSConfig = require('./AWSConfigReader');
 const getConsoleURL = require('./getConsoleURL');
 
 global.getAWSConfig = getAWSConfig;
+// TODO need to be able to support multiple windows
+let win;
 
 // TODO extract this
 global.launchConsole = (profileName, mfaCode) => {
@@ -12,23 +14,20 @@ global.launchConsole = (profileName, mfaCode) => {
         height: 1024,
         webPreferences: {
             partition: profileName,
-            nodeIntegration: false
+            nodeIntegration: true
         }
     };
 
     const config = getAWSConfig()[profileName];
 
-    const nw = (e, url) => {
-        if(e) {
-            e.preventDefault();
-        }
-        let win = new BrowserWindow(options);
-        win.loadURL(url);
-        win.webContents.on('new-window', nw);
-    };
-
     getConsoleURL(config, mfaCode, profileName)
-        .then(url => nw(null, url))
+        .then(url => {
+            win = new BrowserWindow(options);
+            win.loadURL(`file://${__dirname}/tabs.html`);
+            win.webContents.on('did-finish-load', () => {
+                win.webContents.send('openTab', url);
+            });
+        })
         .catch(error => {
             console.error(error, error.stack);
             //app.quit();
@@ -51,7 +50,6 @@ app.on('web-contents-created', (wccEvent, contents) => {
         if(nwEvent) {
             nwEvent.preventDefault();
         }
-        console.log(navigationUrl);
-        // TODO open in a new tab
+        win.webContents.send('openTab', navigationUrl);
     });
 });
