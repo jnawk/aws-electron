@@ -23,22 +23,8 @@
       <div class="etabs-buttons"></div>
   </div>
   <div class="etabs-views"></div>
-  <script>
-    // TODO extract this ... webpack it ...
-    const TabGroup = require("electron-tabs");
-    const tabGroup = new TabGroup({});
-    const { remote, ipcRenderer } = require('electron');
-    ipcRenderer.on('openTab', (event, url) => {
-      tabGroup.addTab({
-        title: 'AWS Console',
-        src: url,
-        active: true,
-        visible: true,
-        webviewAttributes: {
-            nodeintegration: false
-        }
-      });
-    });
+  <script type="text/javascript">
+      require('./tabs.js');
   </script>
 </body>
 </html>
