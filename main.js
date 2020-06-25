@@ -4,8 +4,10 @@ const getAWSConfig = require('./AWSConfigReader');
 const getConsoleURL = require('./getConsoleURL');
 
 global.getAWSConfig = getAWSConfig;
-// TODO need to be able to support multiple windows
-let win;
+
+// need to track the current window so that a new-window event is turned
+// into an openTab event in the right webContents.
+let currentWindow;
 
 // TODO extract this
 global.launchConsole = (profileName, mfaCode) => {
@@ -22,10 +24,18 @@ global.launchConsole = (profileName, mfaCode) => {
 
     getConsoleURL(config, mfaCode, profileName)
         .then(url => {
-            win = new BrowserWindow(options);
+            let win = new BrowserWindow(options);
+
             win.loadURL(`file://${__dirname}/tabs.html`);
             win.webContents.on('did-finish-load', () => {
                 win.webContents.send('openTab', url);
+            });
+
+            // when the window regains focus, update which window
+            // is the current window so that a new-window event is
+            // sent to the right place.
+            win.on('focus', () => {
+                currentWindow = win;
             });
         })
         .catch(error => {
@@ -50,6 +60,6 @@ app.on('web-contents-created', (wccEvent, contents) => {
         if(nwEvent) {
             nwEvent.preventDefault();
         }
-        win.webContents.send('openTab', navigationUrl);
+        currentWindow.webContents.send('openTab', navigationUrl);
     });
 });
