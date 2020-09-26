@@ -16,7 +16,8 @@ global.launchConsole = (profileName, mfaCode) => {
         height: 1024,
         webPreferences: {
             partition: profileName,
-            nodeIntegration: true
+            nodeIntegration: true,
+            webviewTag: true
         }
     };
 
@@ -48,6 +49,9 @@ app.on('ready', () => {
     const options = {
         width: 1280,
         height: 1024,
+        webPreferences: {
+          preload: `${__dirname}/preload.js`
+        }
     };
 
     var win = new BrowserWindow(options);

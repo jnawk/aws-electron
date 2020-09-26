@@ -1,6 +1,6 @@
 const TabGroup = require('electron-tabs');
 const tabGroup = new TabGroup({});
-const { remote, ipcRenderer } = require('electron');
+const { ipcRenderer } = require('electron');
 ipcRenderer.on('openTab', (event, url) => {
     tabGroup.addTab({
         title: 'AWS Console',

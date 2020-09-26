@@ -1,12 +1,11 @@
 import React from 'react';
 import {Container,Row,Col,Button} from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-const remote = require('electron').remote;
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
-const getAWSConfig = remote.getGlobal('getAWSConfig');
-const launchConsole = remote.getGlobal('launchConsole');
+const getAWSConfig = window.getAWSConfig;
+const launchConsole = window.launchConsole;
 
 class AWSConsole extends React.Component {
     constructor(props) {

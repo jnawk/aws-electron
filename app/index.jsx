@@ -2,8 +2,20 @@ import React from 'react';
 import {render} from 'react-dom';
 import AWSConsole from './AWSConsole.jsx';
 import 'bootstrap/dist/css/bootstrap.css';
+import {
+    HashRouter as Router,
+    Switch,
+    Route
+} from "react-router-dom"
 
-const awsconsole = (
-    <AWSConsole/>
+const app = (
+  <Router>
+    <Switch>
+      <Route exact path="/">
+        <AWSConsole/>
+      </Route>
+    </Switch>
+  </Router>
 );
-render(awsconsole, document.getElementById('awsconsole'));
+
+render(app, document.getElementById('app'));
