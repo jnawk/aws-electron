@@ -6,6 +6,7 @@ const BUILD_DIR = path.resolve(__dirname, 'build');
 const APP_DIR = path.resolve(__dirname, 'app');
 
 const config = {
+    mode: 'development',
     entry: APP_DIR + '/index.jsx',
     output: {
         path: BUILD_DIR,
