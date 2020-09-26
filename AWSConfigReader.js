@@ -1,9 +1,8 @@
-const util = require('util');
 const ini = require('ini');
 const fs = require('fs');
 
 const getAWSConfig = () => {
-    const awsConfigFile = util.format('%s/.aws/config', process.env.HOME);
+    const awsConfigFile = `${process.env.HOME}/.aws/config`;
     const readFileOptions = {
         encoding: 'utf-8', flags: 'r'
     };

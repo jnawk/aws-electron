@@ -1,9 +1,8 @@
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 const queryString = require('query-string');
-const util = require('util');
 
-const federationURL = search => util.format('https://signin.aws.amazon.com/federation?%s', search);
+const federationURL = search => `https://signin.aws.amazon.com/federation?${search}`;
 const consoleURL = 'https://console.aws.amazon.com';
 
 const sessionJson = credentials => {
