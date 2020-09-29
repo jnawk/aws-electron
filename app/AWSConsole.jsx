@@ -30,19 +30,19 @@ class AWSConsole extends React.Component {
         return <Container>
             <Row className='d-none d-sm-table-row'>
                 <Col className='d-none d-sm-table-cell' sm={2} md={3}>
-                    <caption>Profile Name</caption>
+                    <b>Profile Name</b>
                 </Col>
                 <Col className='d-none d-md-table-cell' md={3}>
-                    <caption>Role Account</caption>
+                    <b>Role Account</b>
                 </Col>
                 <Col className='d-none d-md-table-cell' md={2}>
-                    <caption>Role Name</caption>
+                    <b>Role Name</b>
                 </Col>
                 <Col className='d-none d-lg-table-cell' lg={2}>
-                    <caption>MFA ARN or Serial Number</caption>
+                    <b>MFA ARN or Serial Number</b>
                 </Col>
                 <Col className='d-none d-md-table-cell' md={2}>
-                    <caption>Credentials Profile</caption>
+                    <b>Credentials Profile</b>
                 </Col>
             </Row>
             {this.usableProfiles.map(profileName => {
