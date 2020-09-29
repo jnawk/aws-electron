@@ -70,7 +70,7 @@ class AWSConsole extends React.Component {
                     </Button>;
                 };
 
-                return <Row className='d-table-row'>
+                return <Row className='d-table-row' key={profileName}>
                     <Col className='d-none d-sm-table-cell' sm={2} md={3}>
                         {profileName.replace(/-/g, String.fromCharCode(0x2011))}
                     </Col>
