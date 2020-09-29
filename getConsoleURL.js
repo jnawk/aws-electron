@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const fetch = require('node-fetch');
 const queryString = require('query-string');
-const proxy = require('proxy-agent');
+const proxyAgent = require('proxy-agent');
+const session = require('electron').session;
 const https = require('https');
 const fs = require('fs');
 
@@ -35,44 +36,51 @@ const consoleURLRequest = token => {
 };
 
 const getConsoleURL = (config, tokenCode, profileName) => {
-    const role = config.role_arn;
+    return session.defaultSession.resolveProxy('https://sts.amazonaws.com')
+      .then(proxy => {
+        console.log('system proxy:', proxy);
 
-    const awsConfigOptions = { profile: config.source_profile };
-    AWS.config.credentials = new AWS.SharedIniFileCredentials(awsConfigOptions);
+        if(proxy == 'DIRECT') {
+          console.log('no proxy');
+          return new https.Agent();
+        } else {
+          proxy = proxy.replace('PROXY ', '');
+          proxy = proxy.replace(/[;\s+].*/, '');
+          let hasScheme = proxy.match(/^(https?):\/\//i);
+          if(!hasScheme) {
+            proxy = `http://${proxy}`
+          }
+          console.log('proxy:', proxy);
+          return proxyAgent(proxy);
+        }
+      }).then(agent => {
+        if(config.ca_bundle !== undefined) {
+          console.log(`setting CA cert to ${config.ca_bundle}`);
+          agent.options = {
+            ca: [fs.readFileSync(config.ca_bundle)],
+            rejectUnauthorized: true
+          };
+        } else {
+          console.log('not overriding CA');
+        }
 
-    let agent;
-    if(process.env.HTTPS_PROXY !== undefined) {
-      console.log(`setting proxy to ${process.env.HTTPS_PROXY}`);
-      agent = proxy(process.env.HTTPS_PROXY)
-    } else {
-      console.log('no proxy');
-      agent = new https.Agent()
-    }
+        AWS.config.credentials = new AWS.SharedIniFileCredentials({
+          profile: config.source_profile
+        });
 
-    if(config.ca_bundle !== undefined) {
-      console.log(`setting CA cert to ${config.ca_bundle}`);
-      agent.options = {
-        ca: [fs.readFileSync(config.ca_bundle)],
-        rejectUnauthorized: true
-      };
-    } else {
-      console.log('not overriding CA');
-    }
+        const assumeRoleParams = {
+            RoleArn: config.role_arn,
+            RoleSessionName: profileName
+        };
+        if(config.mfa_serial) {
+            assumeRoleParams.SerialNumber = config.mfa_serial;
+            assumeRoleParams.TokenCode = tokenCode;
+        }
 
-    AWS.config.update({ httpOptions: { agent: agent } });
-    const sts = new AWS.STS();
-
-    const assumeRoleParams = {
-        RoleArn: role,
-        RoleSessionName: profileName
-    };
-
-    if(config.mfa_serial) {
-        assumeRoleParams.SerialNumber = config.mfa_serial;
-        assumeRoleParams.TokenCode = tokenCode;
-    }
-
-    return sts.assumeRole(assumeRoleParams).promise()
+        AWS.config.update({ httpOptions: { agent: agent } });
+        const sts = new AWS.STS();
+        return sts.assumeRole(assumeRoleParams).promise();
+      })
         .then(result => result.Credentials)
         .then(sessionJson)
         .then(JSON.stringify)
@@ -84,7 +92,7 @@ const getConsoleURL = (config, tokenCode, profileName) => {
         .then(json => json.SigninToken)
         .then(consoleURLRequest)
         .then(queryString.stringify)
-        .then(federationURL);
+        .then(federationURL)
 };
 
 module.exports = getConsoleURL;
