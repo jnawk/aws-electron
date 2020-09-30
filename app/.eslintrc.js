@@ -1,13 +1,26 @@
 module.exports = {
     'env': {
         'browser': true,
-        'commonjs': true,
-        'es2021': true,
-        'node': true
+        'es2021': true
     },
-    'extends': 'eslint:recommended',
+    'extends': [
+        'eslint:recommended',
+        'plugin:react/recommended'
+    ],
     'parserOptions': {
-        'ecmaVersion': 12
+        'ecmaFeatures': {
+            'jsx': true
+        },
+        'ecmaVersion': 12,
+        'sourceType': 'module'
+    },
+    'plugins': [
+        'react'
+    ],
+    'settings': {
+      'react': {
+        'version': 'detect'
+      }
     },
     'rules': {
         'indent': [

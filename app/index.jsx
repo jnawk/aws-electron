@@ -6,16 +6,16 @@ import {
     HashRouter as Router,
     Switch,
     Route
-} from "react-router-dom"
+} from 'react-router-dom';
 
 const app = (
-  <Router>
-    <Switch>
-      <Route exact path="/">
-        <AWSConsole/>
-      </Route>
-    </Switch>
-  </Router>
+    <Router>
+        <Switch>
+            <Route exact path="/">
+                <AWSConsole/>
+            </Route>
+        </Switch>
+    </Router>
 );
 
 render(app, document.getElementById('app'));
