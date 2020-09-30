@@ -40,6 +40,7 @@
     "node-fetch": "^2.6.1",
     "proxy-agent": "^3.1.1",
     "query-string": "^6.13.1",
-    "react-router-dom": "^5.2.0"
+    "react-router-dom": "^5.2.0",
+    "split-ca": "^1.0.1"
   }
 }

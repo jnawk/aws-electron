@@ -4,7 +4,7 @@ const queryString = require('query-string');
 const proxyAgent = require('proxy-agent');
 const session = require('electron').session;
 const https = require('https');
-const fs = require('fs');
+const splitca = require('split-ca');
 
 const federationURL = search => `https://signin.aws.amazon.com/federation?${search}`;
 const consoleURL = 'https://console.aws.amazon.com';
@@ -57,7 +57,7 @@ const getConsoleURL = (config, tokenCode, profileName) => {
         if(config.ca_bundle !== undefined) {
           console.log(`setting CA cert to ${config.ca_bundle}`);
           agent.options = {
-            ca: [fs.readFileSync(config.ca_bundle)],
+            ca: splitca(config.ca_bundle),
             rejectUnauthorized: true
           };
         } else {
