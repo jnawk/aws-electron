@@ -84,6 +84,9 @@ const makeAssumeRoleParams = (config, tokenCode, profileName) => {
         assumeRoleParams.SerialNumber = config.mfa_serial;
         assumeRoleParams.TokenCode = tokenCode;
     }
+    if(config.duration_seconds) {
+      assumeRoleParams.DurationSeconds = config.duration_seconds
+    }
 
     return assumeRoleParams;
 };
