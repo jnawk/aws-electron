@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 
-const getAWSConfig = require('./AWSConfigReader');
+const { getAWSConfig } = require('./AWSConfigReader');
 const getConsoleURL = require('./getConsoleURL');
 
 global.getAWSConfig = getAWSConfig;

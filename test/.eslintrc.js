@@ -1,18 +1,17 @@
 module.exports = {
     'env': {
-        'browser': true,
         'commonjs': true,
         'es2021': true,
-        'node': true
+        'node': true,
+        'mocha': true
     },
-    'plugins': [ 'jsdoc' ],
-    'extends': [
-        'eslint:recommended',
-        'plugin:jsdoc/recommended'
-    ],
+    'extends': [ 'eslint:recommended', 'plugin:mocha/recommended' ],
     'parserOptions': {
         'ecmaVersion': 12
     },
+    'plugins': [
+        'mocha'
+    ],
     'rules': {
         'indent': [
             'error',
