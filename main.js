@@ -27,7 +27,7 @@ global.launchConsole = (profileName, mfaCode) => {
         .then(url => {
             let win = new BrowserWindow(options);
 
-            win.loadURL(`file://${__dirname}/tabs.html`);
+            win.loadURL(`file://${__dirname}/tabs.html?profile=${profileName}`);
             win.webContents.on('did-finish-load', () => {
                 win.webContents.send('openTab', url);
             });

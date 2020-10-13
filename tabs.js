@@ -1,6 +1,8 @@
 const TabGroup = require('electron-tabs');
 const tabGroup = new TabGroup({});
 const { ipcRenderer } = require('electron');
+const partition = new URL(window.location.href).searchParams.get('profile')
+
 ipcRenderer.on('openTab', (event, url) => {
     tabGroup.addTab({
         title: 'AWS Console',
@@ -8,7 +10,8 @@ ipcRenderer.on('openTab', (event, url) => {
         active: true,
         visible: true,
         webviewAttributes: {
-            nodeintegration: false
+            nodeintegration: false,
+            partition: partition
         },
         ready: tab => {
             tab.on('webview-dom-ready', () => {
