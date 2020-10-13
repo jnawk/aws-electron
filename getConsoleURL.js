@@ -85,7 +85,7 @@ const makeAssumeRoleParams = (config, tokenCode, profileName) => {
         assumeRoleParams.TokenCode = tokenCode;
     }
     if(config.duration_seconds) {
-      assumeRoleParams.DurationSeconds = config.duration_seconds
+        assumeRoleParams.DurationSeconds = config.duration_seconds;
     }
 
     return assumeRoleParams;
