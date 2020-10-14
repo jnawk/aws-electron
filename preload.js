@@ -1,4 +1,2 @@
-const { ipcRenderer, remote } = require("electron")
-
-window.getAWSConfig = () => ipcRenderer.invoke("get-aws-config")
-window.launchConsole = remote.getGlobal("launchConsole")
+const { ipcRenderer } = require("electron")
+window.ipcRenderer = ipcRenderer

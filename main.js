@@ -10,7 +10,7 @@ ipcMain.handle("get-aws-config", () => getAWSConfig())
 let currentWindow
 
 // TODO extract this
-global.launchConsole = (profileName, mfaCode) => {
+ipcMain.on("launch-console",  (event, profileName, mfaCode) => {
     const options = {
         width: 1280,
         height: 1024,
@@ -43,7 +43,7 @@ global.launchConsole = (profileName, mfaCode) => {
             console.error(error, error.stack)
             //app.quit();
         })
-}
+})
 
 app.on("ready", () => {
     const options = {
