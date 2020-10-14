@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'">
     <link rel="stylesheet" href="node_modules/electron-tabs/electron-tabs.css">
     <style>
         body{
@@ -23,8 +24,6 @@
       <div class="etabs-buttons"></div>
   </div>
   <div class="etabs-views"></div>
-  <script type="text/javascript">
-      require('./tabs.js');
-  </script>
+  <script type="text/javascript" src="tabs.js"></script>
 </body>
 </html>
