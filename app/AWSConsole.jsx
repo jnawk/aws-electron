@@ -1,5 +1,5 @@
 import React from "react"
-import {Container,Row,Col,Button} from "reactstrap"
+import { Container, Row, Col, Button } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
@@ -11,22 +11,28 @@ class AWSConsole extends React.Component {
     constructor(props) {
         super(props)
 
-        this.awsConfig = getAWSConfig()
-        this.usableProfiles = Object.keys(this.awsConfig)
-            .filter(key => Object.keys(this.awsConfig[key]).includes("role_arn"))
-
         this.state = {
             mfaCode: ""
         }
     }
 
     componentDidMount() {
+        getAWSConfig().then(awsConfig => {
+            const usableProfiles = Object.keys(awsConfig)
+                .filter(key => Object.keys(awsConfig[key]).includes("role_arn"))
+
+            this.setState({awsConfig, usableProfiles})
+        })
     }
 
     componentWillUnmount() {
     }
 
     render() {
+        const { awsConfig, usableProfiles, mfaCode } = this.state
+        if(!usableProfiles) {
+            return <>Loading...</>
+        }
         return <Container>
             <Row className='d-none d-sm-table-row'>
                 <Col className='d-none d-sm-table-cell' sm={2} md={3}>
@@ -45,12 +51,12 @@ class AWSConsole extends React.Component {
                     <b>Credentials Profile</b>
                 </Col>
             </Row>
-            {this.usableProfiles.map(profileName => {
-                const profile = this.awsConfig[profileName]
+            {usableProfiles.map(profileName => {
+                const profile = awsConfig[profileName]
                 const roleRegexResult = roleRegex.exec(profile.role_arn)
-                const shouldDisable = profile.mfa_serial != undefined && this.state.mfaCode.length != 6
+                const shouldDisable = profile.mfa_serial != undefined && mfaCode.length != 6
                 const launchProfile = () => {
-                    launchConsole(profileName, this.state.mfaCode)
+                    launchConsole(profileName, mfaCode)
                     this.setState({mfaCode: ""})
                 }
 
@@ -94,10 +100,10 @@ class AWSConsole extends React.Component {
                     </Col>
                 </Row>
             })}
-            {this.usableProfiles.some(profile => this.awsConfig[profile].mfa_serial) ? <Row>
+            {usableProfiles.some(profile => awsConfig[profile].mfa_serial) ? <Row>
                 <Col>
                     <input type='text'
-                        value={this.state.mfaCode}
+                        value={mfaCode}
                         placeholder='MFA Code'
                         onChange={event => this.setState({mfaCode: event.target.value})}/>
                 </Col>

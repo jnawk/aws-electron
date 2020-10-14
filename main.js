@@ -1,9 +1,9 @@
-const { app, BrowserWindow } = require("electron")
+const { app, BrowserWindow, ipcMain } = require("electron")
 
 const { getAWSConfig } = require("./AWSConfigReader")
 const getConsoleURL = require("./getConsoleURL")
 
-global.getAWSConfig = getAWSConfig
+ipcMain.handle("get-aws-config", () => getAWSConfig())
 
 // need to track the current window so that a new-window event is turned
 // into an openTab event in the right webContents.
