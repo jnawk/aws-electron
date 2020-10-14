@@ -50,7 +50,9 @@ app.on("ready", () => {
         width: 1280,
         height: 1024,
         webPreferences: {
-            preload: `${__dirname}/preload.js`
+            preload: `${__dirname}/preload.js`,
+            worldSafeExecuteJavaScript: true,
+            contextIsolation: true
         }
     }
 

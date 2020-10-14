@@ -1,10 +1,9 @@
 import React from "react"
 import { Container, Row, Col, Button } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
-const ipcRenderer = window.ipcRenderer
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
-
+const backend = window.backend;
 
 class AWSConsole extends React.Component {
     constructor(props) {
@@ -16,7 +15,7 @@ class AWSConsole extends React.Component {
     }
 
     componentDidMount() {
-        ipcRenderer.invoke("get-aws-config").then(awsConfig => {
+        backend.getAWSConfig().then(awsConfig => {
             const usableProfiles = Object.keys(awsConfig)
                 .filter(key => Object.keys(awsConfig[key]).includes("role_arn"))
 
@@ -55,7 +54,7 @@ class AWSConsole extends React.Component {
                 const roleRegexResult = roleRegex.exec(profile.role_arn)
                 const shouldDisable = profile.mfa_serial != undefined && mfaCode.length != 6
                 const launchProfile = () => {
-                    ipcRenderer.send("launch-console", profileName, mfaCode)
+                    backend.launchConsole(profileName, mfaCode)
                     this.setState({mfaCode: ""})
                 }
 
