@@ -1,33 +1,33 @@
 module.exports = {
-    'env': {
-        'commonjs': true,
-        'es2021': true,
-        'node': true,
-        'mocha': true
+    "env": {
+        "commonjs": true,
+        "es2021": true,
+        "node": true,
+        "mocha": true
     },
-    'extends': [ 'eslint:recommended', 'plugin:mocha/recommended' ],
-    'parserOptions': {
-        'ecmaVersion': 12
+    "extends": [ "eslint:recommended", "plugin:mocha/recommended" ],
+    "parserOptions": {
+        "ecmaVersion": 12
     },
-    'plugins': [
-        'mocha'
+    "plugins": [
+        "mocha"
     ],
-    'rules': {
-        'indent': [
-            'error',
+    "rules": {
+        "indent": [
+            "error",
             4
         ],
-        'linebreak-style': [
-            'error',
-            'unix'
+        "linebreak-style": [
+            "error",
+            "unix"
         ],
-        'quotes': [
-            'error',
-            'single'
+        "quotes": [
+            "error",
+            "double"
         ],
-        'semi': [
-            'error',
-            'always'
+        "semi": [
+            "error",
+            "never"
         ]
     }
-};
+}
