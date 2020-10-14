@@ -7,6 +7,7 @@ const APP_DIR = path.resolve(__dirname, "app")
 
 const config = {
     mode: "development",
+    devtool: "source-map",
     entry: APP_DIR + "/index.jsx",
     output: {
         path: BUILD_DIR,
