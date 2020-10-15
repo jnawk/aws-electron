@@ -32,6 +32,7 @@ class AWSConsole extends React.Component {
             return <>Loading...</>
         }
         return <Container>
+        return <Container fluid>
             <Row className='d-none d-sm-table-row'>
                 <Col className='d-none d-sm-table-cell' sm={2} md={3}>
                     <b>Profile Name</b>
