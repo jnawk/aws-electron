@@ -17,7 +17,9 @@ ipcMain.on("launch-console",  (event, profileName, mfaCode) => {
         webPreferences: {
             partition: profileName,
             nodeIntegration: true,
-            webviewTag: true
+            webviewTag: true//, // we aren't ready for this yet
+            // worldSafeExecuteJavaScript: true,
+            // contextIsolation: true
         }
     }
 

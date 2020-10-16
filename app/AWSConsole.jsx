@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
-const backend = window.backend;
+const backend = window.backend
 
 class AWSConsole extends React.Component {
     constructor(props) {
