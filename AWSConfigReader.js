@@ -11,49 +11,68 @@ const cleanProfileKey = key => {
     return key.replace("profile ", "")
 }
 
-module.exports = {
-    getAWSConfig: (awsConfigFile, options) => {
-        if(!awsConfigFile) {
-            awsConfigFile = path.join(os.homedir(), ".aws", "config")
+const isLikelyVaultV4Config = config => {
+    /**
+      AWS Vault version 4 (and earlier, I dunno?) caused things like
+      mfa_serial to be inheritable from the source_profile.  They have since
+      learned the error of their ways, but no doubt there are misguided
+      individuals out there still using this version's broken features.
+     
+      Having a mfa_serial on the default profile is a dead giveaway.
+     */
+
+    return Object.keys(config).map(key=>config[key]).some(profile => {
+        let sourceProfile = profile.source_profile
+        if(!sourceProfile) {
+            return false
         }
-        const awsConfigFileContent = fs.readFileSync(awsConfigFile, readFileOptions)
-        const awsConfig = ini.parse(awsConfigFileContent)
-        for(let key in awsConfig) {
-            const value = awsConfig[key]
-            delete awsConfig[key]
-            awsConfig[cleanProfileKey(key)] = value
+
+        sourceProfile = config[sourceProfile]
+        if(!sourceProfile) {
+            return false
         }
-        if(options && options.vault) {
-            for(const profile in awsConfig) {
-                if(awsConfig[profile].source_profile) {
-                    const sourceProfile = awsConfig[awsConfig[profile].source_profile]
-                    for(const key in sourceProfile) {
-                        if(!(key in awsConfig[profile])) {
-                            awsConfig[profile][key] = sourceProfile[key]
-                        }
+
+        return !!sourceProfile.mfa_serial
+    })
+}
+
+const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
+    if(!awsConfigFile) {
+        awsConfigFile = path.join(os.homedir(), ".aws", "config")
+    }
+    if(!awsCredentialsFile) {
+        awsCredentialsFile = path.join(os.homedir(), ".aws", "credentials")
+    }
+
+    const awsConfigFileContent = fs.readFileSync(awsConfigFile, readFileOptions)
+    const awsCredentialsFileContent = fs.readFileSync(awsCredentialsFile, readFileOptions)
+    const awsConfig = ini.parse(awsConfigFileContent)
+    const awsCredentials = ini.parse(awsCredentialsFileContent)
+    for(const key in awsConfig) {
+        const value = awsConfig[key]
+        delete awsConfig[key]
+        awsConfig[cleanProfileKey(key)] = value
+    }
+    const configs = {
+        awsConfig,
+        credentialsProfiles: Object.keys(awsCredentials) 
+    }
+    if(isLikelyVaultV4Config(awsConfig)) {
+        const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) // this feels yuck
+        for(const profile in vaultConfig) {
+            if(vaultConfig[profile].source_profile) {
+                const sourceProfile = vaultConfig[vaultConfig[profile].source_profile]
+                for(const key in sourceProfile) {
+                    if(!(key in vaultConfig[profile])) {
+                        vaultConfig[profile][key] = sourceProfile[key]
                     }
                 }
             }
         }
-        return awsConfig
-    },
-
-    isLikelyVaultV4Config: config => {
-        /**
-          AWS Vault version 4 (and earlier, I dunno?) caused things like
-          mfa_serial to be inheritable from the source_profile.  They have since
-          learned the error of their ways, but no doubt there are misguided
-          individuals out there still using this version's broken features.
-         
-          Having a mfa_serial on the default profile is a dead giveaway.
-         */
-        if(!config.default) {
-            return false
-        }
-        if(config.default.mfa_serial) {
-            return true
-        }
-
-        return false
+        configs.vaultConfig = vaultConfig
     }
+
+    return configs
 }
+
+module.exports = { getAWSConfig, isLikelyVaultV4Config }

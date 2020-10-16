@@ -1,0 +1,13 @@
+[default]
+region = ap-southeast-2
+;mfa_serial = arn:aws:iam::123456789012:mfa/defaultUsername
+
+;[profile ghostprofile]
+;role_arn = arn:aws:iam::123456789012:role/ghostRoleName
+;source_profile = default
+
+[profile notdefault]
+role_arn = arn:aws:iam::123456789012:role/notDefaultRoleName
+source_profile = default
+mfa_serial = arn:aws:iam::123456789012:mfa/notDefaultUsername
+duration_seconds = 43200
