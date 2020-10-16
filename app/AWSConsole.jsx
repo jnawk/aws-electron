@@ -1,6 +1,8 @@
 import React from "react"
 import { Container, Row, Col, Button, Alert } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
+import { CSSTransitionGroup } from "react-transition-group"
+import "./vaultMessage.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
 const backend = window.backend
@@ -28,7 +30,7 @@ class AWSConsole extends React.Component {
         if(!displayVaultMessage) {
             return null
         }
-        return <Alert variant="info">
+        return <Alert variant="info" key="foo">
             <h1>Vault V4 Style config detected!</h1>
             <p>
                   Your config file has at least one role-assuming profile
@@ -82,7 +84,13 @@ class AWSConsole extends React.Component {
         })
 
         return <>
-            {this.vaultMessage()}
+            <CSSTransitionGroup
+                transitionName='vaultMessage'
+                transitionEnterTimeout={1}
+                transitionLeave={true}
+                transitionLeaveTimeout={300}>
+                {this.vaultMessage()}
+            </CSSTransitionGroup>
             <Container fluid>
                 <Row className='d-none d-sm-table-row'>
                     <Col className='d-none d-sm-table-cell' sm={2} md={3}>

@@ -1,0 +1,17 @@
+.vaultMessage-leave {
+  height: calc(100%);
+  transition-property: transform, height;
+  transition-duration: 1000ms;
+  transition-timing-function: ease-in-out;
+}
+
+.vaultMessage-leave.vaultMessage-leave-active {
+  transform: translateY(-100%);
+  overflow-y: hidden;
+  vertical-align: bottom;
+  max-height: 0%;
+  transition-property: transform, max-height;
+  transition-duration: 150ms;
+  transition-delay: 150ms;
+  transition-timing-function: ease-in-out;
+}
