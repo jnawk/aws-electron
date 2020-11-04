@@ -23,6 +23,7 @@ ipcMain.on("launch-console",  (event, profileName, mfaCode) => {
         }
     }
 
+    // TODO this needs to know if it is vault-config or aws-config
     const config = getAWSConfig()[profileName]
 
     getConsoleURL(config, mfaCode, profileName)
