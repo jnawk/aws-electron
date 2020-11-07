@@ -59,7 +59,7 @@ app.on("ready", () => {
         }
     }
 
-    var win = new BrowserWindow(options)
+    const win = new BrowserWindow(options)
     win.loadURL(`file://${__dirname}/index.html`)
 //    win.toggleDevTools();
 })
