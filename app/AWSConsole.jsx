@@ -76,6 +76,7 @@ class AWSConsole extends React.Component {
         }
         const usingAwsConfig = explicitTreatConfigProperly || vaultConfig == undefined
         const config = usingAwsConfig ? awsConfig : vaultConfig
+        const configType = usingAwsConfig ? "awsConfig" : "vaultConfig"
 
         const usableProfiles = Object.keys(config).filter(key => {
             const profile = config[key]
@@ -114,7 +115,7 @@ class AWSConsole extends React.Component {
                     const roleRegexResult = roleRegex.exec(profile.role_arn)
                     const shouldDisable = profile.mfa_serial != undefined && mfaCode.length != 6
                     const launchProfile = () => {
-                        backend.launchConsole(profileName, mfaCode)
+                        backend.launchConsole({profileName, mfaCode, configType})
                         this.setState({mfaCode: ""})
                     }
 

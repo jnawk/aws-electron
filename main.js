@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron")
 
 const { getAWSConfig } = require("./AWSConfigReader")
-const getConsoleURL = require("./getConsoleURL")
+const launchConsole = require("./launchConsole")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
 
@@ -9,43 +9,12 @@ ipcMain.handle("get-aws-config", () => getAWSConfig())
 // into an openTab event in the right webContents.
 let currentWindow
 
-// TODO extract this
-ipcMain.on("launch-console",  (event, profileName, mfaCode) => {
-    const options = {
-        width: 1280,
-        height: 1024,
-        webPreferences: {
-            partition: profileName,
-            nodeIntegration: true,
-            webviewTag: true//, // we aren't ready for this yet
-            // worldSafeExecuteJavaScript: true,
-            // contextIsolation: true
-        }
-    }
+const setCurrentWindow = win => {
+    currentWindow = win
+}
 
-    // TODO this needs to know if it is vault-config or aws-config
-    const config = getAWSConfig()[profileName]
-
-    getConsoleURL(config, mfaCode, profileName)
-        .then(url => {
-            let win = new BrowserWindow(options)
-
-            win.loadURL(`file://${__dirname}/tabs.html?profile=${profileName}`)
-            win.webContents.on("did-finish-load", () => {
-                win.webContents.send("openTab", url)
-            })
-
-            // when the window regains focus, update which window
-            // is the current window so that a new-window event is
-            // sent to the right place.
-            win.on("focus", () => {
-                currentWindow = win
-            })
-        })
-        .catch(error => {
-            console.error(error, error.stack)
-            //app.quit();
-        })
+ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
+    launchConsole({profileName, mfaCode, configType, setCurrentWindow})
 })
 
 app.on("ready", () => {
