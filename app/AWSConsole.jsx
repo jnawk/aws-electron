@@ -1,7 +1,7 @@
 import React from "react"
 import { Container, Row, Col, Button, Alert } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
-import { CSSTransitionGroup } from "react-transition-group"
+import { CSSTransition, TransitionGroup } from "react-transition-group"
 import "./vaultMessage.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
@@ -30,36 +30,40 @@ class AWSConsole extends React.Component {
         if(!displayVaultMessage) {
             return null
         }
-        return <Alert variant="info" key="foo">
-            <h1>Vault V4 Style config detected!</h1>
-            <p>
+        return <CSSTransition key={"foo"}
+            classNames={"vaultMessage"}
+            timeout={{enter: 1, exit: 300}}>
+            <Alert variant={"info"}>
+                <h1>Vault V4 Style config detected!</h1>
+                <p>
                   Your config file has at least one role-assuming profile
                   which defines a <tt>source_profile</tt> that exists as a
-                {"\u0020"} <i>config</i> profile.  (<tt>source_profile</tt>
-                {"\u0020"} canonically refers to a <i>credentials</i>
-                {"\u0020"} profile).
-            </p>
-            <p>
+                    {"\u0020"} <i>config</i> profile.  (<tt>source_profile</tt>
+                    {"\u0020"} canonically refers to a <i>credentials</i>
+                    {"\u0020"} profile).
+                </p>
+                <p>
                   When using the awscli, this profile will <b>not</b> inherit
                   the config from the config profile matching the {"\u0020"}
-                <tt>source_profile</tt>, while with aws-vault (version 4),
+                    <tt>source_profile</tt>, while with aws-vault (version 4),
                   the profile <b>will</b> inherit the config from the config
                   profile matching the <tt>source_profile</tt>.  (The authors
                   of aws-vault have since realised the error of their ways,
                   and version 5 behaves canonically, if their documentation is
                   to be trusted.)
-            </p>
-            <p>
+                </p>
+                <p>
                   This software will treat configs that <i>look</i> like vault
                   configs as vault configs, unless you tell it not to.
-            </p>
-            <Button onClick={() => {this.setState({explicitTreatConfigProperly: true})}}>
+                </p>
+                <Button onClick={() => {this.setState({explicitTreatConfigProperly: true})}}>
                   Please treat my config file properly.
-            </Button> {"\u0020"}
-            <Button onClick={() => {this.setState({explicitTreatConfigProperly: false})}}>
+                </Button> {"\u0020"}
+                <Button onClick={() => {this.setState({explicitTreatConfigProperly: false})}}>
                   Please treat my config file as a V4 Vault config.
-            </Button>
-        </Alert>
+                </Button>
+            </Alert>
+        </CSSTransition>
     }
 
     render() {
@@ -85,13 +89,9 @@ class AWSConsole extends React.Component {
         })
 
         return <>
-            <CSSTransitionGroup
-                transitionName='vaultMessage'
-                transitionEnterTimeout={1}
-                transitionLeave={true}
-                transitionLeaveTimeout={300}>
+            <TransitionGroup>
                 {this.vaultMessage()}
-            </CSSTransitionGroup>
+            </TransitionGroup>
             <Container fluid>
                 <Row className='d-none d-sm-table-row'>
                     <Col className='d-none d-sm-table-cell' sm={2} md={3}>

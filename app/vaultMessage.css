@@ -1,11 +1,11 @@
-.vaultMessage-leave {
+.vaultMessage-exit {
   height: calc(100%);
   transition-property: transform, height;
   transition-duration: 1000ms;
   transition-timing-function: ease-in-out;
 }
 
-.vaultMessage-leave.vaultMessage-leave-active {
+.vaultMessage-exit.vaultMessage-exit-active {
   transform: translateY(-100%);
   overflow-y: hidden;
   vertical-align: bottom;
