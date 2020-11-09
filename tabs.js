@@ -1,9 +1,13 @@
 const TabGroup = require("electron-tabs")
 const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
-const partition = new URL(window.location.href).searchParams.get("profile")
 
-ipcRenderer.on("openTab", (event, url) => {
+let myWindowNumber
+
+ipcRenderer.on("open-tab", (event, {url, tabNumber, windowNumber, profile}) => {
+    if(windowNumber != undefined) {
+        myWindowNumber = windowNumber
+    }
     tabGroup.addTab({
         title: "AWS Console",
         src: url,
@@ -11,7 +15,7 @@ ipcRenderer.on("openTab", (event, url) => {
         visible: true,
         webviewAttributes: {
             nodeintegration: false,
-            partition: partition
+            partition: profile
         },
         ready: tab => {
             tab.on("webview-dom-ready", () => {
@@ -20,6 +24,10 @@ ipcRenderer.on("openTab", (event, url) => {
                     tab.setTitle(title)
                 }
             })
+            tab.on("close", () => {
+                ipcRenderer.send("close-tab", {windowNumber: myWindowNumber, tabNumber})
+            })
         }
     })
+    ipcRenderer.send("add-tab", {windowNumber: myWindowNumber, tabNumber})
 })
