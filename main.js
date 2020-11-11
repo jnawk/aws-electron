@@ -43,10 +43,11 @@ ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
                 url,
                 partition: profileName,
                 tabNumber: nextTabOrWindowNumber++,
-                windowNumber: nextTabOrWindowNumber++
+                windowNumber: nextTabOrWindowNumber++,
+                expiryTime: new Date().getTime() + (config.duration_seconds || 3600) * 1000
             }
 
-            win.loadURL(`file://${__dirname}/tabs.html`) //?profile=${profileName}`)
+            win.loadURL(`file://${__dirname}/tabs.html`)
             win.webContents.on("did-finish-load", () => {
                 win.webContents.send("open-tab", openTabArguments)
             })
