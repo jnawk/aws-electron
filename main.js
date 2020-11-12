@@ -41,7 +41,7 @@ ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
 
             const openTabArguments = {
                 url,
-                partition: profileName,
+                profile: profileName,
                 tabNumber: nextTabOrWindowNumber++,
                 windowNumber: nextTabOrWindowNumber++,
                 expiryTime: new Date().getTime() + (config.duration_seconds || 3600) * 1000
