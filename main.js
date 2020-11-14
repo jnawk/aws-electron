@@ -20,8 +20,8 @@ const setCurrentWindow = win => {
 
 let nextTabOrWindowNumber = 0
 
-ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
-    const options = {
+const openConsoleWindow = ({profileName, url, expiryTime}) => {
+    const windowOptions = {
         width: 1280,
         height: 1024,
         webPreferences: {
@@ -32,40 +32,40 @@ ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
             // contextIsolation: true
         }
     }
+    const openTabArguments = {
+        url,
+        profile: profileName,
+        tabNumber: nextTabOrWindowNumber++,
+        windowNumber: nextTabOrWindowNumber++,
+        expiryTime
+    }
 
+    const win = new BrowserWindow(windowOptions)
+
+    win.loadURL(`file://${__dirname}/tabs.html`)
+    win.webContents.on("did-finish-load", () => {
+        win.webContents.send("open-tab", openTabArguments)
+    })
+
+    // when the window regains focus, update which window is the current window
+    // so that a new-window event is sent to the right place.
+    win.on("focus", () => setCurrentWindow(win))
+    appState.windows[openTabArguments.windowNumber] = {
+        tabs: [],
+        window: win
+    }
+}
+
+ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
     const config = getAWSConfig()[configType][profileName]
+    const expiryTime = new Date().getTime() + (config.duration_seconds || 3600) * 1000
 
     getConsoleURL(config, mfaCode, profileName)
-        .then(url => {
-            let win = new BrowserWindow(options)
-
-            const openTabArguments = {
-                url,
-                profile: profileName,
-                tabNumber: nextTabOrWindowNumber++,
-                windowNumber: nextTabOrWindowNumber++,
-                expiryTime: new Date().getTime() + (config.duration_seconds || 3600) * 1000
-            }
-
-            win.loadURL(`file://${__dirname}/tabs.html`)
-            win.webContents.on("did-finish-load", () => {
-                win.webContents.send("open-tab", openTabArguments)
-            })
-
-            // when the window regains focus, update which window
-            // is the current window so that a new-window event is
-            // sent to the right place.
-            win.on("focus", () => setCurrentWindow(win))
-            appState.windows[openTabArguments.windowNumber] = {
-                tabs: [],
-                window: win
-            }
-        })
+        .then(url => openConsoleWindow({profileName, url, expiryTime}))
         .catch(error => {
             console.error(error, error.stack)
             //app.quit();
         })
-
 })
 
 ipcMain.on("add-tab", (event, {windowNumber, tabNumber}) => {
