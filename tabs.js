@@ -3,10 +3,14 @@ const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
 
 let myWindowNumber
+let myProfile
 
 ipcRenderer.on("open-tab", (event, {url, tabNumber, windowNumber, profile, expiryTime}) => {
     if(windowNumber != undefined) {
+        // we are given a window number when opening the winow
         myWindowNumber = windowNumber
+        myProfile = profile
+
         // set the expiry timer and message
         const interval = setInterval(() => {
             const currentTime = new Date().getTime()
@@ -28,6 +32,7 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, windowNumber, profile, expir
             }
         }, 1000)
     }
+
     tabGroup.addTab({
         title: "AWS Console",
         src: url,
@@ -35,7 +40,7 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, windowNumber, profile, expir
         visible: true,
         webviewAttributes: {
             nodeintegration: false,
-            partition: profile
+            partition: myProfile
         },
         ready: tab => {
             tab.on("webview-dom-ready", () => {
