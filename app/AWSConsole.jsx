@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.css"
 import { CSSTransition, TransitionGroup } from "react-transition-group"
 import "./vaultMessage.css"
 import "./profileList.css"
+import "./mfaBox.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
 const backend = window.backend
@@ -160,7 +161,7 @@ class AWSConsole extends React.Component {
                         </Col>
                     </Row>
                 })}
-                {usableProfiles.some(profile => config[profile].mfa_serial) ? <Row>
+                {usableProfiles.some(profile => config[profile].mfa_serial) ? <Row className='mfaBox'>
                     <Col>
                         <input type='text'
                             value={mfaCode}
