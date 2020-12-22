@@ -1,0 +1,7 @@
+div.d-table-row:nth-child(even) {
+  background-color: #bbbbbb;
+}
+
+div.launchButton {
+  background-color: #ffffff;
+}

@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, Alert } from "reactstrap"
 import "bootstrap/dist/css/bootstrap.css"
 import { CSSTransition, TransitionGroup } from "react-transition-group"
 import "./vaultMessage.css"
+import "./profileList.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
 const backend = window.backend
@@ -151,10 +152,10 @@ class AWSConsole extends React.Component {
                         <Col className='d-none d-md-table-cell' md={2}>
                             {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
                         </Col>
-                        <Col className='d-table-cell d-sm-none'>
+                        <Col className='d-table-cell d-sm-none launchButton'>
                             {launchButton(profileName)}
                         </Col>
-                        <Col className='d-none d-sm-table-cell' sm={2} md={2}>
+                        <Col className='d-none d-sm-table-cell launchButton' sm={2} md={2}>
                             {launchButton()}
                         </Col>
                     </Row>
