@@ -83,7 +83,7 @@
     "webpack-cli": "^4.2.0"
   },
   "dependencies": {
-    "aws-sdk": "^2.787.0",
+    "aws-sdk": "^2.815.0",
     "electron-tabs": "^0.15.0",
     "ini": "^2.0.0",
     "node-fetch": "^2.6.1",
