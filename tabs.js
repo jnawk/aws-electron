@@ -13,8 +13,8 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
             windowState.expiryTime = expiryTime
 
             if(windowState.expiryUpdateInterval != undefined) {
-              window.clearInterval(windowState.expiryUpdateInterval)
-              windowState.expiryUpdateInterval = undefined
+                window.clearInterval(windowState.expiryUpdateInterval)
+                windowState.expiryUpdateInterval = undefined
             }
         }
 

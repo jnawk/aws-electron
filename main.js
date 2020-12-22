@@ -55,7 +55,7 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     win.webContents.on("did-finish-load", () => {
         win.webContents.send("open-tab", openTabArguments)
     })
-    win.on("close", event => {
+    win.on("close", () => {
         // delete the window state from the app when it is closed
         delete appState.windows[profileName]
     })
