@@ -39,6 +39,7 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     const windowOptions = {
         width: 1280,
         height: 1024,
+        title: `AWS Console - ${profileName}`,
         webPreferences: {
             partition: profileName,
             nodeIntegration: true,
