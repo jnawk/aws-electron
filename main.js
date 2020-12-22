@@ -54,6 +54,10 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     win.webContents.on("did-finish-load", () => {
         win.webContents.send("open-tab", openTabArguments)
     })
+    win.on("close", event => {
+        // delete the window state from the app when it is closed
+        delete appState.windows[profileName]
+    })
 
     // when the window regains focus, update which window is the current window
     // so that a new-window event is sent to the right place.
@@ -95,8 +99,8 @@ ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
     if(appState.windows[profileName].tabs.length == 0) {
         // no more tabs; close the window
         appState.windows[profileName].window.close()
-        // and delete the window information
-        delete appState.windows[profileName]
+        // the close window handler will delete the window information
+        // delete appState.windows[profileName]
     }
 })
 
