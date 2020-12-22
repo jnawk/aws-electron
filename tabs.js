@@ -11,15 +11,21 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
 
         if(expiryTime != undefined) {
             windowState.expiryTime = expiryTime
+
+            if(windowState.expiryUpdateInterval != undefined) {
+              window.clearInterval(windowState.expiryUpdateInterval)
+              windowState.expiryUpdateInterval = undefined
+            }
         }
 
-        // set the expiry timer and message
         if(windowState.expiryUpdateInterval == undefined) {
+            // set the expiry timer and message
             windowState.expiryUpdateInterval = setInterval(() => {
                 const currentTime = new Date().getTime()
                 const timeToGo = windowState.expiryTime - currentTime
                 if (timeToGo < 1000) {
                     clearInterval(windowState.expiryUpdateInterval)
+                    windowState.expiryUpdateInterval = undefined
                 } else {
                     const hoursRemaining = Math.floor(timeToGo / 3600000)
                     const minutesRemaining = Math.floor(
