@@ -1,81 +1,60 @@
-const AWS = require("aws-sdk")
-const fetch = require("node-fetch")
-const queryString = require("query-string")
-const proxyAgent = require("proxy-agent")
-const session = require("electron").session
 const https = require("https")
-const splitca = require("split-ca")
+const http = require("http")
+const fetch = require("node-fetch")
+const session = require("electron").session
+const QueryString = require("query-string")
+const ProxyAgent = require("proxy-agent")
+const splitCa = require("split-ca")
+const AWS = require("aws-sdk")
 
-const federationURL = search => `https://signin.aws.amazon.com/federation?${search}`
 const consoleURL = "https://console.aws.amazon.com"
+const stsEndpoint = "https://sts.amazonaws.com"
 
-const sessionJson = credentials => {
-    return {
-        sessionId: credentials.AccessKeyId,
-        sessionKey: credentials.SecretAccessKey,
-        sessionToken: credentials.SessionToken
+
+const getHttpAgent = async ({sessionDriver, url}) => {
+    if(sessionDriver === undefined) {
+      sessionDriver = session
     }
-}
 
-const signinTokenRequest = sessionJson => {
-    return {
-        Action: "getSigninToken",
-        DurationSeconds: 900,
-        SessionType: "json",
-        Session: sessionJson
+    let proxy = await sessionDriver.defaultSession.resolveProxy(url)
+
+    if(proxy == "DIRECT") {
+        if(url.match(/^https:\/\//i)) {
+          return new https.Agent()
+        }
+        return new http.Agent()
     }
-}
 
-const consoleURLRequest = token => {
-    return {
-        Action: "login",
-        SigninToken: token,
-        Destination: consoleURL,
-        SessionDuration: 43200
+    proxy = proxy.replace(/PROXY ([^;]+);?/, "$1")
+    const hasScheme = proxy.match(/^(https?):\/\//i)
+    if(!hasScheme) {
+        proxy = `http://${proxy}`
     }
+    return ProxyAgent(proxy)
 }
 
-const getProxy = () => {
-    return session.defaultSession.resolveProxy("https://sts.amazonaws.com")
-        .then(proxy => {
-            console.log("system proxy:", proxy)
-            if(proxy == "DIRECT") {
-                console.log("no proxy")
-                return new https.Agent()
-            }
-
-            proxy = proxy.replace("PROXY ", "")
-            proxy = proxy.replace(/[;\s+].*/, "")
-            let hasScheme = proxy.match(/^(https?):\/\//i)
-            if(!hasScheme) {
-                proxy = `http://${proxy}`
-            }
-            console.log("proxy:", proxy)
-            return proxyAgent(proxy)
-        })
-}
-
-const patchCABundle = (agent, config) => {
+const configureProxy = async config => {
+    // assume same proxy & CA bundle for all AWS endpoints
+    const httpAgent = await getHttpAgent({url: stsEndpoint})
     if(config.ca_bundle !== undefined) {
-        console.log(`setting CA cert to ${config.ca_bundle}`)
-        agent.options = {
-            ...agent.options,
-            ca: splitca(config.ca_bundle),
+        httpAgent.options = {
+            ...httpAgent.options,
+            ca: splitCa(config.ca_bundle),
             rejectUnauthorized: true
         }
-    } else {
-        console.log("not overriding CA")
     }
-    return agent
+
+    AWS.config.update({ httpOptions: { agent: httpAgent } })
+    return httpAgent
 }
 
-const injectProxyConfig = agent => AWS.config.update({ httpOptions: { agent: agent } })
+const getRoleCredentials = async (config, tokenCode, profileName) => {
+    // TODO alter this to handle multi-stage role assumption
 
-const injectCredentials = config => AWS.config.credentials = new AWS.SharedIniFileCredentials({
-    profile: config.source_profile
-})
+    AWS.config.credentials = new AWS.SharedIniFileCredentials({
+        profile: config.source_profile
+    })
 
-const makeAssumeRoleParams = (config, tokenCode, profileName) => {
     const assumeRoleParams = {
         RoleArn: config.role_arn,
         RoleSessionName: profileName
@@ -88,28 +67,44 @@ const makeAssumeRoleParams = (config, tokenCode, profileName) => {
         assumeRoleParams.DurationSeconds = config.duration_seconds
     }
 
-    return assumeRoleParams
+    const assumedRole = await new AWS.STS().assumeRole(assumeRoleParams).promise()
+    return assumedRole.Credentials
 }
 
-const getConsoleURL = async (config, tokenCode, profileName) => {
-    return getProxy()
-        .then(agent => patchCABundle(agent, config))
-        .then(injectProxyConfig)
-        .then(() => injectCredentials(config))
-        .then(() => makeAssumeRoleParams(config, tokenCode, profileName))
-        .then(assumeRoleParams => new AWS.STS().assumeRole(assumeRoleParams).promise())
-        .then(result => result.Credentials)
-        .then(sessionJson)
-        .then(JSON.stringify)
-        .then(signinTokenRequest)
-        .then(queryString.stringify)
-        .then(federationURL)
-        .then(fetch)
-        .then(response => response.json())
-        .then(json => json.SigninToken)
-        .then(consoleURLRequest)
-        .then(queryString.stringify)
-        .then(federationURL)
+const getFederationUrl = params => {
+    return `https://signin.aws.amazon.com/federation?${QueryString.stringify(params)}`
 }
 
-module.exports = getConsoleURL
+const getSigninToken = async ({credentials, httpAgent}) => {
+    const getSigninTokenUrl = getFederationUrl({
+        Action: "getSigninToken",
+        DurationSeconds: 900,
+        SessionType: "json",
+        Session: JSON.stringify({
+            sessionId: credentials.AccessKeyId,
+            sessionKey: credentials.SecretAccessKey,
+            sessionToken: credentials.SessionToken
+        })
+    })
+    const fetchResult = await fetch(getSigninTokenUrl, { agent: httpAgent })
+    const fetchJson = await fetchResult.json()
+    return fetchJson.SigninToken
+}
+
+const getConsoleUrl = async (config, tokenCode, profileName) => {
+    // determine if a proxy is necessary, and inject a CA bundle if defined.
+    const httpAgent = await configureProxy(config)
+
+
+    const roleCredentials = await getRoleCredentials(config, tokenCode, profileName)
+    const signinToken = await getSigninToken({roleCredentials, httpAgent})
+
+    return getFederationUrl({
+        Action: "login",
+        SigninToken: signinToken,
+        Destination: consoleURL,
+        SessionDuration: 43200
+    })
+}
+
+module.exports = { getConsoleUrl, getHttpAgent }

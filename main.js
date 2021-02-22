@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require("electron")
 
 const { getAWSConfig } = require("./AWSConfigReader")
-const getConsoleURL = require("./getConsoleURL")
+const { getConsoleUrl } = require("./getConsoleURL")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
 
@@ -78,10 +78,10 @@ ipcMain.on("launch-console", async (event, {profileName, mfaCode, configType}) =
     ) * 1000
 
     try {
-      const url = await getConsoleURL(config, mfaCode, profileName)
-      launchConsole({profileName, url, expiryTime})
+        const url = await getConsoleUrl(config, mfaCode, profileName)
+        launchConsole({profileName, url, expiryTime})
     } catch (error) {
-      console.error(error, error.stack)
+        console.error(error, error.stack)
     }
 })
 

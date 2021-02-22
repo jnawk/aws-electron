@@ -1,4 +1,5 @@
 require("chai").should()
+const expect = require('chai').expect
 const path = require("path")
 
 const { getAWSConfig } = require("../AWSConfigReader")
@@ -15,20 +16,20 @@ describe("AWS Config Reader", function () {
 
         it("should return an object with the default profile", function () {
             const config = getAWSConfig(awsConfigFile1)
-            config.awsConfig.should.have.property("default")
-            config.awsConfig.default.should.have.property("region", "ap-southeast-2")
+            expect(config.awsConfig).to.have.property("default")
+            expect(config.awsConfig.default).to.have.property("region", "ap-southeast-2")
         })
 
         it("should return an object with the notdefault profile", function () {
             const config = getAWSConfig(awsConfigFile1)
-            config.awsConfig.should.have.property("notdefault")
-            config.awsConfig.notdefault.should.have.property("role_arn")
-            config.awsConfig.notdefault.should.have.property("source_profile", "default")
+            expect(config.awsConfig).to.have.property("notdefault")
+            expect(config.awsConfig.notdefault).to.have.property("role_arn")
+            expect(config.awsConfig.notdefault).to.have.property("source_profile", "default")
         })
 
         it("should return an object which does not contain commented out profiles", function () {
             const config = getAWSConfig(awsConfigFile1)
-            config.awsConfig.should.not.have.property("ghostprofile")
+            expect(config.awsConfig).to.not.have.property("ghostprofile")
         })
 
         it("should not have a vaultConfig property", function() {
@@ -64,7 +65,7 @@ describe("AWS Config Reader", function () {
 
         it("should return an awsConfig without enriched profiles", function(){
             const config = getAWSConfig(vaultConfigFile)
-            config.awsConfig.notdefault.should.not.have.property("mfa_serial")
+            expect(config.awsConfig.notdefault).to.not.have.property("mfa_serial")
         })
     })
 })
