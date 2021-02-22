@@ -71,18 +71,18 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     }
 }
 
-ipcMain.on("launch-console", (event, {profileName, mfaCode, configType}) => {
+ipcMain.on("launch-console", async (event, {profileName, mfaCode, configType}) => {
     const config = getAWSConfig()[configType][profileName]
     const expiryTime = new Date().getTime() + (
         config.duration_seconds || 3600
     ) * 1000
 
-    getConsoleURL(config, mfaCode, profileName)
-        .then(url => launchConsole({profileName, url, expiryTime}))
-        .catch(error => {
-            console.error(error, error.stack)
-            //app.quit();
-        })
+    try {
+      const url = await getConsoleURL(config, mfaCode, profileName)
+      launchConsole({profileName, url, expiryTime})
+    } catch (error) {
+      console.error(error, error.stack)
+    }
 })
 
 ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {

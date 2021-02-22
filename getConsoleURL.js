@@ -91,7 +91,7 @@ const makeAssumeRoleParams = (config, tokenCode, profileName) => {
     return assumeRoleParams
 }
 
-const getConsoleURL = (config, tokenCode, profileName) => {
+const getConsoleURL = async (config, tokenCode, profileName) => {
     return getProxy()
         .then(agent => patchCABundle(agent, config))
         .then(injectProxyConfig)
