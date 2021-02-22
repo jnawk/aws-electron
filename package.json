@@ -59,7 +59,7 @@
     "bootstrap": "^4.5.3",
     "chai": "^4.2.0",
     "css-loader": "^5.0.1",
-    "electron": "^10.1.5",
+    "electron": "^10.2.0",
     "electron-builder": "^22.9.1",
     "eslint": "^7.16.0",
     "eslint-plugin-chai": "0.0.1",
