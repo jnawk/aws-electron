@@ -17,11 +17,11 @@ const isLikelyVaultV4Config = config => {
       mfa_serial to be inheritable from the source_profile.  They have since
       learned the error of their ways, but no doubt there are misguided
       individuals out there still using this version's broken features.
-     
+
       Having a mfa_serial on the default profile is a dead giveaway.
      */
 
-    return Object.keys(config).map(key=>config[key]).some(profile => {
+    return Object.keys(config).map(key => config[key]).some(profile => {
         let sourceProfile = profile.source_profile
         if(!sourceProfile) {
             return false
@@ -55,7 +55,7 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
     }
     const configs = {
         awsConfig,
-        credentialsProfiles: Object.keys(awsCredentials) 
+        credentialsProfiles: Object.keys(awsCredentials)
     }
     if(isLikelyVaultV4Config(awsConfig)) {
         const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) // this feels yuck

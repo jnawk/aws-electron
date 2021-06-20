@@ -18,6 +18,8 @@ class AWSConsole extends React.Component {
         }
     }
 
+
+
     componentDidMount() {
         backend.getAWSConfig().then(configs => this.setState(configs))
     }
@@ -80,7 +82,9 @@ class AWSConsole extends React.Component {
         if(!awsConfig) {
             return <>Loading...</>
         }
+
         const usingAwsConfig = explicitTreatConfigProperly || vaultConfig == undefined
+
         const config = usingAwsConfig ? awsConfig : vaultConfig
         const configType = usingAwsConfig ? "awsConfig" : "vaultConfig"
 
@@ -89,7 +93,6 @@ class AWSConsole extends React.Component {
             const credentialsProfile = profile.source_profile || key
             return Object.keys(config[key]).includes("role_arn") && credentialsProfiles.includes(credentialsProfile)
         })
-
         return <>
             <TransitionGroup>
                 {this.vaultMessage()}

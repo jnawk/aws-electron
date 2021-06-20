@@ -7,20 +7,21 @@ const ProxyAgent = require("proxy-agent")
 const splitCa = require("split-ca")
 const AWS = require("aws-sdk")
 
+
 const consoleURL = "https://console.aws.amazon.com"
 const stsEndpoint = "https://sts.amazonaws.com"
 
 
 const getHttpAgent = async ({sessionDriver, url}) => {
     if(sessionDriver === undefined) {
-      sessionDriver = session
+        sessionDriver = session
     }
 
     let proxy = await sessionDriver.defaultSession.resolveProxy(url)
 
     if(proxy == "DIRECT") {
         if(url.match(/^https:\/\//i)) {
-          return new https.Agent()
+            return new https.Agent()
         }
         return new http.Agent()
     }
@@ -47,6 +48,7 @@ const configureProxy = async config => {
     AWS.config.update({ httpOptions: { agent: httpAgent } })
     return httpAgent
 }
+
 
 const getRoleCredentials = async (config, tokenCode, profileName) => {
     // TODO alter this to handle multi-stage role assumption
@@ -94,7 +96,6 @@ const getSigninToken = async ({credentials, httpAgent}) => {
 const getConsoleUrl = async (config, tokenCode, profileName) => {
     // determine if a proxy is necessary, and inject a CA bundle if defined.
     const httpAgent = await configureProxy(config)
-
 
     const roleCredentials = await getRoleCredentials(config, tokenCode, profileName)
     const signinToken = await getSigninToken({roleCredentials, httpAgent})
