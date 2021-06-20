@@ -7,7 +7,7 @@ const ProxyAgent = require("proxy-agent")
 const splitCa = require("split-ca")
 const AWS = require("aws-sdk")
 
-const { getProfileList } = require('./AWSConfigReader')
+const { getProfileList } = require("./AWSConfigReader")
 
 const consoleURL = "https://console.aws.amazon.com"
 const stsEndpoint = "https://sts.amazonaws.com"

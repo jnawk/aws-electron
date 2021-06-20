@@ -29,7 +29,7 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
                     windowState.expiryUpdateInterval = undefined
                 } else {
                     document.getElementById("timeRemaining").innerHTML = (
-                      timeRemainingMessage(timeToGo)
+                        timeRemainingMessage(timeToGo)
                     )
                 }
             }, 1000)
