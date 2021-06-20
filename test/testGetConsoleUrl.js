@@ -6,8 +6,6 @@ const path = require("path")
 const { getProfileList } = require("../getConsoleURL")
 const { getAWSConfig } = require("../AWSConfigReader")
 const awsConfigFile1 = path.join(__dirname, "awsConfig1")
-const awsConfigFile2 = path.join(__dirname, "awsConfig2")
-const vaultConfigFile = path.join(__dirname, "vaultConfig")
 
 
 describe("Get Profile List", function () {

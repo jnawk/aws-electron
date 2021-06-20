@@ -100,7 +100,7 @@ const isSingleRoleAssumingProfile = (
 }
 
 const isMultiStageRoleAssumingProfile = (
-    {config, profileName, credentialsProfiles}
+    {config, profileName}
 ) => {
     const profileList = getProfileList(config, profileName)
     if(profileList.length < 2) {

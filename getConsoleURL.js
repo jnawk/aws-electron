@@ -51,7 +51,7 @@ const configureProxy = async config => {
 }
 
 
-const getRoleCredentials2 = async (config, tokenCode, profileName) => {
+const getRoleCredentials = async (config, tokenCode, profileName) => {
     const profileList = getProfileList(config, profileName)
     console.log(profileList)
 
@@ -103,29 +103,6 @@ const getRoleCredentials2 = async (config, tokenCode, profileName) => {
     return credentials
 }
 
-const getRoleCredentials = async (config, tokenCode, profileName) => {
-    const profileConfig = config[profileName]
-
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({
-        profile: profileConfig.source_profile
-    })
-
-    const assumeRoleParams = {
-        RoleArn: profileConfig.role_arn,
-        RoleSessionName: profileName
-    }
-    if(profileConfig.mfa_serial) {
-        assumeRoleParams.SerialNumber = profileConfig.mfa_serial
-        assumeRoleParams.TokenCode = tokenCode
-    }
-    if(profileConfig.duration_seconds) {
-        assumeRoleParams.DurationSeconds = profileConfig.duration_seconds
-    }
-
-    const assumedRole = await new AWS.STS().assumeRole(assumeRoleParams).promise()
-    return assumedRole.Credentials
-}
-
 const getFederationUrl = params => {
     return `https://signin.aws.amazon.com/federation?${QueryString.stringify(params)}`
 }
@@ -150,7 +127,7 @@ const getConsoleUrl = async (config, tokenCode, profileName) => {
     // determine if a proxy is necessary, and inject a CA bundle if defined.
     const httpAgent = await configureProxy(config)
 
-    const roleCredentials = await getRoleCredentials2(
+    const roleCredentials = await getRoleCredentials(
         config, tokenCode, profileName
     )
     const signinToken = await getSigninToken(
