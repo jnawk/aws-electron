@@ -1,8 +1,9 @@
 const TabGroup = require("electron-tabs")
 const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
-
+const timeRemainingMessage = require("./timeRemaining")
 let windowState = {}
+
 
 ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
     if(profile != undefined) {
@@ -27,26 +28,9 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
                     clearInterval(windowState.expiryUpdateInterval)
                     windowState.expiryUpdateInterval = undefined
                 } else {
-                    const hoursRemaining = Math.floor(timeToGo / 3600000)
-                    const minutesRemaining = Math.floor(
-                        (timeToGo - (hoursRemaining * 3600000)) / 60000
+                    document.getElementById("timeRemaining").innerHTML = (
+                      timeRemainingMessage(timeToGo)
                     )
-                    const secondsRemaining = Math.floor(
-                        (timeToGo - ((hoursRemaining * 3600000) + (
-                            minutesRemaining * 60000
-                        ))) / 1000
-                    )
-                    const hoursMessage = (
-                        hoursRemaining > 0 ? `${hoursRemaining} hours ` : ""
-                    )
-                    const minutesMessage = (
-                        hoursRemaining > 0 && minutesRemaining > 0 ?
-                            `${minutesRemaining} minutes, ` : ""
-                    )
-                    const message = (
-                        `Time remaining: ${hoursMessage}${minutesMessage}${secondsRemaining} seconds`
-                    )
-                    document.getElementById("timeRemaining").innerHTML = message
                 }
             }, 1000)
         }
