@@ -1,5 +1,5 @@
 require("chai").should()
-const expect = require('chai').expect
+const expect = require("chai").expect
 const path = require("path")
 
 const { getAWSConfig } = require("../AWSConfigReader")
