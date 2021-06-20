@@ -1,5 +1,4 @@
 require("chai").should()
-const expect = require("chai").expect
 
 const timeRemainingMessage = require("../timeRemaining")
 
