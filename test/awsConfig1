@@ -11,3 +11,19 @@ role_arn = arn:aws:iam::123456789012:role/notDefaultRoleName
 source_profile = default
 mfa_serial = arn:aws:iam::123456789012:mfa/notDefaultUsername
 duration_seconds = 43200
+
+[profile target]
+role_arn = arn:aws:iam::123456789012:role:targetRoleName
+source_profile = intermediate
+
+[profile intermediate]
+role_arn = arn:aws:iam::123456789012:role:intermediateRoleName
+source_profile = default
+
+[profile loopStart]
+role_arn = arn:aws:iam::123456789012:role:intermediateRoleName
+source_profile = loopIntermediate
+
+[profile loopIntermediate]
+role_arn = arn:aws:iam::123456789012:role:intermediateRoleName
+source_profile = loopIntermediate

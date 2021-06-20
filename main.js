@@ -1,9 +1,16 @@
 const { app, BrowserWindow, ipcMain } = require("electron")
 
-const { getAWSConfig } = require("./AWSConfigReader")
+const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
+ipcMain.handle(
+    "get-usable-profiles",
+    (
+        event,
+        {config, credentialsProfiles}
+    ) => getUsableProfiles({config, credentialsProfiles})
+)
 
 let appState = {
     // need to track the current window so that a new-window event is turned
@@ -71,19 +78,28 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     }
 }
 
-ipcMain.on("launch-console", async (event, {profileName, mfaCode, configType}) => {
-    const config = getAWSConfig()[configType][profileName]
-    const expiryTime = new Date().getTime() + (
-        config.duration_seconds || 3600
-    ) * 1000
+ipcMain.on(
+    "launch-console",
+    async (
+        event,
+        {profileName, mfaCode, configType}
+    ) => {
+        const config = getAWSConfig()[configType]
+        const targetProfileConfig = config[profileName]
 
-    try {
-        const url = await getConsoleUrl(config, mfaCode, profileName)
-        launchConsole({profileName, url, expiryTime})
-    } catch (error) {
-        console.error(error, error.stack)
+        // const config = getAWSConfig()[configType][profileName]
+        const expiryTime = new Date().getTime() + (
+            targetProfileConfig.duration_seconds || 3600
+        ) * 1000
+
+        try {
+            const url = await getConsoleUrl(config, mfaCode, profileName)
+            launchConsole({profileName, url, expiryTime})
+        } catch (error) {
+            console.error(error, error.stack)
+        }
     }
-})
+)
 
 ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
     // we want to track the tabs a profile has open so when the last one closes

@@ -7,6 +7,7 @@ const ProxyAgent = require("proxy-agent")
 const splitCa = require("split-ca")
 const AWS = require("aws-sdk")
 
+const { getProfileList } = require('./AWSConfigReader')
 
 const consoleURL = "https://console.aws.amazon.com"
 const stsEndpoint = "https://sts.amazonaws.com"
@@ -50,23 +51,75 @@ const configureProxy = async config => {
 }
 
 
+const getRoleCredentials2 = async (config, tokenCode, profileName) => {
+    const profileList = getProfileList(config, profileName)
+    console.log(profileList)
+
+    // set the long-term credentials
+    if(profileList.length == 1) {
+        // the profile has a role to assume _and_ credentials to use.
+        // (it needs a role, we can't work with it otherwise)
+        AWS.config.credentials = new AWS.SharedIniFileCredentials({
+            profile: profileName
+        })
+    } else {
+        // the first profile in profileList contains the credentials,
+        // (and maybe a role to assume)
+        AWS.config.credentials = new AWS.SharedIniFileCredentials({
+            profile: profileList[0]
+        })
+    }
+    let credentials = null
+    for(const profileNumber in profileList) {
+        const profile = profileList[profileNumber]
+        const profileConfig = config[profile]
+        if(profileConfig !== undefined && "role_arn" in profileConfig) {
+            // assume the role
+
+            const assumeRoleParams = {
+                RoleArn: profileConfig.role_arn,
+                RoleSessionName: `${profileName}${new Date().getTime()}`
+            }
+            if(profileConfig.mfa_serial) {
+            // this better only be on the first assume role profile in the chain!
+                assumeRoleParams.SerialNumber = profileConfig.mfa_serial
+                assumeRoleParams.TokenCode = tokenCode
+            }
+            if(profileConfig.duration_seconds) {
+                assumeRoleParams.DurationSeconds = profileConfig.duration_seconds
+            }
+            const sts = new AWS.STS()
+            const assumedRole = await sts.assumeRole(assumeRoleParams).promise()
+
+            // update the credentials
+            credentials = assumedRole.Credentials
+            AWS.config.credentials = sts.credentialsFrom(assumedRole)
+        } else {
+            // this must be profile 0, and only credentials,
+            // skip to the next
+        }
+    }
+
+    return credentials
+}
+
 const getRoleCredentials = async (config, tokenCode, profileName) => {
-    // TODO alter this to handle multi-stage role assumption
+    const profileConfig = config[profileName]
 
     AWS.config.credentials = new AWS.SharedIniFileCredentials({
-        profile: config.source_profile
+        profile: profileConfig.source_profile
     })
 
     const assumeRoleParams = {
-        RoleArn: config.role_arn,
+        RoleArn: profileConfig.role_arn,
         RoleSessionName: profileName
     }
-    if(config.mfa_serial) {
-        assumeRoleParams.SerialNumber = config.mfa_serial
+    if(profileConfig.mfa_serial) {
+        assumeRoleParams.SerialNumber = profileConfig.mfa_serial
         assumeRoleParams.TokenCode = tokenCode
     }
-    if(config.duration_seconds) {
-        assumeRoleParams.DurationSeconds = config.duration_seconds
+    if(profileConfig.duration_seconds) {
+        assumeRoleParams.DurationSeconds = profileConfig.duration_seconds
     }
 
     const assumedRole = await new AWS.STS().assumeRole(assumeRoleParams).promise()
@@ -97,8 +150,12 @@ const getConsoleUrl = async (config, tokenCode, profileName) => {
     // determine if a proxy is necessary, and inject a CA bundle if defined.
     const httpAgent = await configureProxy(config)
 
-    const roleCredentials = await getRoleCredentials(config, tokenCode, profileName)
-    const signinToken = await getSigninToken({roleCredentials, httpAgent})
+    const roleCredentials = await getRoleCredentials2(
+        config, tokenCode, profileName
+    )
+    const signinToken = await getSigninToken(
+        {credentials: roleCredentials, httpAgent}
+    )
 
     return getFederationUrl({
         Action: "login",
@@ -108,4 +165,4 @@ const getConsoleUrl = async (config, tokenCode, profileName) => {
     })
 }
 
-module.exports = { getConsoleUrl, getHttpAgent }
+module.exports = { getConsoleUrl, getHttpAgent, getProfileList }

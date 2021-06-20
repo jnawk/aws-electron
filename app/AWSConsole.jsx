@@ -21,10 +21,38 @@ class AWSConsole extends React.Component {
 
 
     componentDidMount() {
-        backend.getAWSConfig().then(configs => this.setState(configs))
+        backend.getAWSConfig().then(configs => {
+            this.setState(configs)
+            const {
+                awsConfig,
+                vaultConfig,
+                credentialsProfiles,
+            } = configs
+
+            const usingAwsConfig = vaultConfig == undefined
+            const config = usingAwsConfig ? awsConfig : vaultConfig
+            return backend.getUsableProfiles({config, credentialsProfiles})
+        }).then(usableProfiles => this.setState({usableProfiles}))
     }
 
     componentWillUnmount() {
+    }
+
+    treatConfigProperly(properly) {
+        const {
+            awsConfig,
+            vaultConfig,
+            credentialsProfiles,
+        } = this.state
+
+        this.setState({explicitTreatConfigProperly: properly})
+
+        const usingAwsConfig = properly || vaultConfig == undefined
+        const config = usingAwsConfig ? awsConfig : vaultConfig
+        if(config) {
+            backend.getUsableProfiles({config, credentialsProfiles})
+                .then(usableProfiles => this.setState({usableProfiles}))
+        }
     }
 
     vaultMessage() {
@@ -60,10 +88,10 @@ class AWSConsole extends React.Component {
                   This software will treat configs that <i>look</i> like vault
                   configs as vault configs, unless you tell it not to.
                 </p>
-                <Button onClick={() => {this.setState({explicitTreatConfigProperly: true})}}>
+                <Button onClick={() => this.treatConfigProperly(true)}>
                   Please treat my config file properly.
                 </Button> {"\u0020"}
-                <Button onClick={() => {this.setState({explicitTreatConfigProperly: false})}}>
+                <Button onClick={() => this.treatConfigProperly(false)}>
                   Please treat my config file as a V4 Vault config.
                 </Button>
             </Alert>
@@ -74,25 +102,22 @@ class AWSConsole extends React.Component {
         const {
             awsConfig,
             vaultConfig,
-            credentialsProfiles,
             mfaCode,
-            explicitTreatConfigProperly
+            explicitTreatConfigProperly,
+            usableProfiles
         } = this.state
 
-        if(!awsConfig) {
+        if(!awsConfig || !usableProfiles) {
             return <>Loading...</>
         }
 
+        // we are using vanilla AWS config if the user has said so,
+        // or if we never received a vault style config to start with
         const usingAwsConfig = explicitTreatConfigProperly || vaultConfig == undefined
 
         const config = usingAwsConfig ? awsConfig : vaultConfig
         const configType = usingAwsConfig ? "awsConfig" : "vaultConfig"
 
-        const usableProfiles = Object.keys(config).filter(key => {
-            const profile = config[key]
-            const credentialsProfile = profile.source_profile || key
-            return Object.keys(config[key]).includes("role_arn") && credentialsProfiles.includes(credentialsProfile)
-        })
         return <>
             <TransitionGroup>
                 {this.vaultMessage()}

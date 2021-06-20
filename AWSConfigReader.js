@@ -75,4 +75,59 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
     return configs
 }
 
-module.exports = { getAWSConfig, isLikelyVaultV4Config }
+const getProfileList = (config, profileName) => {
+    const profiles = [profileName]
+    let profileConfig = config[profileName]
+    while(profileConfig !== undefined && "source_profile" in profileConfig) {
+        const sourceProfile = profileConfig.source_profile
+        if (profiles.includes(sourceProfile)) {
+            throw new Error(`Loop in profiles: ${profiles} + ${sourceProfile}`)
+        }
+        profiles.push(sourceProfile)
+        profileConfig = config[sourceProfile]
+    }
+    return profiles.reverse()
+}
+
+const isSingleRoleAssumingProfile = (
+    {profile, profileName, credentialsProfiles}
+) => {
+    const credentialsProfile = profile.source_profile || profileName
+    return (
+        Object.keys(profile).includes("role_arn") &&
+        credentialsProfiles.includes(credentialsProfile)
+    )
+}
+
+const isMultiStageRoleAssumingProfile = (
+    {config, profileName, credentialsProfiles}
+) => {
+    const profileList = getProfileList(config, profileName)
+    if(profileList.length < 2) {
+        // can't be multi stage assume
+        return false
+    }
+
+    // since we are following source_profile chains, there necessarily is one
+    // we aren't checking the credentials file in other places, so why do so
+    // here?
+    return true
+}
+
+const getUsableProfiles = ({config, credentialsProfiles}) => {
+    return Object.keys(config).filter(key => {
+        const profile = config[key]
+        return isSingleRoleAssumingProfile(
+            {profile, profileName: key, credentialsProfiles}
+        ) || isMultiStageRoleAssumingProfile(
+            {config, profileName: key, credentialsProfiles}
+        )
+    })
+}
+
+module.exports = {
+    getAWSConfig,
+    isLikelyVaultV4Config,
+    getUsableProfiles,
+    getProfileList
+}
