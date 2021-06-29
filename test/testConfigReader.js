@@ -6,8 +6,9 @@ const { getAWSConfig, getUsableProfiles } = require("../AWSConfigReader")
 const { profileRows } = require("../app/getRoleData")
 const awsConfigFile1 = path.join(__dirname, "awsConfig1")
 const awsConfigFile2 = path.join(__dirname, "awsConfig2")
-const aws2faConfig = path.join(__dirname, "aws2faConfig")
 const vaultConfigFile = path.join(__dirname, "vaultConfig")
+const aws2faConfig = path.join(__dirname, "aws2faConfig")
+const aws2faCredentials = path.join(__dirname, "aws2faCredentials")
 
 describe("AWS Config Reader", function () {
     describe("Get Config - reading a canonical AWS config", function () {
@@ -85,7 +86,14 @@ describe("AWS Config Reader", function () {
                 launchButtonGenerator: () => null,
                 profileRowGenerator: () => null,
             })
-
+        })
+        it("should not return unusable profiles", function() {
+            const config = getAWSConfig(aws2faConfig, aws2faCredentials)
+            const usableProfiles = getUsableProfiles({
+                config: config.awsConfig,
+                credentialsProfiles: config.credentialsProfiles
+            })
+            expect(usableProfiles.length).to.equal(1)
         })
     })
 })

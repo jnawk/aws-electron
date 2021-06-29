@@ -108,6 +108,14 @@ const isMultiStageRoleAssumingProfile = (
         return false
     }
 
+    // need to check for role_arn presence on all but the first profile
+    for(let i = 1; i < profileList.length; ++i) {
+        const profile = config[profileList[i]]
+        if(profile.role_arn === undefined) {
+            return false
+        }
+    }
+
     // since we are following source_profile chains, there necessarily is one
     // we aren't checking the credentials file in other places, so why do so
     // here?
