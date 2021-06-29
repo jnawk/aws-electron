@@ -2,9 +2,11 @@ require("chai").should()
 const expect = require("chai").expect
 const path = require("path")
 
-const { getAWSConfig } = require("../AWSConfigReader")
+const { getAWSConfig, getUsableProfiles } = require("../AWSConfigReader")
+const { profileRows } = require("../app/getRoleData")
 const awsConfigFile1 = path.join(__dirname, "awsConfig1")
 const awsConfigFile2 = path.join(__dirname, "awsConfig2")
+const aws2faConfig = path.join(__dirname, "aws2faConfig")
 const vaultConfigFile = path.join(__dirname, "vaultConfig")
 
 describe("AWS Config Reader", function () {
@@ -66,6 +68,24 @@ describe("AWS Config Reader", function () {
         it("should return an awsConfig without enriched profiles", function(){
             const config = getAWSConfig(vaultConfigFile)
             expect(config.awsConfig.notdefault).to.not.have.property("mfa_serial")
+        })
+    })
+
+    describe("Reading AWS2FA config", function() {
+        it("should not blow up", function() {
+            const config = getAWSConfig(aws2faConfig)
+            const usableProfiles = getUsableProfiles({
+                config: config.awsConfig,
+                credentialsProfiles: config.credentialsProfiles
+            })
+            profileRows({
+                usableProfiles,
+                config: config.awsConfig,
+                mfaCode: "",
+                launchButtonGenerator: () => null,
+                profileRowGenerator: () => null,
+            })
+
         })
     })
 })

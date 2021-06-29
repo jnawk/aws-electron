@@ -1,0 +1,13 @@
+; aws2fa config
+
+[profile identity]
+region = ap-southeast-2
+output = json
+mfa_serial = arn:aws:iam::123456789012:mfa/username
+source_profile = identity::source-profile
+; this should not be required!
+; role_arn = arn:aws:iam::123456789012:role/rolename
+
+[profile role]
+role_arn = arn:aws:iam::123456789012:role/rolename
+source_profile = identity
