@@ -5,8 +5,8 @@ import { CSSTransition, TransitionGroup } from "react-transition-group"
 import "./vaultMessage.css"
 import "./profileList.css"
 import "./mfaBox.css"
+import { profileRows } from "./getRoleData"
 
-const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
 const backend = window.backend  // defined in preload.js
 
 class AWSConsole extends React.Component {
@@ -96,6 +96,48 @@ class AWSConsole extends React.Component {
         </CSSTransition>
     }
 
+    launchButtonGenerator({launchProfile, shouldDisable}) {
+        return buttonText => {
+            return <Button onClick={launchProfile}
+                disabled={shouldDisable}
+                title={shouldDisable ? "Enter your 6-digit MFA code first!" : null}>
+                {buttonText ? buttonText : "Launch"}
+            </Button>
+        }
+    }
+
+    profileRow({
+        profileName,
+        roleRegexResult,
+        fullRoleName,
+        shortRoleName,
+        profile,
+        launchButton}) {
+        return <Row className='d-table-row' key={profileName}>
+            <Col className='d-none d-sm-table-cell' sm={2} md={3}>
+                {profileName.replace(/-/g, String.fromCharCode(0x2011))}
+            </Col>
+            <Col className='d-none d-md-table-cell' md={3}>
+                {roleRegexResult[1]} {/*role account*/}
+            </Col>
+            <Col className='d-none d-md-table-cell' md={2}>
+                <div title={fullRoleName == shortRoleName ? null : fullRoleName}>{shortRoleName}</div>
+            </Col>
+            <Col className='d-none d-lg-table-cell' lg={2}>
+                {profile.mfa_serial ? profile.mfa_serial.replace(/arn:aws:iam::/, "") : ""}
+            </Col>
+            <Col className='d-none d-md-table-cell' md={2}>
+                {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
+            </Col>
+            <Col className='d-table-cell d-sm-none launchButton'>
+                {launchButton(profileName)}
+            </Col>
+            <Col className='d-none d-sm-table-cell launchButton' sm={2} md={2}>
+                {launchButton()}
+            </Col>
+        </Row>
+    }
+
     render() {
         const {
             awsConfig,
@@ -138,54 +180,15 @@ class AWSConsole extends React.Component {
                         <b>Credentials Profile</b>
                     </Col>
                 </Row>
-                {usableProfiles.map(profileName => {
-                    const profile = config[profileName]
-                    const roleRegexResult = roleRegex.exec(profile.role_arn)
-                    const shouldDisable = profile.mfa_serial != undefined && mfaCode.length != 6
-                    const launchProfile = () => {
-                        backend.launchConsole({profileName, mfaCode, configType})
-                        this.setState({mfaCode: ""})
-                    }
-
-                    const fullRoleName = roleRegexResult[2].replace(/-/g, String.fromCharCode(0x2011))
-                    var shortRoleName
-                    if(fullRoleName.length > 45) {
-                        shortRoleName = fullRoleName.substring(0, 20) + "..." + fullRoleName.substring(fullRoleName.length - 20)
-                    } else {
-                        shortRoleName = fullRoleName
-                    }
-
-                    const launchButton = buttonText => {
-                        return <Button onClick={launchProfile}
-                            disabled={shouldDisable}
-                            title={shouldDisable ? "Enter your 6-digit MFA code first!" : null}>
-                            {buttonText ? buttonText : "Launch"}
-                        </Button>
-                    }
-
-                    return <Row className='d-table-row' key={profileName}>
-                        <Col className='d-none d-sm-table-cell' sm={2} md={3}>
-                            {profileName.replace(/-/g, String.fromCharCode(0x2011))}
-                        </Col>
-                        <Col className='d-none d-md-table-cell' md={3}>
-                            {roleRegexResult[1]} {/*role account*/}
-                        </Col>
-                        <Col className='d-none d-md-table-cell' md={2}>
-                            <div title={fullRoleName == shortRoleName ? null : fullRoleName}>{shortRoleName}</div>
-                        </Col>
-                        <Col className='d-none d-lg-table-cell' lg={2}>
-                            {profile.mfa_serial ? profile.mfa_serial.replace(/arn:aws:iam::/, "") : ""}
-                        </Col>
-                        <Col className='d-none d-md-table-cell' md={2}>
-                            {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
-                        </Col>
-                        <Col className='d-table-cell d-sm-none launchButton'>
-                            {launchButton(profileName)}
-                        </Col>
-                        <Col className='d-none d-sm-table-cell launchButton' sm={2} md={2}>
-                            {launchButton()}
-                        </Col>
-                    </Row>
+                {profileRows({
+                    usableProfiles,
+                    config,
+                    configType,
+                    mfaCode,
+                    clearMfaCode: () => this.setState({"mfaCode": ""}),
+                    launchConsole: backend.launchConsole,
+                    launchButtonGenerator: this.launchButtonGenerator,
+                    profileRowGenerator: this.profileRow
                 })}
                 {usableProfiles.some(profile => config[profile].mfa_serial) ? <Row className='mfaBox'>
                     <Col>
