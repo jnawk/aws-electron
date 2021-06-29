@@ -7,7 +7,7 @@ import "./profileList.css"
 import "./mfaBox.css"
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/
-const backend = window.backend
+const backend = window.backend  // defined in preload.js
 
 class AWSConsole extends React.Component {
     constructor(props) {
@@ -17,8 +17,6 @@ class AWSConsole extends React.Component {
             mfaCode: ""
         }
     }
-
-
 
     componentDidMount() {
         backend.getAWSConfig().then(configs => {
