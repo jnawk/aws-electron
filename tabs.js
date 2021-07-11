@@ -2,7 +2,9 @@ const TabGroup = require("electron-tabs")
 const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
 const timeRemainingMessage = require("./timeRemaining")
-let windowState = {}
+let windowState = {
+    contextMenuAdded: false
+}
 
 
 ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
@@ -50,6 +52,15 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
                 let title = tab.webview.getTitle()
                 if(!title.toLowerCase().startsWith("http")) {
                     tab.setTitle(title)
+                }
+                if(!windowState.contextMenuAdded) {
+                    ipcRenderer.send(
+                        "add-context-menu",
+                        {
+                            contentsId: tab.webview.getWebContentsId()
+                        }
+                    )
+                    windowState.contextMenuAdded = true
                 }
             })
             tab.on("close", () => ipcRenderer.send(

@@ -1,6 +1,6 @@
 {
   "name": "aws-console",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "AWS Console",
   "main": "main.js",
   "repository": {
@@ -85,6 +85,7 @@
   "dependencies": {
     "aws-sdk": "^2",
     "electron-tabs": "^0.15.0",
+    "electron-context-menu": "^3.1.1",
     "ini": "^2.0.0",
     "node-fetch": "^2.6.1",
     "proxy-agent": "^4",

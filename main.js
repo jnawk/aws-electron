@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain } = require("electron")
+const { app, BrowserWindow, webContents, ipcMain } = require("electron")
+const contextMenu = require("electron-context-menu")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
@@ -105,6 +106,24 @@ ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
     // we want to track the tabs a profile has open so when the last one closes
     // we can close the window.
     appState.windows[profileName].tabs.push(tabNumber)
+})
+
+ipcMain.on("add-context-menu", (event, {contentsId}) => {
+    contextMenu({
+        window: webContents.fromId(contentsId),
+        prepend: (defaultActions, parameters /*, browserWindow*/ ) => {
+            return [{
+                label: "Open in new tab",
+                click: () => {
+                    appState.currentWindow.webContents.send(
+                        "open-tab", {url: parameters.linkURL, tabNumber: nextTabNumber++}
+                    )
+                },
+                // Only show it when right-clicking images
+                visible: parameters.linkURL != ""
+            }]
+        }
+    })
 })
 
 ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
