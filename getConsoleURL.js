@@ -53,7 +53,6 @@ const configureProxy = async config => {
 
 const getRoleCredentials = async (config, tokenCode, profileName) => {
     const profileList = getProfileList(config, profileName)
-    console.log(profileList)
 
     // set the long-term credentials
     if(profileList.length == 1) {
