@@ -3,9 +3,9 @@ const expect = require("chai").expect
 const path = require("path")
 
 const {
-  getAWSConfig,
-  getUsableProfiles,
-  getProfileList
+    getAWSConfig,
+    getUsableProfiles,
+    getProfileList
 } = require("../AWSConfigReader")
 const { profileRows } = require("../app/getRoleData")
 const awsConfigFile1 = path.join(__dirname, "awsConfig1")
@@ -105,9 +105,9 @@ describe("AWS Config Reader", function () {
             const config = getAWSConfig(aws2faConfig, aws2faCredentials)
             const profileList = getProfileList(config.awsConfig, "chained")
             expect(profileList.length).to.equal(3)
-            expect(profileList).to.contain('chained')
-            expect(profileList).to.contain('role')
-            expect(profileList).to.contain('identity')
+            expect(profileList).to.contain("chained")
+            expect(profileList).to.contain("role")
+            expect(profileList).to.contain("identity")
         })
     })
 })

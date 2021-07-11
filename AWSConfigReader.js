@@ -17,7 +17,7 @@ const isLikelyVaultV4Config = config => {
       mfa_serial to be inheritable from the source_profile.  They have since
       learned the error of their ways, but no doubt there are misguided
       individuals out there still using this version's broken features.
-
+     
       Having a mfa_serial on the default profile is a dead giveaway.
      */
 
