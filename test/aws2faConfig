@@ -9,3 +9,7 @@ source_profile = identity::source-profile
 [profile role]
 role_arn = arn:aws:iam::123456789012:role/rolename
 source_profile = identity
+
+[profile chained]
+role_arn = arn:aws:iam::123456789012:role/rolename
+source_profile = role

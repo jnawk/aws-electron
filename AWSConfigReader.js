@@ -17,7 +17,7 @@ const isLikelyVaultV4Config = config => {
       mfa_serial to be inheritable from the source_profile.  They have since
       learned the error of their ways, but no doubt there are misguided
       individuals out there still using this version's broken features.
-     
+
       Having a mfa_serial on the default profile is a dead giveaway.
      */
 
@@ -84,7 +84,15 @@ const getProfileList = (config, profileName) => {
             throw new Error(`Loop in profiles: ${profiles} + ${sourceProfile}`)
         }
         profiles.push(sourceProfile)
-        profileConfig = config[sourceProfile]
+        const nextProfile = config[sourceProfile]
+
+        if(nextProfile && nextProfile.role_arn === undefined) {
+            // if we've found a config profile with no role_arn, then the chain
+            // is supposed to stop with a credentials profile with the same name.
+            profileConfig = undefined
+        } else {
+            profileConfig = nextProfile
+        }
     }
     return profiles.reverse()
 }

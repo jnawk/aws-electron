@@ -2,7 +2,11 @@ require("chai").should()
 const expect = require("chai").expect
 const path = require("path")
 
-const { getAWSConfig, getUsableProfiles } = require("../AWSConfigReader")
+const {
+  getAWSConfig,
+  getUsableProfiles,
+  getProfileList
+} = require("../AWSConfigReader")
 const { profileRows } = require("../app/getRoleData")
 const awsConfigFile1 = path.join(__dirname, "awsConfig1")
 const awsConfigFile2 = path.join(__dirname, "awsConfig2")
@@ -87,13 +91,23 @@ describe("AWS Config Reader", function () {
                 profileRowGenerator: () => null,
             })
         })
-        it("should not return unusable profiles", function() {
+        it("should not return profiles which do not assume roles", function() {
             const config = getAWSConfig(aws2faConfig, aws2faCredentials)
             const usableProfiles = getUsableProfiles({
                 config: config.awsConfig,
                 credentialsProfiles: config.credentialsProfiles
             })
-            expect(usableProfiles.length).to.equal(1)
+            expect(usableProfiles.length).to.equal(2)
+            expect(usableProfiles).to.contain("role")
+            expect(usableProfiles).to.contain("chained")
+        })
+        it("should return the correct profile list", function() {
+            const config = getAWSConfig(aws2faConfig, aws2faCredentials)
+            const profileList = getProfileList(config.awsConfig, "chained")
+            expect(profileList.length).to.equal(3)
+            expect(profileList).to.contain('chained')
+            expect(profileList).to.contain('role')
+            expect(profileList).to.contain('identity')
         })
     })
 })
