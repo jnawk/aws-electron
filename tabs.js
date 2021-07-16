@@ -3,7 +3,8 @@ const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
 const timeRemainingMessage = require("./timeRemaining")
 let windowState = {
-    contextMenuAdded: false
+    contextMenuAdded: false,
+    zoomHandlers: []
 }
 
 
@@ -49,18 +50,19 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
         },
         ready: tab => {
             tab.on("webview-dom-ready", () => {
-                let title = tab.webview.getTitle()
+                const title = tab.webview.getTitle()
+                const contentsId = tab.webview.getWebContentsId()
                 if(!title.toLowerCase().startsWith("http")) {
                     tab.setTitle(title)
                 }
                 if(!windowState.contextMenuAdded) {
-                    ipcRenderer.send(
-                        "add-context-menu",
-                        {
-                            contentsId: tab.webview.getWebContentsId()
-                        }
-                    )
+                    ipcRenderer.send("add-context-menu", {contentsId})
                     windowState.contextMenuAdded = true
+                }
+
+                if(!windowState.zoomHandlers.includes(contentsId)) {
+                    ipcRenderer.send("add-zoom-handlers", {contentsId, profile: windowState.profile})
+                    windowState.zoomHandlers.push(contentsId)
                 }
             })
             tab.on("close", () => ipcRenderer.send(

@@ -108,6 +108,17 @@ ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
     appState.windows[profileName].tabs.push(tabNumber)
 })
 
+ipcMain.on("add-zoom-handlers", (event, {contentsId, profile}) => {
+    const contents = webContents.fromId(contentsId)
+    contents.on('zoom-changed', (event, direction) => {
+        if(direction === "in") {
+            contents.setZoomLevel(contents.getZoomLevel() + 1)
+        } else {
+            contents.setZoomLevel(contents.getZoomLevel() - 1)
+        }
+    })
+})
+
 ipcMain.on("add-context-menu", (event, {contentsId}) => {
     contextMenu({
         window: webContents.fromId(contentsId),
