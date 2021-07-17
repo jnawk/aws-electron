@@ -60,6 +60,12 @@ const launchConsole = ({profileName, url, expiryTime}) => {
 
     const win = new BrowserWindow(windowOptions)
 
+    // save details of this profile's wind
+    appState.windows[profileName] = {
+        tabs: [],
+        window: win,
+    }
+
     win.loadURL(`file://${__dirname}/tabs.html`)
     win.webContents.on("did-finish-load", () => {
         win.webContents.send("open-tab", openTabArguments)
@@ -73,11 +79,6 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     // so that a new-window event is sent to the right place.
     win.on("focus", () => setCurrentWindow(win))
 
-    // save details of this profile's wind
-    appState.windows[profileName] = {
-        tabs: [],
-        window: win
-    }
 }
 
 ipcMain.on(
