@@ -219,7 +219,7 @@ app.on("web-contents-created", (wccEvent, contents) => {
             newWindowEvent.preventDefault()
         }
         // ... open a tab in our current window instead.
-        // (assumes windows are only created in resoonse to the user actually
+        // (assumes windows are only created in response to the user actually
         // doing something - seems reasonable)
         appState.currentWindow.webContents.send(
             "open-tab", {url, tabNumber: nextTabNumber++}
