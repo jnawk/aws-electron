@@ -30,7 +30,7 @@ const setCurrentWindow = win => {
 let nextTabNumber = 0
 
 
-const launchConsole = ({profileName, url, expiryTime}) => {
+const launchConsole = async ({profileName, url, expiryTime}) => {
     const openTabArguments = {
         url,
         profile: profileName,
@@ -67,6 +67,8 @@ const launchConsole = ({profileName, url, expiryTime}) => {
         window: win,
     }
 
+    const bounds = await settings.get(`bounds.${profileName}`)
+
     win.loadURL(`file://${__dirname}/tabs.html`)
     win.webContents.on("did-finish-load", () => {
         win.webContents.send("open-tab", openTabArguments)
@@ -79,14 +81,13 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     // when the window regains focus, update which window is the current window
     // so that a new-window event is sent to the right place.
     win.on("focus", () => setCurrentWindow(win))
-    win.on("ready-to-show", async () => {
+    win.on("ready-to-show", () => {
         if (!appState.windows[profileName].boundsChangedHandlerBound) {
             const boundsChangedFunction = debounce(
                 () => windowBoundsChanged({window: win, profileName}),
                 100
             )
 
-            const bounds = await settings.get(`bounds.${profileName}`)
             if(bounds) {
                 if(bounds.bounds) {
                     win.setBounds(bounds.bounds)
