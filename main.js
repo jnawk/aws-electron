@@ -1,5 +1,6 @@
 const { app, BrowserWindow, webContents, ipcMain } = require("electron")
 const contextMenu = require("electron-context-menu")
+const debounce = require("debounce")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
@@ -78,7 +79,34 @@ const launchConsole = ({profileName, url, expiryTime}) => {
     // when the window regains focus, update which window is the current window
     // so that a new-window event is sent to the right place.
     win.on("focus", () => setCurrentWindow(win))
+    win.on("ready-to-show", async () => {
+        if (!appState.windows[profileName].boundsChangedHandlerBound) {
+            const boundsChangedFunction = debounce(
+                () => windowBoundsChanged({window: win, profileName}),
+                100
+            )
 
+            const bounds = await settings.get(`bounds.${profileName}`)
+            if(bounds) {
+                if(bounds.bounds) {
+                    win.setBounds(bounds.bounds)
+                }
+                if(bounds.maximised) {
+                    win.maximize()
+                }
+            }
+
+            ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
+            appState.windows[profileName].boundsChangedHandlerBound = true
+        }
+    })
+
+}
+
+const windowBoundsChanged = ({window, profileName}) => {
+    const bounds = window.getBounds()
+    const maximised = window.isMaximized()
+    settings.set(`bounds.${profileName}`, {bounds, maximised})
 }
 
 ipcMain.on(
