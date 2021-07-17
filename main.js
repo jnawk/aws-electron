@@ -3,6 +3,7 @@ const contextMenu = require("electron-context-menu")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
+const settings = require("electron-settings")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
 ipcMain.handle(
@@ -108,13 +109,26 @@ ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
     appState.windows[profileName].tabs.push(tabNumber)
 })
 
-ipcMain.on("add-zoom-handlers", (event, {contentsId, profile}) => {
+ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
     const contents = webContents.fromId(contentsId)
+    contents.setZoomLevel(await settings.get(`zoomLevels.${profile}`) || 0)
     contents.on("zoom-changed", (event, direction) => {
+        let newZoomLevel = contents.getZoomLevel()
         if(direction === "in") {
-            contents.setZoomLevel(contents.getZoomLevel() + 1)
+            ++newZoomLevel
         } else {
-            contents.setZoomLevel(contents.getZoomLevel() - 1)
+            --newZoomLevel
+        }
+        contents.setZoomLevel(newZoomLevel)
+        settings.set(`zoomLevels.${profile}`, newZoomLevel)
+    })
+    contents.on("before-input-event", (event, input) => {
+        if(input.control) {
+            if(input.type == "keyUp"){
+                if(input.key === "+" || input.key === "-") {
+                    settings.set(`zoomLevels.${profile}`, contents.getZoomLevel())
+                }
+            }
         }
     })
 })

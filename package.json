@@ -85,6 +85,7 @@
   "dependencies": {
     "aws-sdk": "^2",
     "electron-context-menu": "^3.1.1",
+    "electron-settings": "^4.0.2",
     "electron-tabs": "^0.15.0",
     "ini": "^2.0.0",
     "node-fetch": "^2.6.1",
