@@ -195,7 +195,8 @@ ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
     }
 })
 
-app.on("ready", () => {
+app.on("ready", async () => {
+    const launchWindowBounds = await settings.get("launchWindowBounds")
     const options = {
         width: 1280,
         height: 1024,
@@ -209,6 +210,32 @@ app.on("ready", () => {
     const win = new BrowserWindow(options)
     win.loadURL(`file://${__dirname}/index.html`)
     // win.toggleDevTools();
+
+    win.on("ready-to-show", () => {
+        if (!appState.launchWindowBoundsChangedHandlerBound) {
+            const boundsChangedFunction = debounce(
+                () => {
+                    const bounds = win.getBounds()
+                    const maximised = win.isMaximized()
+                    settings.set("launchWindowBounds", {bounds, maximised})
+                },
+                100
+            )
+
+            if(launchWindowBounds) {
+                if(launchWindowBounds.bounds) {
+                    win.setBounds(launchWindowBounds.bounds)
+                }
+                if(launchWindowBounds.maximised) {
+                    win.maximize()
+                }
+            }
+
+            ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
+            appState.launchWindowBoundsChangedHandlerBound = true
+        }
+    })
+
 })
 
 app.on("window-all-closed", () => app.quit())
