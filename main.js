@@ -110,7 +110,7 @@ ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
 
 ipcMain.on("add-zoom-handlers", (event, {contentsId, profile}) => {
     const contents = webContents.fromId(contentsId)
-    contents.on('zoom-changed', (event, direction) => {
+    contents.on("zoom-changed", (event, direction) => {
         if(direction === "in") {
             contents.setZoomLevel(contents.getZoomLevel() + 1)
         } else {
