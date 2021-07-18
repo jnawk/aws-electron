@@ -164,10 +164,12 @@ ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
 })
 
 ipcMain.on("add-context-menu", (event, {contentsId}) => {
+    const contents = webContents.fromId(contentsId)
     contextMenu({
-        window: webContents.fromId(contentsId),
+        window: contents,
         prepend: (defaultActions, parameters /*, browserWindow*/ ) => {
-            return [{
+            return [
+              {
                 label: "Open in new tab",
                 click: () => {
                     appState.currentWindow.webContents.send(
@@ -176,7 +178,18 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
                 },
                 // Only show it when right-clicking images
                 visible: parameters.linkURL != ""
-            }]
+            },
+            {
+              label: "Back",
+              click: () => contents.goBack(),
+              visible: contents.canGoBack()
+            },
+            {
+              label: "Forwards",
+              click: () => contents.goForward(),
+              visible: contents.canGoForward()
+            }
+          ]
         }
     })
 })
