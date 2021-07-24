@@ -8,10 +8,10 @@ const {
 
 const contextMenu = require("electron-context-menu")
 const debounce = require("debounce")
+const settings = require("electron-settings")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
-const settings = require("electron-settings")
 const { appMenu } = require("./menu")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
