@@ -22,9 +22,7 @@ const template = [
         submenu: [
             {
                 label: "Preferences",
-                click: async () => {
-                    app.openPreferences()
-                }
+                click: async () => app.openPreferences()
             },
             isMac ? { role: "close" } : { role: "quit" }
         ]
