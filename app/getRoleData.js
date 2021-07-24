@@ -18,7 +18,6 @@ const getRoleData = ({profile, mfaCode}) => {
         fullRoleName,
         shortRoleName
     }
-    console.log(result)
     return result
 }
 
