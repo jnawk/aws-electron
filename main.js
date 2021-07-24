@@ -1,10 +1,18 @@
-const { app, BrowserWindow, webContents, ipcMain } = require("electron")
+const {
+  BrowserWindow,
+  Menu,
+  app,
+  ipcMain,
+  webContents
+} = require("electron")
+
 const contextMenu = require("electron-context-menu")
 const debounce = require("debounce")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
 const settings = require("electron-settings")
+const { appMenu } = require("./menu")
 
 ipcMain.handle("get-aws-config", () => getAWSConfig())
 ipcMain.handle(
@@ -209,6 +217,7 @@ ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
 })
 
 app.on("ready", async () => {
+    Menu.setApplicationMenu(appMenu)
     const launchWindowBounds = await settings.get("launchWindowBounds")
     const options = {
         width: 1280,
