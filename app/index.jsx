@@ -18,6 +18,9 @@ const app = (
             <Route exact path="/">
                 <AWSConsole/>
             </Route>
+            <Route exact path="/settings">
+                <Settings/>
+            </Route>
         </Switch>
     </Router>
 )

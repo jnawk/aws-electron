@@ -28,7 +28,24 @@ app.windows = {}
 let nextTabNumber = 0
 
 app.openPreferences = () => {
-  console.log("preferences to open...")
+    if(app.preferencesWindow === undefined) {
+
+        const options = {
+            width: 1280,
+            height: 1024,
+            webPreferences: {
+                preload: `${__dirname}/preload.js`,
+                worldSafeExecuteJavaScript: true,
+                contextIsolation: true
+            }
+        }
+
+        const win = app.preferencesWindow = new BrowserWindow(options)
+        win.loadURL(`file://${__dirname}/index.html#/settings`)
+        win.on("close", () => {
+            delete app.preferencesWindow
+        })
+    }
 }
 
 
