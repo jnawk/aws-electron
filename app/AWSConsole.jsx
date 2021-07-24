@@ -19,15 +19,19 @@ class AWSConsole extends React.Component {
     }
 
     componentDidMount() {
-        backend.getAWSConfig().then(configs => {
-            this.setState(configs)
+        const configPromise = backend.getAWSConfig()
+        const preferencesPromise = backend.getPreferences()
+        Promise.all([configPromise, preferencesPromise]).then(([configs, preferences]) => {
+            const vaultPreference = preferences.vaultPreference || "ask"
+            const properly = vaultPreference == "ask" ? undefined : vaultPreference == "aws"
+            this.setState({...configs, explicitTreatConfigProperly: properly})
             const {
                 awsConfig,
                 vaultConfig,
                 credentialsProfiles,
             } = configs
 
-            const usingAwsConfig = vaultConfig == undefined
+            const usingAwsConfig = vaultConfig == undefined || properly
             const config = usingAwsConfig ? awsConfig : vaultConfig
             return backend.getUsableProfiles({config, credentialsProfiles})
         }).then(usableProfiles => this.setState({usableProfiles}))
