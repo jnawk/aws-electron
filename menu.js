@@ -20,6 +20,12 @@ const template = [
   {
     label: 'File',
     submenu: [
+      {
+        label: 'Preferences',
+        click: async () => {
+          console.log("preferences to open...")
+        }
+      },
       isMac ? { role: 'close' } : { role: 'quit' }
     ]
   },
