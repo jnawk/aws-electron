@@ -1,9 +1,9 @@
 const {
-  BrowserWindow,
-  Menu,
-  app,
-  ipcMain,
-  webContents
+    BrowserWindow,
+    Menu,
+    app,
+    ipcMain,
+    webContents
 } = require("electron")
 
 const contextMenu = require("electron-context-menu")
@@ -23,17 +23,7 @@ ipcMain.handle(
     ) => getUsableProfiles({config, credentialsProfiles})
 )
 
-let appState = {
-    // need to track the current window so that a new-window event is turned
-    // into an openTab event in the right webContents.
-    currentWindow: null,
-    windows: {}
-}
-
-// TODO might be able to do away with this with some proper tracking of windows
-const setCurrentWindow = win => {
-    appState.currentWindow = win
-}
+app.windows = {}
 
 let nextTabNumber = 0
 
@@ -46,7 +36,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
         expiryTime
     }
 
-    const profileSession = appState.windows[profileName]
+    const profileSession = app.windows[profileName]
     if(profileSession) {
         // we already have a window open for this session, reuse it.
         profileSession.window.webContents.send("open-tab", openTabArguments)
@@ -70,7 +60,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
     const win = new BrowserWindow(windowOptions)
 
     // save details of this profile's wind
-    appState.windows[profileName] = {
+    app.windows[profileName] = {
         tabs: [],
         window: win,
     }
@@ -83,14 +73,11 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
     })
     win.on("close", () => {
         // delete the window state from the app when it is closed
-        delete appState.windows[profileName]
+        delete app.windows[profileName]
     })
 
-    // when the window regains focus, update which window is the current window
-    // so that a new-window event is sent to the right place.
-    win.on("focus", () => setCurrentWindow(win))
     win.on("ready-to-show", () => {
-        if (!appState.windows[profileName].boundsChangedHandlerBound) {
+        if (!app.windows[profileName].boundsChangedHandlerBound) {
             const boundsChangedFunction = debounce(
                 () => windowBoundsChanged({window: win, profileName}),
                 100
@@ -106,7 +93,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             }
 
             ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
-            appState.windows[profileName].boundsChangedHandlerBound = true
+            app.windows[profileName].boundsChangedHandlerBound = true
         }
     })
 
@@ -144,7 +131,7 @@ ipcMain.on(
 ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
     // we want to track the tabs a profile has open so when the last one closes
     // we can close the window.
-    appState.windows[profileName].tabs.push(tabNumber)
+    app.windows[profileName].tabs.push(tabNumber)
 })
 
 ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
@@ -180,9 +167,9 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
               {
                 label: "Open in new tab",
                 click: () => {
-                    appState.currentWindow.webContents.send(
                         "open-tab", {url: parameters.linkURL, tabNumber: nextTabNumber++}
                     )
+                        BrowserWindow.getFocusedWindow().webContents.send(
                 },
                 // Only show it when right-clicking images
                 visible: parameters.linkURL != ""
@@ -204,15 +191,14 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
 
 ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
     // remove the tab tracking
-    appState.windows[profileName].tabs = (
-        appState.windows[profileName].tabs.filter(num => tabNumber != num)
+    app.windows[profileName].tabs = (
+      app.windows[profileName].tabs.filter(num => tabNumber != num)
     )
 
-    if(appState.windows[profileName].tabs.length == 0) {
+    if(app.windows[profileName].tabs.length == 0) {
         // no more tabs; close the window
-        appState.windows[profileName].window.close()
+        app.windows[profileName].window.close()
         // the close window handler will delete the window information
-        // delete appState.windows[profileName]
     }
 })
 
@@ -234,7 +220,7 @@ app.on("ready", async () => {
     // win.toggleDevTools();
 
     win.on("ready-to-show", () => {
-        if (!appState.launchWindowBoundsChangedHandlerBound) {
+      if (!app.launchWindowBoundsChangedHandlerBound) {
             const boundsChangedFunction = debounce(
                 () => {
                     const bounds = win.getBounds()
@@ -254,7 +240,7 @@ app.on("ready", async () => {
             }
 
             ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
-            appState.launchWindowBoundsChangedHandlerBound = true
+            app.launchWindowBoundsChangedHandlerBound = true
         }
     })
 
@@ -271,7 +257,7 @@ app.on("web-contents-created", (wccEvent, contents) => {
         // ... open a tab in our current window instead.
         // (assumes windows are only created in response to the user actually
         // doing something - seems reasonable)
-        appState.currentWindow.webContents.send(
+        BrowserWindow.getFocusedWindow().webContents.send(
             "open-tab", {url, tabNumber: nextTabNumber++}
         )
     })
