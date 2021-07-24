@@ -9,5 +9,6 @@ contextBridge.exposeInMainWorld("backend", {
     getUsableProfiles: ({config, credentialsProfiles}) => ipcRenderer.invoke(
         "get-usable-profiles", {config, credentialsProfiles}
     ),
-    getPreferences: () => ipcRenderer.invoke("get-preferences")
+    getPreferences: () => ipcRenderer.invoke("get-preferences"),
+    setPreference: preference => ipcRenderer.send("set-preference", preference)
 })

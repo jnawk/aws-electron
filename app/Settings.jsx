@@ -23,6 +23,7 @@ class Settings extends React.Component {
 
     setPreference(preference) {
         this.setState({preferences: preference})
+        backend.setPreference(preference)        
     }
 
     render() {

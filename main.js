@@ -130,6 +130,16 @@ const windowBoundsChanged = ({window, profileName}) => {
 
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
 ipcMain.on(
+    "set-preference",
+    async (event, preference) => settings.set("preferences", {
+        // existing preferences
+        ...await settings.get("preferences"),
+        // plus the one we are setting
+        ...preference
+    })
+)
+
+ipcMain.on(
     "launch-console",
     async (
         event,
