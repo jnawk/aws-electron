@@ -164,27 +164,27 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
         window: contents,
         prepend: (defaultActions, parameters /*, browserWindow*/ ) => {
             return [
-              {
-                label: "Open in new tab",
-                click: () => {
-                        "open-tab", {url: parameters.linkURL, tabNumber: nextTabNumber++}
-                    )
+                {
+                    label: "Open in new tab",
+                    click: () => {
                         BrowserWindow.getFocusedWindow().webContents.send(
+                            "open-tab", {url: parameters.linkURL, tabNumber: nextTabNumber++}
+                        )
+                    },
+                    // Only show it when right-clicking links
+                    visible: parameters.linkURL != ""
                 },
-                // Only show it when right-clicking images
-                visible: parameters.linkURL != ""
-            },
-            {
-              label: "Back",
-              click: () => contents.goBack(),
-              visible: contents.canGoBack()
-            },
-            {
-              label: "Forwards",
-              click: () => contents.goForward(),
-              visible: contents.canGoForward()
-            }
-          ]
+                {
+                    label: "Back",
+                    click: () => contents.goBack(),
+                    visible: contents.canGoBack()
+                },
+                {
+                    label: "Forwards",
+                    click: () => contents.goForward(),
+                    visible: contents.canGoForward()
+                }
+            ]
         }
     })
 })
