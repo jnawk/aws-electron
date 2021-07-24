@@ -23,8 +23,8 @@ ipcMain.handle(
     ) => getUsableProfiles({config, credentialsProfiles})
 )
 
-app.windows = {}
 
+app.windows = {}
 let nextTabNumber = 0
 
 app.openPreferences = () => {
@@ -47,7 +47,6 @@ app.openPreferences = () => {
         })
     }
 }
-
 
 const launchConsole = async ({profileName, url, expiryTime}) => {
     const openTabArguments = {
@@ -125,6 +124,7 @@ const windowBoundsChanged = ({window, profileName}) => {
     const maximised = window.isMaximized()
     settings.set(`bounds.${profileName}`, {bounds, maximised})
 }
+
 
 ipcMain.on(
     "launch-console",
