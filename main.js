@@ -196,7 +196,7 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
 ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
     // remove the tab tracking
     app.windows[profileName].tabs = (
-      app.windows[profileName].tabs.filter(num => tabNumber != num)
+        app.windows[profileName].tabs.filter(num => tabNumber != num)
     )
 
     if(app.windows[profileName].tabs.length == 0) {
@@ -224,7 +224,7 @@ app.on("ready", async () => {
     // win.toggleDevTools();
 
     win.on("ready-to-show", () => {
-      if (!app.launchWindowBoundsChangedHandlerBound) {
+        if (!app.launchWindowBoundsChangedHandlerBound) {
             const boundsChangedFunction = debounce(
                 () => {
                     const bounds = win.getBounds()
