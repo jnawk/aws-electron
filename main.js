@@ -14,6 +14,7 @@ const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
 const { appMenu } = require("./menu")
 
+// ipcMain.handle deals with ipcRenderer.invoke - these things expect an answer
 ipcMain.handle("get-aws-config", () => getAWSConfig())
 ipcMain.handle(
     "get-usable-profiles",
@@ -126,6 +127,7 @@ const windowBoundsChanged = ({window, profileName}) => {
 }
 
 
+// ipcMain.on deals with ipcRenderer.send - these things don't want an answer
 ipcMain.on(
     "launch-console",
     async (
