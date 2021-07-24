@@ -14,7 +14,8 @@ class AWSConsole extends React.Component {
         super(props)
 
         this.state = {
-            mfaCode: ""
+            mfaCode: "",
+            remember: false
         }
     }
 
@@ -45,6 +46,7 @@ class AWSConsole extends React.Component {
             awsConfig,
             vaultConfig,
             credentialsProfiles,
+            remember
         } = this.state
 
         this.setState({explicitTreatConfigProperly: properly})
@@ -55,10 +57,13 @@ class AWSConsole extends React.Component {
             backend.getUsableProfiles({config, credentialsProfiles})
                 .then(usableProfiles => this.setState({usableProfiles}))
         }
+        if(remember) {
+          backend.setPreference({vaultPreference: properly ? "aws" : "vault"})
+        }
     }
 
     vaultMessage() {
-        const { explicitTreatConfigProperly, vaultConfig } = this.state
+        const { explicitTreatConfigProperly, vaultConfig, remember } = this.state
 
         const displayVaultMessage = explicitTreatConfigProperly == undefined && vaultConfig != undefined
         if(!displayVaultMessage) {
@@ -96,6 +101,13 @@ class AWSConsole extends React.Component {
                 <Button onClick={() => this.treatConfigProperly(false)}>
                   Please treat my config file as a V4 Vault config.
                 </Button>
+                {"\u0020"}
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onClick={()=>this.setState({remember: !remember})}
+                />
+                {"\u0020"} Remember this
             </Alert>
         </CSSTransition>
     }
