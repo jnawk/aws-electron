@@ -27,6 +27,10 @@ app.windows = {}
 
 let nextTabNumber = 0
 
+app.openPreferences = () => {
+  console.log("preferences to open...")
+}
+
 
 const launchConsole = async ({profileName, url, expiryTime}) => {
     const openTabArguments = {

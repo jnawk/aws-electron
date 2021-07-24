@@ -23,7 +23,7 @@ const template = [
             {
                 label: "Preferences",
                 click: async () => {
-                    console.log("preferences to open...")
+                    app.openPreferences()
                 }
             },
             isMac ? { role: "close" } : { role: "quit" }
