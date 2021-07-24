@@ -16,6 +16,7 @@ const { appMenu } = require("./menu")
 
 // ipcMain.handle deals with ipcRenderer.invoke - these things expect an answer
 ipcMain.handle("get-aws-config", () => getAWSConfig())
+ipcMain.handle("get-preferences", () => settings.get("preferences"))
 ipcMain.handle(
     "get-usable-profiles",
     (
