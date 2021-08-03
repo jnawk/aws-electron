@@ -58,7 +58,7 @@ class AWSConsole extends React.Component {
                 .then(usableProfiles => this.setState({usableProfiles}))
         }
         if(remember) {
-          backend.setPreference({vaultPreference: properly ? "aws" : "vault"})
+            backend.setPreference({vaultPreference: properly ? "aws" : "vault"})
         }
     }
 
@@ -103,9 +103,9 @@ class AWSConsole extends React.Component {
                 </Button>
                 {"\u0020"}
                 <input
-                  type="checkbox"
-                  checked={remember}
-                  onClick={()=>this.setState({remember: !remember})}
+                    type="checkbox"
+                    checked={remember}
+                    onClick={()=>this.setState({remember: !remember})}
                 />
                 {"\u0020"} Remember this
             </Alert>
