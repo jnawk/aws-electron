@@ -65,6 +65,8 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
         return
     }
 
+    const bounds = await settings.get(`bounds.${profileName}`)
+
     // we do not have a window open for this session; need to open one
     const windowOptions = {
         width: 1280,
@@ -76,7 +78,8 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             webviewTag: true//, // TODO we aren't ready for this yet
             // worldSafeExecuteJavaScript: true,
             // contextIsolation: true
-        }
+        },
+        ...bounds.bounds
     }
 
     const win = new BrowserWindow(windowOptions)
@@ -86,8 +89,6 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
         tabs: [],
         window: win,
     }
-
-    const bounds = await settings.get(`bounds.${profileName}`)
 
     win.loadURL(`file://${__dirname}/tabs.html`)
     win.webContents.on("did-finish-load", () => {
@@ -106,9 +107,6 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             )
 
             if(bounds) {
-                if(bounds.bounds) {
-                    win.setBounds(bounds.bounds)
-                }
                 if(bounds.maximised) {
                     win.maximize()
                 }
@@ -246,7 +244,8 @@ app.on("ready", async () => {
             preload: `${__dirname}/preload.js`,
             worldSafeExecuteJavaScript: true,
             contextIsolation: true
-        }
+        },
+        ...launchWindowBounds.bounds
     }
 
     const win = new BrowserWindow(options)
@@ -265,9 +264,6 @@ app.on("ready", async () => {
             )
 
             if(launchWindowBounds) {
-                if(launchWindowBounds.bounds) {
-                    win.setBounds(launchWindowBounds.bounds)
-                }
                 if(launchWindowBounds.maximised) {
                     win.maximize()
                 }
