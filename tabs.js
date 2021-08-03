@@ -50,11 +50,11 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
         ready: tab => {
             tab.on("webview-dom-ready", () => {
                 const title = tab.webview.getTitle()
-                const contentsId = tab.webview.getWebContentsId()
                 if(!title.toLowerCase().startsWith("http")) {
                     tab.setTitle(title)
                 }
 
+                const contentsId = tab.webview.getWebContentsId()
                 if(!windowState.contentsHandlers.includes(contentsId)) {
                     ipcRenderer.send("add-context-menu", {contentsId})
                     ipcRenderer.send("add-zoom-handlers", {contentsId, profile: windowState.profile})
