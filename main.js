@@ -24,7 +24,16 @@ ipcMain.handle(
         {config, credentialsProfiles}
     ) => getUsableProfiles({config, credentialsProfiles})
 )
-
+ipcMain.handle("get-title", async (event, {title, profile}) => {
+    const tabTitlePreference = await settings.get("preferences.tabTitlePreference")
+    if(tabTitlePreference === "{profile} - {title}") {
+        return `${profile} - ${title}`
+    } else if(tabTitlePreference === "{title} - {profile}") {
+        return `${title} - ${profile}`
+    } else {
+        return title
+    }
+})
 
 app.windows = {}
 let nextTabNumber = 0

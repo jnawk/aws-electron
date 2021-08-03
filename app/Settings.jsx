@@ -23,7 +23,7 @@ class Settings extends React.Component {
 
     setPreference(preference) {
         this.setState({preferences: preference})
-        backend.setPreference(preference)        
+        backend.setPreference(preference)
     }
 
     render() {
@@ -31,7 +31,10 @@ class Settings extends React.Component {
         if(!preferences) {
             return <>Loading...</>
         }
-        const { vaultPreference } = preferences
+        const {
+            vaultPreference,
+            tabTitlePreference
+        } = preferences
         return <>
             <Container fluid>
                 <Row /*className='d-none d-sm-table-row'*/>
@@ -58,6 +61,33 @@ class Settings extends React.Component {
                                 onClick={() => {this.setPreference({vaultPreference: "vault"})}}
                             >
                               Treat as aws-vault
+                            </Button>
+                        </ButtonGroup>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                    Tab title format
+                    </Col>
+                    <Col>
+                        <ButtonGroup>
+                            <Button
+                                color={(tabTitlePreference === undefined || tabTitlePreference === "{title}") ? "success" : "secondary"}
+                                onClick={() => {this.setPreference({tabTitlePreference: "{title}"})}}
+                            >
+                                {"{title}"}
+                            </Button>
+                            <Button
+                                color={tabTitlePreference === "{profile} - {title}" ? "success" : "secondary"}
+                                onClick={() => {this.setPreference({tabTitlePreference: "{profile} - {title}"})}}
+                            >
+                                {"{profile} - {title}"}
+                            </Button>
+                            <Button
+                                color={tabTitlePreference === "{title} - {profile}" ? "success" : "secondary"}
+                                onClick={() => {this.setPreference({tabTitlePreference: "{title} - {profile}"})}}
+                            >
+                                {"{title} - {profile}"}
                             </Button>
                         </ButtonGroup>
                     </Col>
