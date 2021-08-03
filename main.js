@@ -79,6 +79,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             // worldSafeExecuteJavaScript: true,
             // contextIsolation: true
         },
+        show: false,
         ...bounds.bounds
     }
 
@@ -111,6 +112,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
                     win.maximize()
                 }
             }
+            win.show();
 
             ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
             app.windows[profileName].boundsChangedHandlerBound = true
@@ -245,6 +247,7 @@ app.on("ready", async () => {
             worldSafeExecuteJavaScript: true,
             contextIsolation: true
         },
+        show: false,
         ...launchWindowBounds.bounds
     }
 
@@ -268,6 +271,7 @@ app.on("ready", async () => {
                     win.maximize()
                 }
             }
+            win.show();
 
             ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
             app.launchWindowBoundsChangedHandlerBound = true
