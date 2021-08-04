@@ -51,7 +51,12 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
             tab.on("webview-dom-ready", async () => {
                 const title = tab.webview.getTitle()
                 if(!title.toLowerCase().startsWith("http")) {
-                    tab.setTitle(await ipcRenderer.invoke("get-title", {title, profile}))
+                    tab.setTitle(
+                        await ipcRenderer.invoke(
+                            "get-title",
+                            {title, profile: windowState.profile}
+                        )
+                    )
                 }
 
                 const contentsId = tab.webview.getWebContentsId()
