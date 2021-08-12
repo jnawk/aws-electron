@@ -248,6 +248,7 @@ ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
 app.on("ready", async () => {
     Menu.setApplicationMenu(appMenu)
     const launchWindowBounds = await settings.get("launchWindowBounds")
+    const bounds = launchWindowBounds ? launchWindowBounds.bounds : {}
     const options = {
         width: 1280,
         height: 1024,
@@ -257,7 +258,7 @@ app.on("ready", async () => {
             contextIsolation: true
         },
         show: false,
-        ...launchWindowBounds.bounds
+        ...bounds
     }
 
     const win = new BrowserWindow(options)
