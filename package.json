@@ -1,6 +1,6 @@
 {
   "name": "aws-console",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "description": "AWS Console",
   "main": "main.js",
   "repository": {

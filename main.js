@@ -74,7 +74,8 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
         return
     }
 
-    const bounds = await settings.get(`bounds.${profileName}`)
+    const profileBounds = await settings.get(`bounds.${profileName}`)
+    const bounds = profileBounds ? profileBounds.bounds : {}
 
     // we do not have a window open for this session; need to open one
     const windowOptions = {
@@ -89,7 +90,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             // contextIsolation: true
         },
         show: false,
-        ...bounds.bounds
+        ...bounds
     }
 
     const win = new BrowserWindow(windowOptions)
