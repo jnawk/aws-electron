@@ -202,6 +202,21 @@ ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
     })
 })
 
+ipcMain.on("add-forward-back-handlers", (event, {contentsId, profile}) => {
+    app.windows[profile].window.on("app-command", (event, command) => {
+        const contents = webContents.fromId(contentsId)
+        if(command == "browser-backward") {
+            if(contents.canGoBack()) {
+                contents.goBack()
+            }
+        } else if(command == "browser-forward") {
+            if(contents.canGoForward()) {
+                contents.goForward()
+            }
+        }
+    })
+})
+
 ipcMain.on("add-context-menu", (event, {contentsId}) => {
     const contents = webContents.fromId(contentsId)
     contextMenu({

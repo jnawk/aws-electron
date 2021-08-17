@@ -63,6 +63,7 @@ ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
                 if(!windowState.contentsHandlers.includes(contentsId)) {
                     ipcRenderer.send("add-context-menu", {contentsId})
                     ipcRenderer.send("add-zoom-handlers", {contentsId, profile: windowState.profile})
+                    ipcRenderer.send("add-forward-back-handlers", {contentsId, profile: windowState.profile})
                     windowState.contentsHandlers.push(contentsId)
                 }
             })
