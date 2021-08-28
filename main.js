@@ -20,11 +20,11 @@ ipcMain.handle("get-preferences", () => settings.get("preferences"))
 ipcMain.handle(
     "get-usable-profiles",
     (
-        event,
+        _event,
         {config, credentialsProfiles}
     ) => getUsableProfiles({config, credentialsProfiles})
 )
-ipcMain.handle("get-title", async (event, {title, profile}) => {
+ipcMain.handle("get-title", async (_event, {title, profile}) => {
     const tabTitlePreference = await settings.get("preferences.tabTitlePreference")
     if(tabTitlePreference === "{profile} - {title}") {
         return `${profile} - ${title}`
@@ -75,7 +75,7 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
     }
 
     const profileBounds = await settings.get(`bounds.${profileName}`)
-    const bounds = profileBounds ? profileBounds.bounds : {}
+    const bounds = profileBounds ? profileBounds["bounds"] : {}
 
     // we do not have a window open for this session; need to open one
     const windowOptions = {
@@ -141,7 +141,7 @@ const windowBoundsChanged = ({window, profileName}) => {
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
 ipcMain.on(
     "set-preference",
-    async (event, preference) => settings.set("preferences", {
+    async (_event, preference) => settings.set("preferences", {
         // existing preferences
         ...await settings.get("preferences"),
         // plus the one we are setting
@@ -152,7 +152,7 @@ ipcMain.on(
 ipcMain.on(
     "launch-console",
     async (
-        event,
+        _event,
         {profileName, mfaCode, configType}
     ) => {
         const config = getAWSConfig()[configType]
@@ -172,16 +172,16 @@ ipcMain.on(
     }
 )
 
-ipcMain.on("add-tab", (event, {profileName, tabNumber}) => {
+ipcMain.on("add-tab", (_event, {profileName, tabNumber}) => {
     // we want to track the tabs a profile has open so when the last one closes
     // we can close the window.
     app.windows[profileName].tabs.push(tabNumber)
 })
 
-ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
+ipcMain.on("add-zoom-handlers", async (_event, {contentsId, profile}) => {
     const contents = webContents.fromId(contentsId)
     contents.setZoomLevel(await settings.get(`zoomLevels.${profile}`) || 0)
-    contents.on("zoom-changed", (event, direction) => {
+    contents.on("zoom-changed", (_event, direction) => {
         let newZoomLevel = contents.getZoomLevel()
         if(direction === "in") {
             ++newZoomLevel
@@ -191,7 +191,7 @@ ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
         contents.setZoomLevel(newZoomLevel)
         settings.set(`zoomLevels.${profile}`, newZoomLevel)
     })
-    contents.on("before-input-event", (event, input) => {
+    contents.on("before-input-event", (_event, input) => {
         if(input.control) {
             if(input.type == "keyUp"){
                 if(input.key === "+" || input.key === "-") {
@@ -202,8 +202,8 @@ ipcMain.on("add-zoom-handlers", async (event, {contentsId, profile}) => {
     })
 })
 
-ipcMain.on("add-forward-back-handlers", (event, {contentsId, profile}) => {
-    app.windows[profile].window.on("app-command", (event, command) => {
+ipcMain.on("add-forward-back-handlers", (_event, {contentsId, profile}) => {
+    app.windows[profile].window.on("app-command", (_event, command) => {
         const contents = webContents.fromId(contentsId)
         if(command == "browser-backward") {
             if(contents.canGoBack()) {
@@ -217,11 +217,11 @@ ipcMain.on("add-forward-back-handlers", (event, {contentsId, profile}) => {
     })
 })
 
-ipcMain.on("add-context-menu", (event, {contentsId}) => {
+ipcMain.on("add-context-menu", (_event, {contentsId}) => {
     const contents = webContents.fromId(contentsId)
     contextMenu({
         window: contents,
-        prepend: (defaultActions, parameters /*, browserWindow*/ ) => {
+        prepend: (_defaultActions, parameters /*, browserWindow*/ ) => {
             return [
                 {
                     label: "Open in new tab",
@@ -248,7 +248,7 @@ ipcMain.on("add-context-menu", (event, {contentsId}) => {
     })
 })
 
-ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
+ipcMain.on("close-tab", (_event, {profileName, tabNumber}) => {
     // remove the tab tracking
     app.windows[profileName].tabs = (
         app.windows[profileName].tabs.filter(num => tabNumber != num)
@@ -264,7 +264,7 @@ ipcMain.on("close-tab", (event, {profileName, tabNumber}) => {
 app.on("ready", async () => {
     Menu.setApplicationMenu(appMenu)
     const launchWindowBounds = await settings.get("launchWindowBounds")
-    const bounds = launchWindowBounds ? launchWindowBounds.bounds : {}
+    const bounds = launchWindowBounds ? launchWindowBounds["bounds"] : {}
     const options = {
         width: 1280,
         height: 1024,
@@ -293,7 +293,7 @@ app.on("ready", async () => {
             )
 
             if(launchWindowBounds) {
-                if(launchWindowBounds.maximised) {
+                if(launchWindowBounds["maximised"]) {
                     win.maximize()
                 }
             }
@@ -308,7 +308,7 @@ app.on("ready", async () => {
 
 app.on("window-all-closed", () => app.quit())
 
-app.on("web-contents-created", (wccEvent, contents) => {
+app.on("web-contents-created", (_wccEvent, contents) => {
     contents.on("new-window", (newWindowEvent, url) => {
         if(newWindowEvent) {
             // if we receive a new window event, we want to cancel it and ...

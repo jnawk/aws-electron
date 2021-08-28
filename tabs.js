@@ -3,11 +3,14 @@ const tabGroup = new TabGroup({})
 const { ipcRenderer } = require("electron")
 const timeRemainingMessage = require("./timeRemaining")
 let windowState = {
-    contentsHandlers: []
+    contentsHandlers: [],
+    profile: undefined,
+    expiryTime: undefined,
+    expiryUpdateInterval: undefined,    
 }
 
 
-ipcRenderer.on("open-tab", (event, {url, tabNumber, profile, expiryTime}) => {
+ipcRenderer.on("open-tab", (_event, {url, tabNumber, profile, expiryTime}) => {
     if(profile != undefined) {
         // we are given a window number when opening the winow
         windowState.profile = profile

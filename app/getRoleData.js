@@ -21,7 +21,7 @@ const getRoleData = ({profile, mfaCode}) => {
     return result
 }
 
-module.exports.profileRows = ({
+const profileRows = ({
     usableProfiles,
     config,
     configType,
@@ -56,3 +56,4 @@ module.exports.profileRows = ({
         })
     })
 }
+export { profileRows }
