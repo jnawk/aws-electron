@@ -15,5 +15,8 @@ contextBridge.exposeInMainWorld(
         setPreference: preference => ipcRenderer.send(
             "set-preference", preference
         ),
+        rotateKey: ({profile, aws, local}) => ipcRenderer.invoke(
+            "rotate-key", {profile, aws, local}
+        ),
     }
 )

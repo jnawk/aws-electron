@@ -24,6 +24,10 @@ const template = [
                 label: "Preferences",
                 click: async () => app.openPreferences()
             },
+            {
+                label: "Rotate Keys",
+                click: async () => app.openKeyRotation()
+            },
             isMac ? { role: "close" } : { role: "quit" }
         ]
     },

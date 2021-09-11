@@ -12,6 +12,7 @@ const settings = require("electron-settings")
 
 const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
 const { getConsoleUrl } = require("./getConsoleURL")
+const { rotateKey } = require("./rotateKey")
 const { appMenu } = require("./menu")
 
 // ipcMain.handle deals with ipcRenderer.invoke - these things expect an answer
@@ -34,6 +35,9 @@ ipcMain.handle("get-title", async (_event, {title, profile}) => {
         return title
     }
 })
+ipcMain.handle(
+    "rotate-key",
+    (_event, {profile, aws, local}) => rotateKey({profile, aws, local}))
 
 app.windows = {}
 let nextTabNumber = 0
@@ -55,6 +59,27 @@ app.openPreferences = () => {
         win.on("close", () => {
             delete app.preferencesWindow
         })
+    }
+}
+
+app.openKeyRotation = () => {
+    if(app.keyRotationWindow === undefined) {
+        const options = {
+            width: 1280,
+            height: 1024,
+            webPreferences: {
+                preload: `${__dirname}/preload.js`,
+                worldSafeExecuteJavaScript: true,
+                contextIsolation: true
+            }
+        }
+
+        const win = app.keyRotationWindow = new BrowserWindow(options)
+        win.loadURL(`file://${__dirname}/index.html#/keyRotation`)
+        win.on("close", () => {
+            delete app.keyRotationWindow
+        })
+
     }
 }
 

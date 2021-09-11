@@ -10,6 +10,7 @@ import "bootstrap/dist/css/bootstrap.css"
 
 import AWSConsole from "./AWSConsole.jsx"
 import Settings from "./Settings.jsx"
+import KeyRotation from "./KeyRotation.jsx"
 
 
 const app = (
@@ -20,6 +21,9 @@ const app = (
             </Route>
             <Route exact path="/settings">
                 <Settings/>
+            </Route>
+            <Route exact path="/keyRotation">
+                <KeyRotation/>
             </Route>
         </Switch>
     </Router>
