@@ -56,6 +56,7 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
     const configs = {
         awsConfig,
         credentialsProfiles: Object.keys(awsCredentials)
+        vaultConfig: undefined,
     }
     if(isLikelyVaultV4Config(awsConfig)) {
         const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) // this feels yuck
@@ -70,6 +71,8 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
             }
         }
         configs.vaultConfig = vaultConfig
+    } else {
+        delete configs.vaultConfig
     }
 
     return configs
