@@ -12,12 +12,12 @@ const cleanProfileKey = key => {
 }
 
 const isLikelyVaultV4Config = config => {
-    /**
+    /*
       AWS Vault version 4 (and earlier, I dunno?) caused things like
       mfa_serial to be inheritable from the source_profile.  They have since
       learned the error of their ways, but no doubt there are misguided
       individuals out there still using this version's broken features.
-     
+
       Having a mfa_serial on the default profile is a dead giveaway.
      */
 
@@ -145,5 +145,5 @@ module.exports = {
     getAWSConfig,
     isLikelyVaultV4Config,
     getUsableProfiles,
-    getProfileList
+    getProfileList,
 }
