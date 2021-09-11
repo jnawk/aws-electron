@@ -53,9 +53,11 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
         delete awsConfig[key]
         awsConfig[cleanProfileKey(key)] = value
     }
+    const credentialsProfiles = Object.keys(awsCredentials)
     const configs = {
         awsConfig,
-        credentialsProfiles: Object.keys(awsCredentials)
+        credentialsProfiles: credentialsProfiles,
+        longTermCredentialsProfiles: credentialsProfiles.filter(profile => awsCredentials[profile].aws_access_key_id.startsWith("AKIA")),
         vaultConfig: undefined,
     }
     if(isLikelyVaultV4Config(awsConfig)) {
