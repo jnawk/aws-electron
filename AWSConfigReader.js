@@ -59,7 +59,7 @@ const getAWSConfig = (awsConfigFile, awsCredentialsFile) => {
         vaultConfig: undefined,
     }
     if(isLikelyVaultV4Config(awsConfig)) {
-        const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) // this feels yuck
+        const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) // this feels yuck // yes but why are we doing this?
         for(const profile in vaultConfig) {
             if(vaultConfig[profile].source_profile) {
                 const sourceProfile = vaultConfig[vaultConfig[profile].source_profile]
