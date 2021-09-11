@@ -40,7 +40,6 @@ let nextTabNumber = 0
 
 app.openPreferences = () => {
     if(app.preferencesWindow === undefined) {
-
         const options = {
             width: 1280,
             height: 1024,
@@ -124,7 +123,13 @@ const launchConsole = async ({profileName, url, expiryTime}) => {
             }
             win.show();
 
-            ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
+            [
+                "move",
+                "restore",
+                "maximize",
+                "unmaximize",
+                "resize"
+            ].map(event => win.on(event, boundsChangedFunction))
             app.windows[profileName].boundsChangedHandlerBound = true
         }
     })
@@ -195,7 +200,10 @@ ipcMain.on("add-zoom-handlers", async (_event, {contentsId, profile}) => {
         if(input.control) {
             if(input.type == "keyUp"){
                 if(input.key === "+" || input.key === "-") {
-                    settings.set(`zoomLevels.${profile}`, contents.getZoomLevel())
+                    settings.set(
+                        `zoomLevels.${profile}`,
+                        contents.getZoomLevel()
+                    )
                 }
             }
         }
@@ -227,7 +235,11 @@ ipcMain.on("add-context-menu", (_event, {contentsId}) => {
                     label: "Open in new tab",
                     click: () => {
                         BrowserWindow.getFocusedWindow().webContents.send(
-                            "open-tab", {url: parameters.linkURL, tabNumber: nextTabNumber++}
+                            "open-tab",
+                            {
+                                url: parameters.linkURL,
+                                tabNumber: nextTabNumber++
+                            }
                         )
                     },
                     // Only show it when right-clicking links
@@ -299,7 +311,13 @@ app.on("ready", async () => {
             }
             win.show();
 
-            ["move", "restore", "maximize", "unmaximize", "resize"].map(event => win.on(event, boundsChangedFunction))
+            [
+                "move",
+                "restore",
+                "maximize",
+                "unmaximize",
+                "resize"
+            ].map(event => win.on(event, boundsChangedFunction))
             app.launchWindowBoundsChangedHandlerBound = true
         }
     })
