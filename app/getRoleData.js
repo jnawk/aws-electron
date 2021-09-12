@@ -56,4 +56,4 @@ const profileRows = ({
         })
     })
 }
-export { profileRows }
+module.exports = { profileRows }
