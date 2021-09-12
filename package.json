@@ -65,7 +65,7 @@
     "chai": "^4",
     "css-loader": "^6.2.0",
     "electron": "^10",
-    "electron-builder": "^22.9.1",
+    "electron-builder": "^22.11.7",
     "eslint": "^7",
     "eslint-plugin-chai": "0.0.1",
     "eslint-plugin-jsdoc": "^36.1.0",
