@@ -70,7 +70,7 @@
     "eslint": "^7",
     "eslint-plugin-chai": "0.0.1",
     "eslint-plugin-jsdoc": "^36.1.0",
-    "eslint-plugin-mocha": "^8.2.0",
+    "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-react": "^7",
     "file-loader": "^6.2.0",
     "jquery": "^3.6.0",
