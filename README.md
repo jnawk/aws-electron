@@ -1,11 +1,9 @@
 # aws-electron
 Access the AWS Console using Access Keys and assumed roles.
 
-## Getting started
-* `npm install`
-
-    this will install all the dependencies
-    
-* `npm start`
-
-    this will invoke `webpack` and then start the application
+## Development notes:
+### Old dependency versions
+1. `node-fetch` can't be upgraded to 3.x as it is an ES Module, which can't be
+  imported from a CommonJS Module.  Switching to `"type": "module"` in
+  `package.json` just makes it impossible to use `webpack`.
+1. `electron` can't be upgraded beyond 10.x because shit breaks, I forget what.
