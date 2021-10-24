@@ -6,6 +6,10 @@ const {
     webContents
 } = require("electron")
 
+// address GHSA-mpjm-v997-c4h4
+delete require("electron").nativeImage.createThumbnailFromPath
+
+
 const contextMenu = require("electron-context-menu")
 const debounce = require("debounce")
 const settings = require("electron-settings")
