@@ -3,22 +3,8 @@ const { app, Menu } = require("electron")
 const isMac = process.platform === "darwin"
 
 const template = [
-    ...(isMac ? [{
-        label: app.name,
-        submenu: [
-            { role: "about" },
-            { type: "separator" },
-            { role: "services" },
-            { type: "separator" },
-            { role: "hide" },
-            { role: "hideothers" },
-            { role: "unhide" },
-            { type: "separator" },
-            { role: "quit" }
-        ]
-    }] : []),
     {
-        label: "File",
+        label: isMac ? app.name : "AWS Console",
         submenu: [
             {
                 label: "Preferences",
@@ -28,7 +14,19 @@ const template = [
                 label: "Rotate Keys",
                 click: async () => app.openKeyRotation()
             },
-            isMac ? { role: "close" } : { role: "quit" }
+            ...(isMac ? [
+                { type: "separator" },
+                { role: "about" },
+                { type: "separator" },
+                { role: "services" },
+                { type: "separator" },
+                { role: "hide" },
+                { role: "hideothers" },
+                { role: "unhide" },
+                { type: "separator" },
+            ] : []),
+            { role: "close" },
+            { role: "quit" },
         ]
     },
     {
