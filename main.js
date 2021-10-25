@@ -14,7 +14,8 @@ const contextMenu = require("electron-context-menu")
 const debounce = require("debounce")
 const settings = require("electron-settings")
 
-const { getAWSConfig, getUsableProfiles } = require("./AWSConfigReader")
+const { getAWSConfig, getUsableProfiles, getCachableProfiles } = require("./AWSConfigReader")
+const { doMfa } = require("./mfaCache")
 const { getConsoleUrl } = require("./getConsoleURL")
 const { rotateKey } = require("./rotateKey")
 const { appMenu } = require("./menu")
@@ -29,6 +30,11 @@ ipcMain.handle(
         {config, credentialsProfiles}
     ) => getUsableProfiles({config, credentialsProfiles})
 )
+ipcMain.handle(
+    "get-mfa-profiles",
+    async ( _event, {config} ) => getCachableProfiles({config})
+)
+
 ipcMain.handle("get-title", async (_event, {title, profile}) => {
     const tabTitlePreference = await settings.get("preferences.tabTitlePreference")
     if(tabTitlePreference === "{profile} - {title}") {
@@ -84,6 +90,26 @@ app.openKeyRotation = () => {
             delete app.keyRotationWindow
         })
 
+    }
+}
+
+app.openMfaCache = () => {
+    if(app.mfaCacheWindow === undefined) {
+        const options = {
+            width: 1280,
+            height: 1024,
+            webPreferences: {
+                preload: `${__dirname}/preload.js`,
+                worldSafeExecuteJavaScript: true,
+                contextIsolation: true
+            }
+        }
+
+        const win = app.mfaCacheWindow = new BrowserWindow(options)
+        win.loadURL(`file://${__dirname}/index.html#/mfaCache`)
+        win.on("close", () => {
+            delete app.mfaCacheWindow
+        })
     }
 }
 
@@ -204,6 +230,11 @@ ipcMain.on(
             console.error(error, error.stack)
         }
     }
+)
+
+ipcMain.on(
+    "do-mfa",
+    async ( _event, {profileName, mfaCode} ) => doMfa({profileName, mfaCode})
 )
 
 ipcMain.on("add-tab", (_event, {profileName, tabNumber}) => {

@@ -56,4 +56,32 @@ const profileRows = ({
         })
     })
 }
-module.exports = { profileRows }
+
+const mfaRows = ({
+    config,
+    mfaCode,
+    clearMfaCode,
+    doMfa,
+    mfaButtonGenerator,
+    mfaRowGenerator
+}) => {
+
+    return Object.keys(config.awsConfig).map(profileName => {
+        const profile = config.awsConfig[profileName]
+        const launchProfile = () => {
+            doMfa({profileName, mfaCode})
+            clearMfaCode()
+        }
+
+        const shouldDisable = mfaCode.length != 6
+        const mfaButton = mfaButtonGenerator({launchProfile, shouldDisable})
+
+        return mfaRowGenerator({
+            profileName,
+            profile,
+            mfaButton
+        })
+    })
+}
+
+module.exports = { profileRows, mfaRows }

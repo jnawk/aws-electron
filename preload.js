@@ -18,5 +18,11 @@ contextBridge.exposeInMainWorld(
         rotateKey: ({profile, aws, local}) => ipcRenderer.invoke(
             "rotate-key", {profile, aws, local}
         ),
+        getMfaProfiles: ({config}) => ipcRenderer.invoke(
+            "get-mfa-profiles", {config}
+        ),
+        doMfa: ({profileName, mfaCode}) => ipcRenderer.send(
+            "do-mfa", {profileName, mfaCode}
+        )
     }
 )

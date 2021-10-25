@@ -146,9 +146,39 @@ const getUsableProfiles = ({config, credentialsProfiles}) => {
     })
 }
 
+const getCachableProfiles = ({config}) => {
+    const mfaProfiles = Object.keys(config.awsConfig).filter(key => {
+        const profile = config.awsConfig[key]
+        if (profile.mfa_serial === undefined) {
+            return false
+        }
+        if (profile.role_arn !== undefined) {
+            return false
+        }
+        let shortTermCredentialsProfile = profile.source_profile
+        if (shortTermCredentialsProfile === undefined) {
+            shortTermCredentialsProfile = key
+        }
+        const longTermCredentialsProfile = `${shortTermCredentialsProfile}::source-profile`
+        if (config.longTermCredentialsProfiles.includes(longTermCredentialsProfile) || config.longTermCredentialsProfiles.includes(shortTermCredentialsProfile)) {
+            return true
+        }
+        return false
+    })
+    const newConfig = JSON.parse(JSON.stringify(config))
+    const toRemove = Object.keys(config.awsConfig).filter(key => !(mfaProfiles.includes(key)))
+    toRemove.map(key => {
+        delete newConfig.awsConfig[key]
+    })
+    delete newConfig.vaultConfig
+    return newConfig
+}
+
+
 module.exports = {
     getAWSConfig,
     isLikelyVaultV4Config,
     getUsableProfiles,
     getProfileList,
+    getCachableProfiles
 }

@@ -11,6 +11,7 @@ import "bootstrap/dist/css/bootstrap.css"
 import AWSConsole from "./AWSConsole.jsx"
 import Settings from "./Settings.jsx"
 import KeyRotation from "./KeyRotation.jsx"
+import MfaCache from "./MfaCache.jsx"
 
 
 const app = (
@@ -24,6 +25,9 @@ const app = (
             </Route>
             <Route exact path="/keyRotation">
                 <KeyRotation/>
+            </Route>
+            <Route exact path="/mfaCache">
+                <MfaCache/>
             </Route>
         </Switch>
     </Router>

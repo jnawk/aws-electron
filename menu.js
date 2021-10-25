@@ -14,6 +14,10 @@ const template = [
                 label: "Rotate Keys",
                 click: async () => app.openKeyRotation()
             },
+            {
+                label: "MFA Cache",
+                click: async () => app.openMfaCache()
+            },
             ...(isMac ? [
                 { type: "separator" },
                 { role: "about" },
