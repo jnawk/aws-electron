@@ -97,7 +97,6 @@ describe("AWS Config Reader", function () {
                 config: config.awsConfig,
                 credentialsProfiles: config.credentialsProfiles
             })
-            expect(usableProfiles.length).to.equal(2)
             expect(usableProfiles).to.contain("role")
             expect(usableProfiles).to.contain("chained")
         })
