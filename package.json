@@ -96,7 +96,7 @@
     "electron-settings": "^4.0.2",
     "electron-tabs": "^0.15.0",
     "ini": "^2.0.0",
-    "node-fetch": "^2.6.2",
+    "node-fetch": "^3.1.1",
     "proxy-agent": "^5.0.0",
     "query-string": "^7.0.1",
     "split-ca": "^1.0.1"
