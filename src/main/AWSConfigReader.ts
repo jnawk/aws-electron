@@ -7,8 +7,9 @@ import {
   GetUsableProfilesArguments,
 } from './types';
 
+// Wow some bull shit going on here.
 const readFileOptions = {
-  encoding: 'utf-8', flags: 'r',
+  encoding: 'utf-8' as const, flag: 'r' as const,
 };
 
 function cleanProfileKey(key: string): string {
