@@ -20,9 +20,7 @@ function getRoleData({
   }
 
   // TODO the assumption that the role regex result has >= 3 entries is faulty
-  const fullRoleName = roleRegexResult[2].replace(
-    /-/g, String.fromCharCode(0x2011),
-  );
+  const fullRoleName = roleRegexResult[2].replace(/-/g, String.fromCharCode(0x2011));
   let shortRoleName: string;
   if (fullRoleName && fullRoleName.length > 45) {
     const first20 = fullRoleName.substring(0, 20);

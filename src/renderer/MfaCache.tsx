@@ -88,41 +88,39 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
     }
 
     return (
-      <>
-        <Container fluid>
-          <Row className="d-none d-sm-table-row">
-            <Col className="d-none d-sm-table-cell" sm={2} md={3}>
-              <b>Profile Name</b>
-            </Col>
-            <Col className="d-none d-lg-table-cell" lg={2}>
-              <b>MFA ARN or Serial Number</b>
-            </Col>
-            <Col className="d-none d-md-table-cell" md={2}>
-              <b>Credentials Profile</b>
-            </Col>
-          </Row>
-          {mfaRows({
-            config,
-            mfaCode,
-            clearMfaCode: () => this.setState({ mfaCode: '' }),
-            doMfa: backend.doMfa,
-            mfaButtonGenerator: this.mfaButtonGenerator,
-            mfaRowGenerator: this.mfaRow,
-          })}
-          <Row className="mfaBox">
-            <Col>
-              <input
-                type="text"
-                value={mfaCode}
-                placeholder="MFA Code"
-                onChange={(
-                  event: any, // TODO not any
-                ) => this.setState({ mfaCode: event.target.value })}
-              />
-            </Col>
-          </Row>
-        </Container>
-      </>
+      <Container fluid>
+        <Row className="d-none d-sm-table-row">
+          <Col className="d-none d-sm-table-cell" sm={2} md={3}>
+            <b>Profile Name</b>
+          </Col>
+          <Col className="d-none d-lg-table-cell" lg={2}>
+            <b>MFA ARN or Serial Number</b>
+          </Col>
+          <Col className="d-none d-md-table-cell" md={2}>
+            <b>Credentials Profile</b>
+          </Col>
+        </Row>
+        {mfaRows({
+          config,
+          mfaCode,
+          clearMfaCode: () => this.setState({ mfaCode: '' }),
+          doMfa: backend.doMfa,
+          mfaButtonGenerator: this.mfaButtonGenerator,
+          mfaRowGenerator: this.mfaRow,
+        })}
+        <Row className="mfaBox">
+          <Col>
+            <input
+              type="text"
+              value={mfaCode}
+              placeholder="MFA Code"
+              onChange={(
+                event: any, // TODO not any
+              ) => this.setState({ mfaCode: event.target.value })}
+            />
+          </Col>
+        </Row>
+      </Container>
     );
   }
 }

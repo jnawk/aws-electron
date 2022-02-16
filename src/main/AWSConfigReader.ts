@@ -51,12 +51,8 @@ export function getAWSConfig(
     awsCredentialsFile = path.join(os.homedir(), '.aws', 'credentials');
   }
 
-  const awsConfigFileContent = fs.readFileSync(
-    awsConfigFile, readFileOptions,
-  );
-  const awsCredentialsFileContent = fs.readFileSync(
-    awsCredentialsFile, readFileOptions,
-  );
+  const awsConfigFileContent = fs.readFileSync(awsConfigFile, readFileOptions);
+  const awsCredentialsFileContent = fs.readFileSync(awsCredentialsFile, readFileOptions);
   const awsConfig = ini.parse(awsConfigFileContent);
   const awsCredentials = ini.parse(awsCredentialsFileContent);
   for (const key in awsConfig) {

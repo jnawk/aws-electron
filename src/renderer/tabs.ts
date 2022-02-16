@@ -104,9 +104,7 @@ ipcRenderer.on('open-tab', (_event, {
           windowState.contentsHandlers.push(contentsId);
         }
       });
-      tab.on('close', () => ipcRenderer.send(
-        'close-tab', { profileName: windowState.profile, tabNumber },
-      ));
+      tab.on('close', () => ipcRenderer.send('close-tab', { profileName: windowState.profile, tabNumber }));
     },
   });
   ipcRenderer.send('add-tab', { profileName: windowState.profile, tabNumber });

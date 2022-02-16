@@ -191,9 +191,7 @@ async function getSigninToken(
     }),
   });
 
-  const response = await urllib.request(
-    getSigninTokenUrl, { agent: httpAgent },
-  );
+  const response = await urllib.request(getSigninTokenUrl, { agent: httpAgent });
   const responseData = response.data.toString();
   const json: SigninResult = JSON.parse(responseData);
   return json.SigninToken;
@@ -207,9 +205,7 @@ export async function getConsoleUrl(
   // determine if a proxy is necessary, and inject a CA bundle if defined.
   const httpAgent = await configureProxy(config);
 
-  const roleCredentials = await getRoleCredentials(
-    config, tokenCode, profileName,
-  );
+  const roleCredentials = await getRoleCredentials(config, tokenCode, profileName);
   const signinToken = await getSigninToken(
     { credentials: roleCredentials, httpAgent },
   );

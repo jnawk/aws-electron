@@ -46,30 +46,20 @@ contextBridge.exposeInMainWorld(
     getUsableProfiles: ({
       config,
       credentialsProfiles,
-    }: GetUsableProfilesArguments) => ipcRenderer.invoke(
-      'get-usable-profiles', { config, credentialsProfiles },
-    ),
+    }: GetUsableProfilesArguments) => ipcRenderer.invoke('get-usable-profiles', { config, credentialsProfiles }),
 
     getPreferences: () => ipcRenderer.invoke('get-preferences'),
 
-    setPreference: (preference: Record<string, any>) => ipcRenderer.send(
-      'set-preference', preference,
-    ),
+    setPreference: (preference: Record<string, any>) => ipcRenderer.send('set-preference', preference),
 
     rotateKey: ({
       profile,
       aws,
       local,
-    }: RotateKeyArguments) => ipcRenderer.invoke(
-      'rotate-key', { profile, aws, local },
-    ),
+    }: RotateKeyArguments) => ipcRenderer.invoke('rotate-key', { profile, aws, local }),
 
-    getMfaProfiles: ({ config }: GetMfaProfilesArguments) => ipcRenderer.invoke(
-      'get-mfa-profiles', { config },
-    ),
+    getMfaProfiles: ({ config }: GetMfaProfilesArguments) => ipcRenderer.invoke('get-mfa-profiles', { config }),
 
-    doMfa: ({ profileName, mfaCode }: DoMfaArguments) => ipcRenderer.send(
-      'do-mfa', { profileName, mfaCode },
-    ),
+    doMfa: ({ profileName, mfaCode }: DoMfaArguments) => ipcRenderer.send('do-mfa', { profileName, mfaCode }),
   },
 );

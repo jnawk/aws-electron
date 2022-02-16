@@ -306,11 +306,7 @@ function windowBoundsChanged({
 }: WindowBoundsChangedArguments): void {
   const bounds = window.getBounds();
   const maximised = window.isMaximized();
-  settings.set(
-    `bounds.${profileName}`, { bounds: { ...bounds }, maximised },
-  ).finally(
-    () => { /* nothing */ },
-  );
+  void settings.set(`bounds.${profileName}`, { bounds: { ...bounds }, maximised });
 }
 
 type AsyncLaunchConsoleArguments = {
@@ -443,9 +439,7 @@ ipcMain.on(
       targetProfileConfig.duration_seconds || 3600
     ) * 1000;
 
-    getConsoleUrl(
-      config, mfaCode, profileName,
-    ).then(
+    getConsoleUrl(config, mfaCode, profileName).then(
       (consoleUrl) => launchConsole(
         { profileName, consoleUrl, expiryTime },
       ),
@@ -461,7 +455,7 @@ ipcMain.on(
     profileName,
     mfaCode,
   }: AsyncDoMfaArguments) => {
-    doMfa({ profileName, mfaCode }).finally(() => { /* nothing */ });
+    void doMfa({ profileName, mfaCode });
   },
 );
 
@@ -497,11 +491,7 @@ ipcMain.on(
         newZoomLevel -= 1;
       }
       contents.setZoomLevel(newZoomLevel);
-      settings.set(
-        `zoomLevels.${profile}`, newZoomLevel,
-      ).finally(
-        () => { /* nothing */ },
-      );
+      void settings.set(`zoomLevels.${profile}`, newZoomLevel);
     });
 
     contents.on('before-input-event', (__event, input) => {
