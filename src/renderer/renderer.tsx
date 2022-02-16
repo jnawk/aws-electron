@@ -9,7 +9,7 @@ import * as ReactDOM from 'react-dom';
 import {
   Route,
   HashRouter as Router,
-  Switch,
+  Routes,
 } from 'react-router-dom';
 
 import AWSConsole from './AWSConsole';
@@ -19,20 +19,12 @@ import Settings from './Settings';
 
 const app = (
   <Router>
-    <Switch>
-      <Route exact path="/">
-        <AWSConsole />
-      </Route>
-      <Route exact path="/settings">
-        <Settings />
-      </Route>
-      <Route exact path="/keyRotation">
-        <KeyRotation />
-      </Route>
-      <Route exact path="/mfaCache">
-        <MfaCache />
-      </Route>
-    </Switch>
+    <Routes>
+      <Route path="/" element={<AWSConsole />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/keyRotation" element={<KeyRotation />} />
+      <Route path="/mfaCache" element={<MfaCache />} />
+    </Routes>
   </Router>
 );
 
