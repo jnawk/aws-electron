@@ -1,67 +1,111 @@
-require("webpack")
-const MiniCssExtractPlugin = require("mini-css-extract-plugin")
-const path = require("path")
+const lodash = require('lodash');
+const CopyPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require('path');
 
-const BUILD_DIR = path.resolve(__dirname, "build")
-const APP_DIR = path.resolve(__dirname, "app")
-
-const config = {
-    mode: "development",
-    devtool: "source-map",
-    entry: APP_DIR + "/index.jsx",
-    output: {
-        path: BUILD_DIR,
-        filename: "aws-console.js"
-    },
-    target: "electron-renderer",
-    module: {
-        rules: [
-            {
-                test: /\.jsx?$/,
-                include: APP_DIR,
-                use: {
-                    loader: "babel-loader"
-                }
-            },
-            {
-                test: /\.css$/,
-                use: [
-                    MiniCssExtractPlugin.loader,
-                    "css-loader"
-                ]
-            },
-            {
-                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: "file-loader"
-                }
-            },
-            {
-                test: /\.(woff|woff2)$/,
-                use: {
-                    loader: "url-loader?prefix=font/&limit=5000"
-                }
-            },
-            {
-                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: "url-loader?limit=10000&mimetype=application/octet-stream"
-                }
-            },
-            {
-                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-                use: {
-                    loader: "url-loader?limit=10000&mimetype=image/svg+xml"
-                }
-            }
-        ]
-    },
-    plugins: [
-        new MiniCssExtractPlugin({
-            filename: "[name].css",
-            chunkFilename: "[id].css"
-        })
-    ]
+function srcPaths(src) {
+  return path.join(__dirname, src);
 }
 
-module.exports = config
+const isEnvProduction = process.env.NODE_ENV === 'production';
+const isEnvDevelopment = process.env.NODE_ENV === 'development';
+
+// #region Common settings
+const commonConfig = {
+  devtool: isEnvDevelopment ? 'source-map' : false,
+  mode: isEnvProduction ? 'production' : 'development',
+  output: { path: srcPaths('dist') },
+  node: { __dirname: false, __filename: false },
+  resolve: {
+    alias: {
+      _: srcPaths('src'),
+      _main: srcPaths('src/main'),
+      _models: srcPaths('src/models'),
+      _public: srcPaths('public'),
+      _renderer: srcPaths('src/renderer'),
+      _utils: srcPaths('src/utils')
+    },
+    extensions: ['.js', '.json', '.ts', '.tsx'],
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(ts|tsx)$/,
+        exclude: /node_modules/,
+        loader: 'ts-loader',
+      },
+      {
+        test: /\.(scss|css)$/,
+        use: ['style-loader', 'css-loader'],
+      },
+      {
+        test: /\.(jpg|png|svg|ico|icns)$/,
+        loader: 'file-loader',
+        options: {
+          name: '[path][name].[ext]',
+        },        
+      },
+    ],
+  },
+};
+// #endregion
+
+const mainConfig = lodash.cloneDeep(commonConfig);
+mainConfig.entry = './src/main/main.ts';
+mainConfig.target = 'electron-main';
+mainConfig.output.filename = 'main.bundle.js';
+mainConfig.plugins = [
+  new CopyPlugin({
+    patterns: [
+      {
+        from: 'package.json',
+        to: 'package.json',
+        transform: (content, _path) => { // eslint-disable-line no-unused-vars
+          const jsonContent = JSON.parse(content);
+
+          delete jsonContent.devDependencies;
+          delete jsonContent.scripts;
+          delete jsonContent.build;
+
+          jsonContent.main = './main.bundle.js';
+          jsonContent.scripts = { start: 'electron ./main.bundle.js' };
+          jsonContent.postinstall = 'electron-builder install-app-deps';
+
+          return JSON.stringify(jsonContent, undefined, 2);
+        },
+      },
+    ],
+  }),
+];
+
+const preloadConfig = lodash.cloneDeep(commonConfig);
+preloadConfig.target = 'electron-preload';
+preloadConfig.entry = { preload: './src/main/preload.ts' }
+
+const tabsConfig = lodash.cloneDeep(commonConfig);
+tabsConfig.target = 'electron-renderer';
+tabsConfig.entry = { tabs: './src/renderer/tabs.ts' }
+
+const rendererConfig = lodash.cloneDeep(commonConfig);
+rendererConfig.entry = './src/renderer/renderer.tsx';
+rendererConfig.target = 'electron-renderer';
+rendererConfig.output.filename = 'renderer.bundle.js';
+rendererConfig.plugins = [
+  new HtmlWebpackPlugin({
+    template: path.resolve(__dirname, './public/index.html'),
+  }),
+  new HtmlWebpackPlugin({
+    template: path.resolve(__dirname, './public/tabs.html'),
+    filename: "tabs.html"
+  }),
+  new CopyPlugin({
+    patterns: [
+      {
+        from: "node_modules/electron-tabs/electron-tabs.css",
+        to: "electron-tabs.css"
+      }
+    ]
+  })
+];
+
+module.exports = [mainConfig, rendererConfig, preloadConfig, tabsConfig];
