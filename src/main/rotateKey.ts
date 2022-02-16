@@ -94,11 +94,11 @@ export default async function rotateKey({
     };
 
     log.push('Writing credentials file');
-    fs.writeFile(
+    void fs.writeFile(
       getAWSCredentialsFile({ awsCredentialsFile }),
       ini.stringify(credentials),
       writeFileOptions,
-    ).finally(() => { /* nothing */ });
+    );
 
     if (aws === 'RETAIN') {
       return ['Success'];

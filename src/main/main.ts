@@ -46,14 +46,14 @@ const state: ApplicationState = {
       };
 
       state.preferencesWindow = new BrowserWindow(options);
-      state.preferencesWindow.loadURL(
+      void state.preferencesWindow.loadURL(
         url.format({
           pathname: path.join(__dirname, './index.html'),
           protocol: 'file:',
           hash: '/settings',
           slashes: true,
         }),
-      ).finally(() => { /* nothing */ });
+      );
       state.preferencesWindow.on('close', () => {
         delete state.preferencesWindow;
       });
@@ -73,14 +73,14 @@ const state: ApplicationState = {
       };
 
       state.keyRotationWindow = new BrowserWindow(options);
-      state.keyRotationWindow.loadURL(
+      void state.keyRotationWindow.loadURL(
         url.format({
           pathname: path.join(__dirname, './index.html'),
           protocol: 'file:',
           hash: '/keyRotation',
           slashes: true,
         }),
-      ).finally(() => { /* nothing */ });
+      );
       state.keyRotationWindow.on('close', () => {
         delete state.keyRotationWindow;
       });
@@ -101,14 +101,14 @@ const state: ApplicationState = {
 
       state.mfaCacheWindow = new BrowserWindow(options);
 
-      state.mfaCacheWindow.loadURL(
+      void state.mfaCacheWindow.loadURL(
         url.format({
           pathname: path.join(__dirname, './index.html'),
           protocol: 'file:',
           hash: '/mfaCache',
           slashes: true,
         }),
-      ).finally(() => { /* nothing */ });
+      );
       state.mfaCacheWindow.on('close', () => {
         delete state.mfaCacheWindow;
       });
@@ -179,10 +179,10 @@ function createWindow(): void {
           const newBounds = mainWindow.getBounds();
           const maximised = mainWindow.isMaximized();
 
-          settings.set(
+          void settings.set(
             'launchWindowBounds',
             { bounds: { ...newBounds }, maximised },
-          ).finally(() => { /* nothing */ });
+          );
         },
         100,
       );
@@ -407,15 +407,13 @@ async function launchConsole({
 ipcMain.on(
   'set-preference',
   (_event, preference) => {
-    settings.get('preferences').then(
+    void settings.get('preferences').then(
       (preferences) => settings.set('preferences', {
         // existing preferences
         ...preferences as Record<string, unknown>,
         // plus the one we are setting
         ...preference,
       }),
-    ).finally(
-      () => { /* nothing */ },
     );
   },
 );
@@ -498,24 +496,20 @@ ipcMain.on(
       if (input.control) {
         if (input.type === 'keyUp') {
           if (input.key === '+' || input.key === '-') {
-            settings.set(
+            void settings.set(
               `zoomLevels.${profile}`,
               contents.getZoomLevel(),
-            ).finally(
-              () => { /* nothing */ },
             );
           }
         }
       }
     });
 
-    settings.get(
+    void settings.get(
       `zoomLevels.${profile}`,
     ).then((zoomLevel: number) => {
       contents.setZoomLevel(zoomLevel || 0);
-    }).finally(
-      () => { /* nothing */ },
-    );
+    });
   },
 );
 

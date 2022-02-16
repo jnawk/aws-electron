@@ -60,7 +60,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
       return backend.getUsableProfiles({ config, credentialsProfiles });
     }).then(
       (usableProfiles) => this.setState({ usableProfiles }),
-    ); // .finally(()=>{/*nothing*/});
+    );
   }
 
   treatConfigProperly(properly: boolean): void {

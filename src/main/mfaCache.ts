@@ -108,9 +108,9 @@ export async function doMfa({
     aws_session_token: temporaryCredentials.SessionToken,
   };
 
-  fs.writeFile(
+  void fs.writeFile(
     getAWSCredentialsFile({ awsCredentialsFile }),
     ini.stringify(credentials),
     writeFileOptions,
-  ).finally(() => { /* nothing */ });
+  );
 }
