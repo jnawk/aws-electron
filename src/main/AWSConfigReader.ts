@@ -7,6 +7,21 @@ import {
   GetUsableProfilesArguments,
 } from './types';
 
+import {
+  CredentialsProfile, ConfigProfile,
+} from './awsConfigInterfaces';
+
+interface Config {
+  [key: string]: ConfigProfile
+}
+
+interface Configs {
+  awsConfig: Config,
+  vaultConfig?: Config,
+  credentialsProfiles: Array<string>,
+  longTermCredentialsProfiles: Array<string>,
+}
+
 // Wow some bull shit going on here.
 const readFileOptions = {
   encoding: 'utf-8' as const, flag: 'r' as const,
@@ -16,7 +31,7 @@ function cleanProfileKey(key: string): string {
   return key.replace('profile ', '');
 }
 
-export function isLikelyVaultV4Config(config: any): boolean { // TODO not any
+export function isLikelyVaultV4Config(config: Config): boolean {
   /*
       AWS Vault version 4 (and earlier, I dunno?) caused things like
       mfa_serial to be inheritable from the source_profile.  They have since
@@ -27,16 +42,15 @@ export function isLikelyVaultV4Config(config: any): boolean { // TODO not any
      */
 
   return Object.keys(config).map((key) => config[key]).some((profile) => {
-    let sourceProfile = profile.source_profile;
-    if (!sourceProfile) {
+    const sourceProfileName = profile.source_profile;
+    if (!sourceProfileName) {
       return false;
     }
 
-    sourceProfile = config[sourceProfile];
+    const sourceProfile = config[sourceProfileName];
     if (!sourceProfile) {
       return false;
     }
-
     return !!sourceProfile.mfa_serial;
   });
 }
@@ -44,44 +58,46 @@ export function isLikelyVaultV4Config(config: any): boolean { // TODO not any
 export function getAWSConfig(
   awsConfigFile?: string,
   awsCredentialsFile?: string,
-): any { // TODO not any
-  if (!awsConfigFile) {
-    awsConfigFile = path.join(os.homedir(), '.aws', 'config');
-  }
-  if (!awsCredentialsFile) {
-    awsCredentialsFile = path.join(os.homedir(), '.aws', 'credentials');
-  }
-
-  const awsConfigFileContent = fs.readFileSync(awsConfigFile, readFileOptions);
-  const awsCredentialsFileContent = fs.readFileSync(awsCredentialsFile, readFileOptions);
-  const awsConfig = ini.parse(awsConfigFileContent);
-  const awsCredentials = ini.parse(awsCredentialsFileContent);
+): Configs {
+  const awsConfigFileContent = fs.readFileSync(
+    awsConfigFile || path.join(os.homedir(), '.aws', 'config'),
+    readFileOptions,
+  );
+  const awsCredentialsFileContent = fs.readFileSync(
+    awsCredentialsFile || path.join(os.homedir(), '.aws', 'credentials'),
+    readFileOptions,
+  );
+  const awsConfig: Config = ini.parse(awsConfigFileContent);
+  const awsCredentials: {[key: string]: CredentialsProfile} = ini.parse(awsCredentialsFileContent);
   for (const key in awsConfig) {
     const value = awsConfig[key];
     delete awsConfig[key];
     awsConfig[cleanProfileKey(key)] = value;
   }
   const credentialsProfiles = Object.keys(awsCredentials);
-  const configs = {
+
+  const configs: Configs = {
     awsConfig,
     credentialsProfiles,
     longTermCredentialsProfiles: credentialsProfiles.filter(
-      (profile): boolean => awsCredentials[
-        profile
-      ].aws_access_key_id.startsWith('AKIA'),
+      (profile): boolean => {
+        const accessKeyId = awsCredentials[profile].access_key_id;
+        return (accessKeyId !== undefined && accessKeyId.startsWith('AKIA'));
+      },
     ),
     vaultConfig: undefined,
   };
   if (isLikelyVaultV4Config(awsConfig)) {
     // this feels yuck // yes but why are we doing this?
-    const vaultConfig = JSON.parse(JSON.stringify(awsConfig));
+    const vaultConfig: Config = JSON.parse(JSON.stringify(awsConfig));
 
     for (const profile in vaultConfig) {
-      if (vaultConfig[profile].source_profile) {
-        const sourceProfile = vaultConfig[vaultConfig[profile].source_profile];
+      const vaultProfile = vaultConfig[profile];
+      if (vaultProfile.source_profile) {
+        const sourceProfile = vaultConfig[vaultProfile.source_profile];
         for (const key in sourceProfile) {
-          if (!(key in vaultConfig[profile])) {
-            vaultConfig[profile][key] = sourceProfile[key];
+          if (!(key in vaultProfile)) {
+            vaultProfile[key] = sourceProfile[key];
           }
         }
       }
@@ -90,7 +106,6 @@ export function getAWSConfig(
   } else {
     delete configs.vaultConfig;
   }
-
   return configs;
 }
 

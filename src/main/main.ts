@@ -421,7 +421,7 @@ ipcMain.on(
 interface LaunchConsoleArguments {
   profileName: string,
   mfaCode: string,
-  configType: string
+  configType: 'awsConfig' | 'vaultConfig'
 }
 
 ipcMain.on(
@@ -429,15 +429,16 @@ ipcMain.on(
   (
     _event,
     { profileName, mfaCode, configType }: LaunchConsoleArguments,
-  ) => {
+  ): void => {
     const config = getAWSConfig()[configType];
-    const targetProfileConfig = config[profileName];
-
+    if (config === undefined) {
+      throw new Error("Config doesn't exist");
+    }
     const expiryTime = new Date().getTime() + (
-      targetProfileConfig.duration_seconds || 3600
+      config[profileName].duration_seconds || 3600
     ) * 1000;
 
-    getConsoleUrl(config, mfaCode, profileName).then(
+    void getConsoleUrl(config, mfaCode, profileName).then(
       (consoleUrl) => launchConsole(
         { profileName, consoleUrl, expiryTime },
       ),
@@ -452,7 +453,7 @@ ipcMain.on(
   (_event, {
     profileName,
     mfaCode,
-  }: AsyncDoMfaArguments) => {
+  }: AsyncDoMfaArguments): void => {
     void doMfa({ profileName, mfaCode });
   },
 );
@@ -464,7 +465,7 @@ interface AddTabArguments {
 
 ipcMain.on(
   'add-tab',
-  (_event, { profileName, tabNumber }: AddTabArguments) => {
+  (_event, { profileName, tabNumber }: AddTabArguments): void => {
   // we want to track the tabs a profile has open so when the last one closes
   // we can close the window.
     state.windows[profileName].tabs.push(tabNumber);
@@ -478,7 +479,7 @@ interface AddHandlersArguments {
 
 ipcMain.on(
   'add-zoom-handlers',
-  (_event, { contentsId, profile }: AddHandlersArguments) => {
+  (_event, { contentsId, profile }: AddHandlersArguments): void => {
     const contents = webContents.fromId(contentsId);
 
     contents.on('zoom-changed', (__event, direction) => {
@@ -515,7 +516,7 @@ ipcMain.on(
 
 ipcMain.on(
   'add-forward-back-handlers',
-  (_event, { contentsId, profile }: AddHandlersArguments) => {
+  (_event, { contentsId, profile }: AddHandlersArguments): void => {
     state.windows[profile].window.on(
       'app-command',
       (__event: any, command: string) => {
@@ -538,7 +539,7 @@ type AddContextMenuPrependParameters = {
   linkURL: string
 }
 
-ipcMain.on('add-context-menu', (_event, { contentsId }) => {
+ipcMain.on('add-context-menu', (_event, { contentsId }): void => {
   const contents = webContents.fromId(contentsId);
   contextMenu({
     window: contents,
@@ -587,7 +588,7 @@ ipcMain.on(
   'close-tab',
   (_event, {
     profileName, tabNumber,
-  }: CloseTabArguments) => {
+  }: CloseTabArguments): void => {
   // remove the tab tracking
     state.windows[profileName].tabs = (
       state.windows[profileName].tabs.filter((num: number) => tabNumber !== num)
