@@ -1,5 +1,4 @@
 import React from 'react';
-import { ConfigProfile } from '_/main/awsConfigInterfaces';
 import {
   GetRoleDataArguments,
   GetRoleDataResult,

@@ -10,12 +10,7 @@ import './profileList.css';
 import './mfaBox.css';
 import './tt.css';
 
-import {
-  Config,
-  LaunchButton,
-  LaunchButtonGeneratorArguments,
-  ProfileRowArguments,
-} from '_/main/types';
+import { Config } from '_/main/types';
 import { profileRows } from './getRoleData';
 import { launchButtonGenerator } from './mfaAwareButtonGenerator';
 import { profileRow } from './profileListGenerator';

@@ -3,7 +3,7 @@ import { Col, Container, Row } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './profileList.css';
 import './mfaBox.css';
-import { Configs, MfaRowArguments } from '_main/types';
+import { Configs } from '_main/types';
 import { mfaRows } from './getRoleData';
 
 import { mfaButtonGenerator } from './mfaAwareButtonGenerator';
