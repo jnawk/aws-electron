@@ -13,15 +13,12 @@ import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { session } from 'electron';
 import { getProfileList } from './AWSConfigReader';
+import {
+  AssumeRoleParams, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult,
+} from './types';
 
 const consoleURL = 'https://console.aws.amazon.com';
 const stsEndpoint = 'https://sts.amazonaws.com';
-
-type GetHttpAgentArguments = {
-  sessionDriver?: any,
-  url: string,
-  ca?: any
-}
 
 export async function getHttpAgent({
   sessionDriver,
@@ -54,14 +51,6 @@ async function configureProxy(
     ca: config.ca_bundle ? splitCa(config.ca_bundle) : undefined,
   });
   return httpAgent;
-}
-
-type AssumeRoleParams = {
-  RoleArn: string,
-  RoleSessionName: string,
-  SerialNumber?: string,
-  TokenCode?: string,
-  DurationSeconds?: number
 }
 
 async function getRoleCredentials(
@@ -148,33 +137,10 @@ async function getRoleCredentials(
   return credentials;
 }
 
-interface GetFederationUrlArguments {
-  Action: string,
-  SigninToken?: string,
-  Destination?: string,
-  SessionDuration?: number,
-  DurationSeconds?: number,
-  SessionType?: string,
-  Session?: string,
-}
 function getFederationUrl(
   params: GetFederationUrlArguments,
 ): string {
   return `https://signin.aws.amazon.com/federation?${QueryString.stringify(params)}`;
-}
-
-type AWSCredentials = {
-  AccessKeyId: string,
-  SecretAccessKey: string,
-  SessionToken: string
-}
-type GetSigninTokenArguments = {
-  credentials: AWSCredentials,
-  httpAgent: https.Agent
-}
-
-type SigninResult = {
-    SigninToken: string
 }
 
 async function getSigninToken(

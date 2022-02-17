@@ -4,23 +4,15 @@ import * as os from 'os';
 import * as path from 'path';
 
 import {
+  Config,
+  Configs,
+  GetCachableProfilesArguments,
   GetUsableProfilesArguments,
 } from './types';
 
 import {
   CredentialsProfile, ConfigProfile,
 } from './awsConfigInterfaces';
-
-interface Config {
-  [key: string]: ConfigProfile
-}
-
-interface Configs {
-  awsConfig: Config,
-  vaultConfig?: Config,
-  credentialsProfiles: Array<string>,
-  longTermCredentialsProfiles: Array<string>,
-}
 
 // Wow some bull shit going on here.
 const readFileOptions = {
@@ -158,7 +150,7 @@ function isSingleRoleAssumingProfile({
 }
 
 type IsMultiStageRoleAssumingProfileArguments = {
-  config: any, // TODO not any
+  config: Config,
   profileName: string
 }
 
@@ -196,10 +188,6 @@ export function getUsableProfiles({
       { config, profileName: key },
     );
   });
-}
-
-type GetCachableProfilesArguments = {
-  config: any // TODO not any
 }
 
 export function getCachableProfiles({

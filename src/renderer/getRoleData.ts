@@ -1,17 +1,20 @@
 import React from 'react';
-import { Row } from 'reactstrap';
+import { ConfigProfile } from '_/main/awsConfigInterfaces';
 import {
   GetRoleDataArguments,
   GetRoleDataResult,
   MfaRowsArguments,
   ProfileRowsArguments,
-} from './types';
+} from '_main/types';
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
 function getRoleData({
   profile, mfaCode,
 }: GetRoleDataArguments): GetRoleDataResult {
+  if (profile.role_arn === undefined) {
+    throw new Error('need a role arn'); // ??
+  }
   const roleRegexResult = roleRegex.exec(profile.role_arn);
   const shouldDisable = (profile.mfa_serial !== undefined
     && mfaCode.length !== 6);
@@ -86,7 +89,7 @@ export function mfaRows({
   mfaRowGenerator,
 }: MfaRowsArguments): Array<React.ReactElement> {
   return Object.keys(config.awsConfig).map((profileName): React.ReactElement => {
-    const profile = config.awsConfig[profileName];
+    const profile = config.awsConfig[profileName] as ConfigProfile;
     const launchProfile = () => {
       doMfa({ profileName, mfaCode });
       clearMfaCode();
