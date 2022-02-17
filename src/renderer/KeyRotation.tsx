@@ -3,6 +3,7 @@ import {
   Button, ButtonGroup, Col, Container, Row,
 } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import './tt.css';
 
 const { backend } = window; // defined in preload.js
 
@@ -45,7 +46,7 @@ class KeyRotation extends React.Component<Record<string, never>, KeyRotationStat
     });
   }
 
-  render(): React.Component {
+  render(): React.ReactElement {
     const { profiles, settings: { aws, local }, log } = this.state;
     if (!profiles) {
       return <>Loading...</>;
@@ -94,7 +95,7 @@ class KeyRotation extends React.Component<Record<string, never>, KeyRotationStat
         </Row>
         <Row>
           <Col md={3}>
-            <tt>~/.aws/credentials</tt>
+            <span className="tt">~/.aws/credentials</span>
             {' '}
             options
           </Col>

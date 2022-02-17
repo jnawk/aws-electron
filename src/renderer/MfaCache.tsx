@@ -42,7 +42,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
   mfaButtonGenerator({
     launchProfile, shouldDisable,
   }: LaunchButtonGeneratorArguments): LaunchButton {
-    return function (buttonText?: string): Button {
+    return function (buttonText?: string): React.ReactElement {
       return (
         <Button
           onClick={launchProfile}
@@ -61,7 +61,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
     profileName,
     profile,
     mfaButton,
-  }: MfaRowArguments): Row {
+  }: MfaRowArguments): React.ReactElement {
     return (
       <Row className="d-table-row" key={profileName}>
         <Col className="d-none d-sm-table-cell" sm={2} md={3}>
@@ -78,7 +78,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
     );
   }
 
-  render(): React.Component {
+  render(): React.ReactElement {
     const {
       config,
       mfaCode,

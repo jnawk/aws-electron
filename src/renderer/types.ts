@@ -1,19 +1,4 @@
-import { MouseEventHandler } from 'react';
-import { Button, Row } from 'reactstrap';
-
-declare module 'react' {
-    namespace JSX {
-        interface IntrinsicElements {
-        tt: unknown;
-        h1: unknown;
-        p: unknown;
-        i: unknown;
-        b: unknown;
-        input: unknown;
-        div: unknown;
-        }
-    }
-}
+import React, { MouseEventHandler } from 'react';
 
 export interface GetRoleDataArguments {
     profile: any,
@@ -33,7 +18,7 @@ export interface LaunchButtonGeneratorArguments {
 }
 
 export interface LaunchButton {
-    (text?: string): Button
+    (text?: string): React.ReactElement
 }
 
 interface LaunchConsoleArguments {
@@ -54,16 +39,12 @@ export interface MfaRowsArguments {
     clearMfaCode: {(): void},
     doMfa: any, // TODO not any
     mfaButtonGenerator: {(args: LaunchButtonGeneratorArguments): LaunchButton},
-    mfaRowGenerator: {(args: MfaRowArguments): Row}
+    mfaRowGenerator: {(args: MfaRowArguments): React.ReactElement}
 }
 
 export interface Profile {
     mfa_serial: string,
     source_profile: string
-}
-
-interface ProfileRowGenerator {
-    (args: ProfileRowArguments): Row
 }
 
 export interface ProfileRowsArguments {
@@ -76,7 +57,7 @@ export interface ProfileRowsArguments {
     launchButtonGenerator: {
         (args: LaunchButtonGeneratorArguments): LaunchButton
     },
-    profileRowGenerator: ProfileRowGenerator
+    profileRowGenerator: {(args: ProfileRowArguments): React.ReactElement}
 }
 
 export interface ProfileRowArguments {

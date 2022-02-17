@@ -1,3 +1,4 @@
+import React from 'react';
 import { Row } from 'reactstrap';
 import {
   GetRoleDataArguments,
@@ -47,7 +48,7 @@ export function profileRows({
   launchConsole,
   launchButtonGenerator,
   profileRowGenerator,
-}: ProfileRowsArguments): Array<Row> {
+}: ProfileRowsArguments): Array<React.ReactElement> {
   return usableProfiles.map((profileName: string) => {
     const profile = config[profileName];
     const launchProfile = () => {
@@ -83,8 +84,8 @@ export function mfaRows({
   doMfa,
   mfaButtonGenerator,
   mfaRowGenerator,
-}: MfaRowsArguments): Array<Row> {
-  return Object.keys(config.awsConfig).map((profileName): Row => {
+}: MfaRowsArguments): Array<React.ReactElement> {
+  return Object.keys(config.awsConfig).map((profileName): React.ReactElement => {
     const profile = config.awsConfig[profileName];
     const launchProfile = () => {
       doMfa({ profileName, mfaCode });

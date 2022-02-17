@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './vaultMessage.css';
 import './profileList.css';
 import './mfaBox.css';
+import './tt.css';
 
 import { profileRows } from './getRoleData';
 import {
@@ -84,7 +85,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     }
   }
 
-  vaultMessage(): React.Component | null {
+  vaultMessage(): React.ReactElement | null {
     const { explicitTreatConfigProperly, vaultConfig, remember } = this.state;
 
     const displayVaultMessage = (
@@ -105,7 +106,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             Your config file has at least one role-assuming profile
             which defines a
             {' '}
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             {' '}
             that exists as a
             {'\u0020'}
@@ -113,7 +114,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             <i>config</i>
             {' '}
             profile.  (
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             {'\u0020'}
             {' '}
             canonically refers to a
@@ -131,14 +132,14 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             the config from the config profile matching the
             {' '}
             {'\u0020'}
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             , while with aws-vault (version 4),
             the profile
             <b>will</b>
             {' '}
             inherit the config from the config
             profile matching the
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             .  (The authors
             of aws-vault have since realised the error of their ways,
             and version 5 behaves canonically, if their documentation is
@@ -197,7 +198,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     shortRoleName,
     profile,
     launchButton,
-  }: ProfileRowArguments): Row {
+  }: ProfileRowArguments): React.ReactElement {
     return (
       <Row className="d-table-row" key={profileName}>
         <Col className="d-none d-sm-table-cell" sm={2} md={3}>
@@ -210,7 +211,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
         </Col>
         <Col className="d-none d-md-table-cell" md={2}>
           <div title={(fullRoleName === shortRoleName
-            ? null : fullRoleName)}
+            ? undefined : fullRoleName)}
           >
             {shortRoleName}
           </div>
@@ -232,7 +233,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     );
   }
 
-  render(): React.Component {
+  render(): React.ReactElement {
     const {
       awsConfig,
       vaultConfig,

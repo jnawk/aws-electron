@@ -29,7 +29,7 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
     backend.setPreference(preference);
   }
 
-  render(): React.Component {
+  render(): React.Component| React.ReactElement {
     const { preferences } = this.state;
     if (!preferences) {
       return <>Loading...</>;
