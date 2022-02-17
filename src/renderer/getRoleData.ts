@@ -101,5 +101,3 @@ export function mfaRows({
     });
   });
 }
-
-module.exports = { profileRows, mfaRows };
