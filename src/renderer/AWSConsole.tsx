@@ -240,7 +240,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     const usingAwsConfig = (explicitTreatConfigProperly
       || vaultConfig === undefined);
 
-    const config = usingAwsConfig ? awsConfig : vaultConfig;
+    const config = usingAwsConfig ? awsConfig : vaultConfig || awsConfig;
     const configType = usingAwsConfig ? 'awsConfig' : 'vaultConfig';
 
     return (
@@ -277,9 +277,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             profileRowGenerator: this.profileRow,
           })}
           {usableProfiles.some(
-            (profile: string) => config[
-              profile
-            ].mfa_serial,
+            (profile: string) => config[profile].mfa_serial !== undefined,
           ) ? (
             <Row className="mfaBox">
               <Col>
