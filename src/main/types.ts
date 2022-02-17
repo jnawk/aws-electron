@@ -155,3 +155,17 @@ export interface AssumeRoleParams {
   TokenCode?: string,
   DurationSeconds?: number
 }
+
+export type VaultOptions = 'ask' | 'aws' | 'vault'
+export type TabTitleOptions = '{title}' | '{title} - {profile}' | '{profile} - {title}'
+
+export type VaultPreference = {
+  vaultPreference?: VaultOptions
+}
+
+export type TabTitlePreference = {
+  tabTitlePreference?: TabTitleOptions
+}
+
+export type Preference = VaultPreference | TabTitlePreference
+export type Preferences = VaultPreference & TabTitlePreference

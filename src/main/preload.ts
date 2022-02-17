@@ -1,25 +1,28 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 import {
+  Configs,
   DoMfaArguments,
   GetMfaProfilesArguments,
   GetUsableProfilesArguments,
   LaunchConsoleArguments,
+  Preference,
+  Preferences,
   RotateKeyArguments,
 } from './types';
 
 declare global {
     interface Window {
       backend: {
-          getAWSConfig: {(): Promise<any>}, // TODO not any
-          launchConsole: {(args: LaunchConsoleArguments): void}, // TODO not any
+          getAWSConfig: {(): Promise<Configs>},
+          launchConsole: {(args: LaunchConsoleArguments): void},
           getUsableProfiles: {
-            (args: GetUsableProfilesArguments): Promise<any> // TODO not any
+            (args: GetUsableProfilesArguments): Array<string>
           },
-          getPreferences: {(): Promise<any> }, // TODO not any
-          setPreference: {(preference: Record<string, any>): void},
+          getPreferences: {(): Promise<Preferences> },
+          setPreference: {(preference: Preference): void},
           rotateKey: {
-            (args: RotateKeyArguments): Promise<any> // TODO not any
+            (args: RotateKeyArguments): Promise<Array<string>>
           },
           getMfaProfiles: {
             (args: GetMfaProfilesArguments): Promise<any> // TODO not any

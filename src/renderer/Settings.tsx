@@ -3,11 +3,12 @@ import 'bootstrap/dist/css/bootstrap.css';
 import {
   Button, ButtonGroup, Col, Container, Row,
 } from 'reactstrap';
+import { Preference, Preferences } from '_/main/types';
 
 const { backend } = window; // defined in preload.js
 
 interface SettingsState {
-    preferences?: any // TODO not any
+  preferences?: Preferences
 }
 
 class Settings extends React.Component<Record<string, never>, SettingsState> {
@@ -19,12 +20,11 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
 
   componentDidMount(): void {
     void backend.getPreferences().then((preferences) => {
-      preferences = preferences || {};
-      this.setState({ preferences });
+      this.setState({ preferences: preferences || {} });
     });
   }
 
-  setPreference(preference: any): void {
+  setPreference(preference: Preference): void {
     this.setState({ preferences: preference });
     backend.setPreference(preference);
   }
