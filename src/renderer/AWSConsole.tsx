@@ -239,7 +239,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
                   value={mfaCode}
                   placeholder="MFA Code"
                   onChange={(
-                    event: any, // TODO not any
+                    event: React.ChangeEvent<HTMLInputElement>,
                   ) => this.setState({
                     mfaCode: event.target.value,
                   })}
