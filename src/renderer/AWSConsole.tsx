@@ -12,6 +12,7 @@ import './tt.css';
 
 import { profileRows } from './getRoleData';
 import {
+  Config,
   LaunchButton,
   LaunchButtonGeneratorArguments,
   ProfileRowArguments,
@@ -23,11 +24,11 @@ const { backend } = window; // defined in preload.js
 interface AWSConsoleState {
   mfaCode: string,
   remember: boolean,
-  usableProfiles?: any, // TODO not any
-  awsConfig?: any, // TODO not any
-  vaultConfig?: any, // TODO not any
-  credentialsProfiles?: any, // TODO not any
-  explicitTreatConfigProperly?: any, // TODO not any
+  usableProfiles?: Array<string>,
+  awsConfig?: Config,
+  vaultConfig?: Config,
+  credentialsProfiles?: Array<string>,
+  explicitTreatConfigProperly?: boolean,
 }
 
 export default class AWSConsole extends React.Component<Record<string, never>, AWSConsoleState> {
@@ -50,12 +51,14 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
         ? 'ask' : preferences.vaultPreference || 'ask');
       const properly = (vaultPreference === 'ask'
         ? undefined : vaultPreference === 'aws');
-      this.setState({ ...configs, explicitTreatConfigProperly: properly });
       const {
         awsConfig,
         vaultConfig,
         credentialsProfiles,
       } = configs;
+      this.setState({
+        awsConfig, vaultConfig, credentialsProfiles, explicitTreatConfigProperly: properly,
+      });
 
       const usingAwsConfig = vaultConfig === undefined || properly;
       const config = usingAwsConfig ? awsConfig : vaultConfig;
@@ -207,7 +210,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             ? profile.mfa_serial.replace(/arn:aws:iam::/, '') : '')}
         </Col>
         <Col className="d-none d-md-table-cell" md={2}>
-          {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
+          {profile.source_profile ? profile.source_profile.replace(/-/g, String.fromCharCode(0x2011)) : ''}
         </Col>
         <Col className="d-table-cell d-sm-none launchButton">
           {launchButton(profileName)}
