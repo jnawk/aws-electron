@@ -16,6 +16,7 @@ import {
   LaunchButtonGeneratorArguments,
   ProfileRowArguments,
 } from './types';
+import { launchButtonGenerator } from './MfaAwareButton';
 
 const { backend } = window; // defined in preload.js
 
@@ -176,21 +177,6 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
   }
 
   // TODO component?
-  launchButtonGenerator({
-    launchProfile, shouldDisable,
-  }: LaunchButtonGeneratorArguments): LaunchButton {
-    return (buttonText?: string) => (
-      <Button
-        onClick={launchProfile}
-        disabled={shouldDisable}
-        title={shouldDisable ? 'Enter your 6-digit MFA code first!' : undefined}
-      >
-        {buttonText || 'Launch'}
-      </Button>
-    );
-  }
-
-  // TODO component?
   profileRow({
     profileName,
     roleRegexResult,
@@ -284,7 +270,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             mfaCode,
             clearMfaCode: () => this.setState({ mfaCode: '' }),
             launchConsole: backend.launchConsole,
-            launchButtonGenerator: this.launchButtonGenerator,
+            launchButtonGenerator,
             profileRowGenerator: this.profileRow,
           })}
           {usableProfiles.some(

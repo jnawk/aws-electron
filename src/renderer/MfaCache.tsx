@@ -13,6 +13,7 @@ import {
   MfaRowArguments,
 
 } from './types';
+import { mfaButtonGenerator } from './MfaAwareButton';
 
 const { backend } = window; // defined in preload.js
 
@@ -36,24 +37,6 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
     ).then(
       (config) => this.setState({ config }),
     );
-  }
-
-  // TODO component
-  mfaButtonGenerator({
-    launchProfile, shouldDisable,
-  }: LaunchButtonGeneratorArguments): LaunchButton {
-    return function (buttonText?: string): React.ReactElement {
-      return (
-        <Button
-          onClick={launchProfile}
-          disabled={shouldDisable}
-          title={(shouldDisable
-            ? 'Enter your 6-digit MFA code first!' : undefined)}
-        >
-          {buttonText || 'MFA'}
-        </Button>
-      );
-    };
   }
 
   // TODO component
@@ -105,7 +88,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
           mfaCode,
           clearMfaCode: () => this.setState({ mfaCode: '' }),
           doMfa: backend.doMfa,
-          mfaButtonGenerator: this.mfaButtonGenerator,
+          mfaButtonGenerator,
           mfaRowGenerator: this.mfaRow,
         })}
         <Row className="mfaBox">
