@@ -89,7 +89,7 @@ export function mfaRows({
   mfaRowGenerator,
 }: MfaRowsArguments): Array<React.ReactElement> {
   return Object.keys(config.awsConfig).map((profileName): React.ReactElement => {
-    const profile = config.awsConfig[profileName] as ConfigProfile;
+    const profile = config.awsConfig[profileName];
     const launchProfile = () => {
       doMfa({ profileName, mfaCode });
       clearMfaCode();

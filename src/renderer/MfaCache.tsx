@@ -3,6 +3,7 @@ import { Col, Container, Row } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './profileList.css';
 import './mfaBox.css';
+import { Configs, MfaRowArguments } from '_main/types';
 import { mfaRows } from './getRoleData';
 
 import { mfaButtonGenerator } from './MfaAwareButton';
@@ -11,7 +12,7 @@ const { backend } = window; // defined in preload.js
 
 interface MfaCacheState {
     mfaCode: string,
-    config?: any, // TODO not any
+    config?: Configs,
 }
 
 class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {

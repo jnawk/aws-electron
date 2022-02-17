@@ -192,7 +192,7 @@ export function getUsableProfiles({
 
 export function getCachableProfiles({
   config,
-}: GetCachableProfilesArguments): any { // TODO not any
+}: GetCachableProfilesArguments): Configs {
   const mfaProfiles = Object.keys(config.awsConfig).filter((key) => {
     const profile = config.awsConfig[key];
     if (profile.mfa_serial === undefined) {
@@ -215,7 +215,7 @@ export function getCachableProfiles({
         shortTermCredentialsProfile,
       ))));
   });
-  const newConfig = JSON.parse(JSON.stringify(config));
+  const newConfig: Configs = JSON.parse(JSON.stringify(config));
   const toRemove = (Object.keys(config.awsConfig)
     .filter((key):boolean => !(mfaProfiles.includes(key))));
   toRemove.map((key) => {

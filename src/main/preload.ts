@@ -25,7 +25,7 @@ declare global {
             (args: RotateKeyArguments): Promise<Array<string>>
           },
           getMfaProfiles: {
-            (args: GetMfaProfilesArguments): Promise<any> // TODO not any
+            (args: GetMfaProfilesArguments): Promise<Configs>
           },
           doMfa: {(args: DoMfaArguments): void}
         };

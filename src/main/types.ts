@@ -84,7 +84,7 @@ export interface MfaRowArguments {
 }
 
 export interface MfaRowsArguments {
-    config: Config,
+    config: Configs,
     mfaCode: string,
     clearMfaCode: {(): void},
     doMfa: {(args: DoMfaArguments): void},
