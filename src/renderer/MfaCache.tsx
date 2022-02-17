@@ -6,7 +6,7 @@ import './mfaBox.css';
 import { Configs, MfaRowArguments } from '_main/types';
 import { mfaRows } from './getRoleData';
 
-import { mfaButtonGenerator } from './MfaAwareButton';
+import { mfaButtonGenerator } from './mfaAwareButtonGenerator';
 
 const { backend } = window; // defined in preload.js
 

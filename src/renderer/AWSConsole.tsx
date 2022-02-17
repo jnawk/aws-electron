@@ -17,7 +17,7 @@ import {
   ProfileRowArguments,
 } from '_/main/types';
 import { profileRows } from './getRoleData';
-import { launchButtonGenerator } from './MfaAwareButton';
+import { launchButtonGenerator } from './mfaAwareButtonGenerator';
 
 const { backend } = window; // defined in preload.js
 
