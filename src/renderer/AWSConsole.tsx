@@ -81,8 +81,8 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     const usingAwsConfig = properly || vaultConfig === undefined;
     const config = usingAwsConfig ? awsConfig : vaultConfig;
     if (config) {
-      void backend.getUsableProfiles({ config, credentialsProfiles })
-        .then((usableProfiles) => this.setState({ usableProfiles }));
+      const usableProfiles = backend.getUsableProfiles({ config, credentialsProfiles });
+      this.setState({ usableProfiles });
     }
     if (remember) {
       backend.setPreference({ vaultPreference: properly ? 'aws' : 'vault' });
