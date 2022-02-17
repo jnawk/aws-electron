@@ -1,16 +1,8 @@
 import * as React from 'react';
-import {
-  Button, Col, Container, Row,
-} from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './profileList.css';
 import './mfaBox.css';
-import {
-  LaunchButton,
-  LaunchButtonGeneratorArguments,
-  MfaRowArguments,
-
-} from '_main/types';
 import { mfaRows } from './getRoleData';
 
 import { mfaButtonGenerator } from './MfaAwareButton';
