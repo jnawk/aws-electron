@@ -37,10 +37,11 @@ class KeyRotation extends React.Component<Record<string, never>, KeyRotationStat
   }
 
   rotateKey(profile: string): void {
+    const { settings: { aws, local } } = this.state;
     void backend.rotateKey({
       profile,
-      aws: this.state.settings.aws,
-      local: this.state.settings.local,
+      aws,
+      local,
     }).then((log: Array<string>) => {
       this.setState({ log });
     });
