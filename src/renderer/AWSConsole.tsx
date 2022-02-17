@@ -10,13 +10,13 @@ import './profileList.css';
 import './mfaBox.css';
 import './tt.css';
 
-import { profileRows } from './getRoleData';
 import {
   Config,
   LaunchButton,
   LaunchButtonGeneratorArguments,
   ProfileRowArguments,
-} from './types';
+} from '_/main/types';
+import { profileRows } from './getRoleData';
 import { launchButtonGenerator } from './MfaAwareButton';
 
 const { backend } = window; // defined in preload.js

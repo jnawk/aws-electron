@@ -5,14 +5,14 @@ import {
 import 'bootstrap/dist/css/bootstrap.css';
 import './profileList.css';
 import './mfaBox.css';
-import { mfaRows } from './getRoleData';
-
 import {
   LaunchButton,
   LaunchButtonGeneratorArguments,
   MfaRowArguments,
 
-} from './types';
+} from '_main/types';
+import { mfaRows } from './getRoleData';
+
 import { mfaButtonGenerator } from './MfaAwareButton';
 
 const { backend } = window; // defined in preload.js
