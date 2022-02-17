@@ -175,8 +175,6 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     );
   }
 
-  // TODO component?
-
   render(): React.ReactElement {
     const {
       awsConfig,
