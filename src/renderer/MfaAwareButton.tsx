@@ -5,7 +5,7 @@ import { LaunchButtonGeneratorArguments, LaunchButton } from '_/main/types';
 function mfaAwareButtonGenerator(defaultText: string, {
   launchProfile, shouldDisable,
 }: LaunchButtonGeneratorArguments): LaunchButton {
-  return function (buttonText?: string) {
+  return function buttonGenerator(buttonText?: string) {
     return (
       <Button
         onClick={launchProfile}
