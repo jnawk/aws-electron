@@ -201,7 +201,7 @@ export function getCachableProfiles({
     if (profile.role_arn !== undefined) {
       return false;
     }
-    let shortTermCredentialsProfile: string = profile.source_profile;
+    let shortTermCredentialsProfile = profile.source_profile;
     if (shortTermCredentialsProfile === undefined) {
       shortTermCredentialsProfile = key;
     }
