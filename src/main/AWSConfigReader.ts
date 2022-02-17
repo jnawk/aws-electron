@@ -73,7 +73,7 @@ export function getAWSConfig(
     credentialsProfiles,
     longTermCredentialsProfiles: credentialsProfiles.filter(
       (profile): boolean => {
-        const accessKeyId = awsCredentials[profile].access_key_id;
+        const accessKeyId = awsCredentials[profile].aws_access_key_id;
         return (accessKeyId !== undefined && accessKeyId.startsWith('AKIA'));
       },
     ),

@@ -9,8 +9,8 @@ export interface ConfigProfile {
   }
 
 export interface CredentialsProfile {
-    access_key_id?: string,
-    secret_access_key?: string,
-    session_token?: string,
+    aws_access_key_id?: string,
+    aws_secret_access_key?: string,
+    aws_session_token?: string,
     [key: string]: unknown
   }
