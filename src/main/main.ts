@@ -284,7 +284,7 @@ ipcMain.handle(
     if (tabTitlePreference === '{title} - {profile}') {
       return [title, profile].join(' - ');
     }
-    return <string>title; // it's not a fucking any, this is dumb!!!
+    return title;
   },
 );
 ipcMain.handle(
@@ -398,12 +398,15 @@ ipcMain.on(
   'set-preference',
   (_event, preference: Preference) => {
     void settings.get('preferences').then(
-      (preferences) => settings.set('preferences', {
-        // existing preferences
-        ...preferences as Record<string, unknown>,
-        // plus the one we are setting
-        ...preference,
-      }),
+      (preferences) => {
+        const newPreference = JSON.parse(JSON.stringify(preference)) as {[key: string]: string };
+        const existingPreferences = JSON.parse(JSON.stringify(preferences)) as {[key: string]: string};
+
+        return settings.set('preferences', {
+          ...existingPreferences,
+          ...newPreference,
+        });
+      },
     );
   },
 );

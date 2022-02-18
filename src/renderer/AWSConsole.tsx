@@ -57,7 +57,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
       });
 
       const usingAwsConfig = vaultConfig === undefined || properly;
-      const config = usingAwsConfig ? awsConfig : vaultConfig;
+      const config = usingAwsConfig ? awsConfig : vaultConfig || awsConfig;
       return backend.getUsableProfiles({ config, credentialsProfiles });
     }).then(
       (usableProfiles) => this.setState({ usableProfiles }),
@@ -77,8 +77,10 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     const usingAwsConfig = properly || vaultConfig === undefined;
     const config = usingAwsConfig ? awsConfig : vaultConfig;
     if (config && credentialsProfiles) {
-      const usableProfiles = backend.getUsableProfiles({ config, credentialsProfiles });
-      this.setState({ usableProfiles });
+      void backend.getUsableProfiles({ config, credentialsProfiles })
+        .then((usableProfiles) => {
+          this.setState({ usableProfiles });
+        });
     }
     if (remember) {
       backend.setPreference({ vaultPreference: properly ? 'aws' : 'vault' });
