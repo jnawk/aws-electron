@@ -26,7 +26,21 @@ import {
 } from './AWSConfigReader';
 
 import { getConsoleUrl } from './getConsoleURL';
-import { ApplicationState, GetMfaProfilesArguments, GetUsableProfilesArguments } from './types';
+import {
+  AddContextMenuParameters,
+  AddHandlersArguments,
+  AddTabArguments,
+  ApplicationState,
+  BoundsPreference,
+  FrontendLaunchConsoleArguments,
+  GetMfaProfilesArguments,
+  GetTitleArguments,
+  GetUsableProfilesArguments,
+  LaunchConsoleArguments,
+  Preference,
+  RotateKeyArguments,
+  TabTitleOptions,
+} from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
 
@@ -118,26 +132,10 @@ const state: ApplicationState = {
 
 let mainWindow: Electron.BrowserWindow | null;
 
-type LaunchWindowBoundsSettings = {
-    bounds: Electron.Rectangle,
-    maximised?: boolean
-}
-
 function createWindow(): void {
   Menu.setApplicationMenu(buildAppMenu(state));
 
-  const launchWindowBoundsSetting = settings.getSync('launchWindowBounds');
-  let bounds: Electron.Rectangle & { maximised?: boolean } | null = null;
-  let maximised = false;
-  if (launchWindowBoundsSetting !== undefined
-    && launchWindowBoundsSetting !== null) {
-    const launchWindowBounds = launchWindowBoundsSetting.valueOf() as LaunchWindowBoundsSettings;
-    bounds = launchWindowBounds.bounds;
-    const m = launchWindowBounds.maximised;
-    if (m !== undefined && m !== null) {
-      maximised = m;
-    }
-  }
+  const launchWindowBoundsSetting = settings.getSync('launchWindowBounds') as BoundsPreference;
 
   const options = {
     width: 1280,
@@ -150,17 +148,17 @@ function createWindow(): void {
       // worldSafeExecuteJavaScript: true, // TODO from old
     },
     show: false,
-    ...bounds,
+    ...launchWindowBoundsSetting.bounds,
   };
 
   mainWindow = new BrowserWindow(options);
-  mainWindow.loadURL(
+  void mainWindow.loadURL(
     url.format({
       pathname: path.join(__dirname, './index.html'),
       protocol: 'file:',
       slashes: true,
     }),
-  ).finally(() => { /* no action */ });
+  );
 
   // win.toggleDevTools();
 
@@ -176,18 +174,20 @@ function createWindow(): void {
             throw new Error('WTF is going on');
           }
 
-          const newBounds = mainWindow.getBounds();
-          const maximised = mainWindow.isMaximized();
-
+          const launchWindowBounds: BoundsPreference = {
+            bounds: { ...mainWindow.getBounds() },
+            maximised: mainWindow.isMaximized(),
+          };
           void settings.set(
             'launchWindowBounds',
-            { bounds: { ...newBounds }, maximised },
+            launchWindowBounds,
           );
         },
         100,
       );
 
-      if (maximised) {
+      if (launchWindowBoundsSetting
+        && launchWindowBoundsSetting.maximised) {
         mainWindow.maximize();
       }
       mainWindow.show();
@@ -272,28 +272,24 @@ ipcMain.handle(
   (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
-interface GetTitleArguments {
-  title: string,
-  profile: string
-}
-
 ipcMain.handle(
   'get-title',
   async (_event, { title, profile }: GetTitleArguments): Promise<string> => {
     const tabTitlePreference = await settings.get(
       'preferences.tabTitlePreference',
-    );
+    ) as TabTitleOptions;
     if (tabTitlePreference === '{profile} - {title}') {
-      return `${profile} - ${title}`;
-    } if (tabTitlePreference === '{title} - {profile}') {
-      return `${title} - ${profile}`;
+      return [profile, title].join(' - ');
     }
-    return title;
+    if (tabTitlePreference === '{title} - {profile}') {
+      return [title, profile].join(' - ');
+    }
+    return <string>title; // it's not a fucking any, this is dumb!!!
   },
 );
 ipcMain.handle(
   'rotate-key',
-  (_event, { profile, aws, local }) => rotateKey({ profile, aws, local }),
+  (_event, { profile, aws, local }: RotateKeyArguments) => rotateKey({ profile, aws, local }),
 );
 
 type WindowBoundsChangedArguments = {
@@ -306,20 +302,14 @@ function windowBoundsChanged({
 }: WindowBoundsChangedArguments): void {
   const bounds = window.getBounds();
   const maximised = window.isMaximized();
-  void settings.set(`bounds.${profileName}`, { bounds: { ...bounds }, maximised });
+  void settings.set(`bounds.${profileName}`, { bounds, maximised } as BoundsPreference);
 }
-
-type AsyncLaunchConsoleArguments = {
-  profileName: string,
-  consoleUrl: string,
-  expiryTime: number,
-};
 
 async function launchConsole({
   profileName,
   consoleUrl,
   expiryTime,
-}: AsyncLaunchConsoleArguments): Promise<void> {
+}: LaunchConsoleArguments): Promise<void> {
   const openTabArguments = {
     url: consoleUrl,
     profile: profileName,
@@ -334,8 +324,8 @@ async function launchConsole({
     return;
   }
 
-  const profileBounds = (await settings.get(`bounds.${profileName}`)) as any;
-  const bounds = profileBounds ? profileBounds.bounds : {};
+  const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
+  const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
 
   // we do not have a window open for this session; need to open one
   const windowOptions = {
@@ -385,7 +375,7 @@ async function launchConsole({
       );
 
       if (bounds) {
-        if (bounds.maximised) {
+        if (profileBounds.maximised) {
           win.maximize();
         }
       }
@@ -406,7 +396,7 @@ async function launchConsole({
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
 ipcMain.on(
   'set-preference',
-  (_event, preference) => {
+  (_event, preference: Preference) => {
     void settings.get('preferences').then(
       (preferences) => settings.set('preferences', {
         // existing preferences
@@ -418,17 +408,11 @@ ipcMain.on(
   },
 );
 
-interface LaunchConsoleArguments {
-  profileName: string,
-  mfaCode: string,
-  configType: 'awsConfig' | 'vaultConfig'
-}
-
 ipcMain.on(
   'launch-console',
   (
     _event,
-    { profileName, mfaCode, configType }: LaunchConsoleArguments,
+    { profileName, mfaCode, configType }: FrontendLaunchConsoleArguments,
   ): void => {
     const config = getAWSConfig()[configType];
     if (config === undefined) {
@@ -442,7 +426,7 @@ ipcMain.on(
       (consoleUrl) => launchConsole(
         { profileName, consoleUrl, expiryTime },
       ),
-    ).catch((error) => {
+    ).catch((error: Error) => {
       console.error(error, error.stack);
     });
   },
@@ -458,11 +442,6 @@ ipcMain.on(
   },
 );
 
-interface AddTabArguments {
-  profileName: string,
-  tabNumber: number
-}
-
 ipcMain.on(
   'add-tab',
   (_event, { profileName, tabNumber }: AddTabArguments): void => {
@@ -471,11 +450,6 @@ ipcMain.on(
     state.windows[profileName].tabs.push(tabNumber);
   },
 );
-
-interface AddHandlersArguments {
-  contentsId: number,
-  profile: string
-}
 
 ipcMain.on(
   'add-zoom-handlers',
@@ -519,7 +493,7 @@ ipcMain.on(
   (_event, { contentsId, profile }: AddHandlersArguments): void => {
     state.windows[profile].window.on(
       'app-command',
-      (__event: any, command: string) => {
+      (__event, command: string) => {
         const contents = webContents.fromId(contentsId);
         if (command === 'browser-backward') {
           if (contents.canGoBack()) {
@@ -535,17 +509,13 @@ ipcMain.on(
   },
 );
 
-type AddContextMenuPrependParameters = {
-  linkURL: string
-}
-
-ipcMain.on('add-context-menu', (_event, { contentsId }): void => {
+ipcMain.on('add-context-menu', (_event, { contentsId }: AddContextMenuParameters): void => {
   const contents = webContents.fromId(contentsId);
   contextMenu({
     window: contents,
     prepend: (
-      _defaultActions: any,
-      parameters: AddContextMenuPrependParameters,
+      _defaultActions,
+      parameters,
     ) => [
       {
         label: 'Open in new tab',

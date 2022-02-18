@@ -3,10 +3,11 @@ import {
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
+import { Rectangle } from 'electron/main';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
 export interface ApplicationState {
-  windows: {[key: string]: any},
+  windows: {[key: string]: WindowDetails},
 
   openPreferences: {(): void},
   openKeyRotation: {(): void},
@@ -19,12 +20,46 @@ export interface ApplicationState {
   launchWindowBoundsChangedHandlerBound: boolean
 }
 
+export interface AddContextMenuParameters {
+  contentsId: number
+}
+
+export interface AddHandlersArguments {
+  contentsId: number,
+  profile: string
+}
+
+export interface AddTabArguments {
+  profileName: string,
+  tabNumber: number
+}
+
+export interface AssumeRoleParams {
+  RoleArn: string,
+  RoleSessionName: string,
+  SerialNumber?: string,
+  TokenCode?: string,
+  DurationSeconds?: number
+}
+
 export interface AwsConfigFile {
   [key: string]: AwsConfigProfile
 }
 
+export interface AwsCredentials {
+  AccessKeyId: string,
+  SecretAccessKey: string,
+  SessionToken: string
+}
+
 export interface AwsCredentialsFile {
   [key: string]: AwsCredentialsProfile
+}
+
+export interface BoundsPreference {
+  bounds?: Rectangle,
+  maximised?: boolean,
+  [key: string]: any
 }
 
 export interface Configs {
@@ -34,45 +69,55 @@ export interface Configs {
   longTermCredentialsProfiles: Array<string>,
 }
 
-export interface LaunchConsoleArguments {
+export interface DoMfaArguments {
   profileName: string,
-  mfaCode: string,
-  configType: string
+  mfaCode: string
 }
 
-export interface GetUsableProfilesArguments {
-  config: AwsConfigFile,
-  credentialsProfiles: Array<string>
+export interface GetCachableProfilesArguments {
+  config: Configs
 }
 
-export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
-export type LocalAction = 'BACKUP' | 'DELETE'
+export interface GetFederationUrlArguments {
+  Action: string,
+  SigninToken?: string,
+  Destination?: string,
+  SessionDuration?: number,
+  DurationSeconds?: number,
+  SessionType?: string,
+  Session?: string,
+}
 
-export interface RotateKeyArguments {
-  profile: string,
-  aws: AwsAction,
-  local: LocalAction
+export interface GetHttpAgentArguments {
+  sessionDriver?: any,
+  url: string,
+  ca?: any
 }
 
 export interface GetMfaProfilesArguments {
   config: Configs
 }
 
-export interface DoMfaArguments {
-  profileName: string,
+export interface GetRoleDataArguments {
+  profile: AwsConfigProfile,
   mfaCode: string
 }
 
-export interface GetRoleDataArguments {
-    profile: AwsConfigProfile,
-    mfaCode: string
+export interface GetRoleDataResult {
+  roleRegexResult: Array<string>,
+  shouldDisable: boolean,
+  fullRoleName: string,
+  shortRoleName: string
 }
 
-export interface GetRoleDataResult {
-    roleRegexResult: Array<string>,
-    shouldDisable: boolean,
-    fullRoleName: string,
-    shortRoleName: string
+export interface GetSigninTokenArguments {
+  credentials: AwsCredentials,
+  httpAgent: https.Agent
+}
+
+export interface GetUsableProfilesArguments {
+  config: AwsConfigFile,
+  credentialsProfiles: Array<string>
 }
 
 export interface LaunchButtonGeneratorArguments {
@@ -82,6 +127,18 @@ export interface LaunchButtonGeneratorArguments {
 
 export interface LaunchButton {
     (text?: string): React.ReactElement
+}
+
+export interface FrontendLaunchConsoleArguments {
+  profileName: string,
+  mfaCode: string,
+  configType: 'awsConfig' | 'vaultConfig'
+}
+
+export interface LaunchConsoleArguments {
+  profileName: string,
+  consoleUrl: string,
+  expiryTime: number,
 }
 
 export interface MfaRowArguments {
@@ -121,48 +178,25 @@ export interface ProfileRowsArguments {
     profileRowGenerator: {(args: ProfileRowArguments): React.ReactElement}
 }
 
-export interface GetFederationUrlArguments {
-  Action: string,
-  SigninToken?: string,
-  Destination?: string,
-  SessionDuration?: number,
-  DurationSeconds?: number,
-  SessionType?: string,
-  Session?: string,
-}
-
-export interface AWSCredentials {
-  AccessKeyId: string,
-  SecretAccessKey: string,
-  SessionToken: string
-}
-
-export interface GetSigninTokenArguments {
-  credentials: AWSCredentials,
-  httpAgent: https.Agent
+export interface RotateKeyArguments {
+  awsCredentialsFile?: string,
+  profile: string,
+  aws: AwsAction,
+  local: LocalAction
 }
 
 export interface SigninResult {
     SigninToken: string
 }
 
-export interface GetCachableProfilesArguments {
-  config: Configs
+export interface WindowDetails {
+    tabs: Array<any>,
+    window: BrowserWindow,
+    boundsChangedHandlerBound?: boolean
 }
 
-export interface GetHttpAgentArguments {
-  sessionDriver?: any,
-  url: string,
-  ca?: any
-}
-
-export interface AssumeRoleParams {
-  RoleArn: string,
-  RoleSessionName: string,
-  SerialNumber?: string,
-  TokenCode?: string,
-  DurationSeconds?: number
-}
+export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
+export type LocalAction = 'BACKUP' | 'DELETE'
 
 export type VaultOptions = 'ask' | 'aws' | 'vault'
 export type TabTitleOptions = '{title}' | '{title} - {profile}' | '{profile} - {title}'
