@@ -4,7 +4,6 @@ import {
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
-import { Rectangle } from 'electron/main';
 import { Credentials as AwsCredentials } from '@aws-sdk/client-sts';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
@@ -53,9 +52,8 @@ export interface AwsCredentialsFile {
 }
 
 export interface BoundsPreference {
-  bounds?: Rectangle,
+  bounds?: Electron.Rectangle,
   maximised?: boolean,
-  [key: string]: any
 }
 
 export interface Configs {
@@ -135,6 +133,17 @@ export interface FrontendLaunchConsoleArguments {
   configType: ConfigType
 }
 
+export interface IsMultiStageRoleAssumingProfileArguments {
+  config: AwsConfigFile,
+  profileName: string
+}
+
+export interface IsSingleRoleAssumingProfileArguments {
+  profile: AwsConfigProfile,
+  profileName: string,
+  credentialsProfiles: Array<string>
+}
+
 export interface LaunchConsoleArguments {
   profileName: string,
   consoleUrl: string,
@@ -195,7 +204,7 @@ export interface SigninResult {
 }
 
 export interface WindowDetails {
-    tabs: Array<any>,
+    tabs: Array<number>,
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean
 }

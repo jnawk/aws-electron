@@ -9,6 +9,8 @@ import {
   Configs,
   GetCachableProfilesArguments,
   GetUsableProfilesArguments,
+  IsMultiStageRoleAssumingProfileArguments,
+  IsSingleRoleAssumingProfileArguments,
 } from './types';
 
 // Wow some bull shit going on here.
@@ -56,9 +58,15 @@ export function getAWSConfig(
     awsCredentialsFile || path.join(os.homedir(), '.aws', 'credentials'),
     readFileOptions,
   );
-  const awsConfig: AwsConfigFile = ini.parse(awsConfigFileContent);
-  const awsCredentials: AwsCredentialsFile = ini.parse(awsCredentialsFileContent);
-  for (const key in awsConfig) {
+  const awsConfig = ini.parse(awsConfigFileContent) as AwsConfigFile;
+  const awsCredentials = ini.parse(awsCredentialsFileContent) as AwsCredentialsFile;
+
+  // replace [profile foo] with [foo]
+  const profileNames = Object.keys(awsConfig);
+  for (let profileNumber = 0;
+    profileNumber < profileNames.length;
+    profileNumber += 1) {
+    const key = profileNames[profileNumber];
     const value = awsConfig[key];
     delete awsConfig[key];
     awsConfig[cleanProfileKey(key)] = value;
@@ -78,15 +86,25 @@ export function getAWSConfig(
   };
   if (isLikelyVaultV4Config(awsConfig)) {
     // this feels yuck // yes but why are we doing this?
-    const vaultConfig: AwsConfigFile = JSON.parse(JSON.stringify(awsConfig));
+    const vaultConfig = JSON.parse(JSON.stringify(awsConfig)) as AwsConfigFile;
 
-    for (const profile in vaultConfig) {
+    const vaultProfileNames = Object.keys(vaultConfig);
+    for (let vaultProfileNumber = 0;
+      vaultProfileNumber < vaultProfileNames.length;
+      vaultProfileNumber += 1) {
+      const profile = vaultProfileNames[vaultProfileNumber];
       const vaultProfile = vaultConfig[profile];
       if (vaultProfile.source_profile) {
         const sourceProfile = vaultConfig[vaultProfile.source_profile];
-        for (const key in sourceProfile) {
-          if (!(key in vaultProfile)) {
-            vaultProfile[key] = sourceProfile[key];
+        if(sourceProfile){
+          const sourceProfileKeys = Object.keys(sourceProfile);
+          for (let keyNumber = 0;
+            keyNumber < sourceProfileKeys.length;
+            keyNumber += 1) {
+            const key = sourceProfileKeys[keyNumber];
+            if (!(key in vaultProfile)) {
+              vaultProfile[key] = sourceProfile[key];
+            }
           }
         }
       }
@@ -99,13 +117,13 @@ export function getAWSConfig(
 }
 
 export function getProfileList(
-  config: any,
+  config: AwsConfigFile,
   profileName: string,
 ): Array<string> {
   const profiles = [profileName];
   let profileConfig = config[profileName];
-  while (profileConfig !== undefined && 'source_profile' in profileConfig) {
-    const sourceProfile: string = profileConfig.source_profile;
+  while (profileConfig !== undefined && profileConfig.source_profile) {
+    const sourceProfile = profileConfig.source_profile;
     if (profiles.includes(sourceProfile)) {
       throw new Error(
         `Loop in profiles: ${profiles.join(', ')} + ${sourceProfile}`,
@@ -117,21 +135,11 @@ export function getProfileList(
     if (nextProfile && nextProfile.role_arn === undefined) {
       // if we've found a config profile with no role_arn, then the chain
       // is supposed to stop with a credentials profile with the same name.
-      profileConfig = undefined;
-    } else {
-      profileConfig = nextProfile;
+      return profiles.reverse();
     }
+    profileConfig = nextProfile;
   }
   return profiles.reverse();
-}
-
-type IsSingleRoleAssumingProfileArguments = {
-  profile: {
-      source_profile?: string,
-      [key: string]: unknown
-  },
-  profileName: string,
-  credentialsProfiles: Array<string>
 }
 
 function isSingleRoleAssumingProfile({
@@ -144,11 +152,6 @@ function isSingleRoleAssumingProfile({
     Object.keys(profile).includes('role_arn')
         && credentialsProfiles.includes(credentialsProfile)
   );
-}
-
-type IsMultiStageRoleAssumingProfileArguments = {
-  config: AwsConfigFile,
-  profileName: string
 }
 
 function isMultiStageRoleAssumingProfile(
@@ -179,6 +182,9 @@ export function getUsableProfiles({
 }: GetUsableProfilesArguments): Array<string> {
   return Object.keys(config).filter((key) => {
     const profile = config[key];
+    if (profile === undefined) {
+      return false;
+    }
     return isSingleRoleAssumingProfile(
       { profile, profileName: key, credentialsProfiles },
     ) || isMultiStageRoleAssumingProfile(
@@ -212,10 +218,11 @@ export function getCachableProfiles({
         shortTermCredentialsProfile,
       ))));
   });
-  const newConfig: Configs = JSON.parse(JSON.stringify(config));
+  const newConfig = JSON.parse(JSON.stringify(config)) as Configs;
   const toRemove = (Object.keys(config.awsConfig)
-    .filter((key):boolean => !(mfaProfiles.includes(key))));
-  toRemove.map((key) => {
+    .filter((key):boolean => !(mfaProfiles.includes(key)))
+  );
+  toRemove.forEach((key) => {
     delete newConfig.awsConfig[key];
   });
   delete newConfig.vaultConfig;

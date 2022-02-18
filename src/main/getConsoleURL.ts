@@ -68,7 +68,7 @@ async function getRoleCredentials(
     // (and maybe a role to assume)
     [profile] = profileList;
   }
-  
+
   const httpAgent = await configureProxy(config);
   const requestHandler = new NodeHttpHandler({ httpAgent });
 

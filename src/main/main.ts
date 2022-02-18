@@ -174,7 +174,7 @@ function createWindow(): void {
             throw new Error('WTF is going on');
           }
 
-          const launchWindowBounds: BoundsPreference = {
+          const launchWindowBounds = {
             bounds: { ...mainWindow.getBounds() },
             maximised: mainWindow.isMaximized(),
           };
@@ -300,9 +300,12 @@ type WindowBoundsChangedArguments = {
 function windowBoundsChanged({
   window, profileName,
 }: WindowBoundsChangedArguments): void {
-  const bounds = window.getBounds();
-  const maximised = window.isMaximized();
-  void settings.set(`bounds.${profileName}`, { bounds, maximised } as BoundsPreference);
+  const windowBounds = {
+    bounds: { ...window.getBounds() },
+    maximised: window.isMaximized(),
+  };
+
+  void settings.set(`bounds.${profileName}`, windowBounds);
 }
 
 async function launchConsole({
