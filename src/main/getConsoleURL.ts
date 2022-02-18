@@ -6,26 +6,23 @@ import * as urllib from 'urllib';
 import {
   AssumeRoleCommand,
   STSClient,
-  Credentials as TemporaryCredentials,
+  Credentials as AwsCredentials,
 } from '@aws-sdk/client-sts';
-import { CredentialProvider, Credentials } from '@aws-sdk/types';
+import { CredentialProvider } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { session } from 'electron';
 import { getProfileList } from './AWSConfigReader';
 import {
-  AssumeRoleParams, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult,
+  AssumeRoleParams, AwsConfigFile, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult, SplitCa,
 } from './types';
+import { AwsConfigProfile } from './awsConfigInterfaces';
 
 const consoleURL = 'https://console.aws.amazon.com';
 const stsEndpoint = 'https://sts.amazonaws.com';
 
-export async function getHttpAgent({
-  sessionDriver,
-  url,
-  ca,
-}: GetHttpAgentArguments): Promise<https.Agent> {
-  let proxy = await (sessionDriver || session).defaultSession.resolveProxy(url);
+export async function getHttpAgent({ url, ca }: GetHttpAgentArguments): Promise<https.Agent> {
+  let proxy = await session.defaultSession.resolveProxy(url);
 
   if (proxy === 'DIRECT') {
     return new https.Agent({
@@ -42,22 +39,22 @@ export async function getHttpAgent({
   return new ProxyAgent(proxy);
 }
 
-async function configureProxy(
-  config: any,
-): Promise<https.Agent> { // TODO rename
+async function configureProxy( // TODO rename
+  config: AwsConfigProfile,
+): Promise<https.Agent> {
   // assume same proxy & CA bundle for all AWS endpoints
   const httpAgent = await getHttpAgent({
     url: stsEndpoint,
-    ca: config.ca_bundle ? splitCa(config.ca_bundle) : undefined,
+    ca: config.ca_bundle ? (splitCa as SplitCa)(config.ca_bundle) : undefined,
   });
   return httpAgent;
 }
 
 async function getRoleCredentials(
-  config: any,
+  config: AwsConfigFile,
   tokenCode: string,
   profileName: string,
-): Promise<any> { // TODO not any
+): Promise<CredentialProvider | AwsCredentials> {
   const profileList = getProfileList(config, profileName);
 
   // set the long-term credentials
@@ -69,21 +66,20 @@ async function getRoleCredentials(
   } else {
     // the first profile in profileList contains the credentials,
     // (and maybe a role to assume)
-    profile = profileList[0];
+    [profile] = profileList;
   }
-
+  
   const httpAgent = await configureProxy(config);
   const requestHandler = new NodeHttpHandler({ httpAgent });
 
-  let credentials: Credentials | CredentialProvider | TemporaryCredentials;
+  let credentials: CredentialProvider | AwsCredentials;
   credentials = fromIni({ profile });
-
   let sts = new STSClient({ credentials, requestHandler });
 
-  for (const profileNumber in profileList) {
+  for (let profileNumber = 0; profileNumber < profileList.length; profileNumber += 1) {
     profile = profileList[profileNumber];
     const profileConfig = config[profile];
-    if (profileConfig !== undefined && 'role_arn' in profileConfig) {
+    if (profileConfig !== undefined && profileConfig.role_arn) {
       // assume the role
       const assumeRoleParams: AssumeRoleParams = {
         RoleArn: profileConfig.role_arn,
@@ -157,14 +153,14 @@ async function getSigninToken(
     }),
   });
 
-  const response = await urllib.request(getSigninTokenUrl, { agent: httpAgent });
-  const responseData = response.data.toString();
-  const json: SigninResult = JSON.parse(responseData);
+  const response = await urllib.request<string>(getSigninTokenUrl, { agent: httpAgent });
+  const responseData = response.data;
+  const json = JSON.parse(responseData) as SigninResult;
   return json.SigninToken;
 }
 
 export async function getConsoleUrl(
-  config: any,
+  config: AwsConfigFile,
   tokenCode: string,
   profileName: string,
 ): Promise<string> {
@@ -173,7 +169,7 @@ export async function getConsoleUrl(
 
   const roleCredentials = await getRoleCredentials(config, tokenCode, profileName);
   const signinToken = await getSigninToken(
-    { credentials: roleCredentials, httpAgent },
+    { credentials: roleCredentials as AwsCredentials, httpAgent },
   );
 
   return getFederationUrl({

@@ -1,9 +1,11 @@
+import * as fs from 'fs';
 import {
   BrowserWindow,
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
 import { Rectangle } from 'electron/main';
+import { Credentials as AwsCredentials } from '@aws-sdk/client-sts';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
 export interface ApplicationState {
@@ -46,12 +48,6 @@ export interface AwsConfigFile {
   [key: string]: AwsConfigProfile
 }
 
-export interface AwsCredentials {
-  AccessKeyId: string,
-  SecretAccessKey: string,
-  SessionToken: string
-}
-
 export interface AwsCredentialsFile {
   [key: string]: AwsCredentialsProfile
 }
@@ -89,9 +85,8 @@ export interface GetFederationUrlArguments {
 }
 
 export interface GetHttpAgentArguments {
-  sessionDriver?: any,
   url: string,
-  ca?: any
+  ca?: string | Buffer | Array<string | Buffer>
 }
 
 export interface GetMfaProfilesArguments {
@@ -113,6 +108,11 @@ export interface GetRoleDataResult {
 export interface GetSigninTokenArguments {
   credentials: AwsCredentials,
   httpAgent: https.Agent
+}
+
+export interface GetTitleArguments {
+  title: string,
+  profile: string
 }
 
 export interface GetUsableProfilesArguments {
@@ -139,6 +139,11 @@ export interface LaunchConsoleArguments {
   profileName: string,
   consoleUrl: string,
   expiryTime: number,
+}
+
+export interface LaunchWindowBoundsSettings {
+  bounds: Electron.Rectangle,
+  maximised?: boolean
 }
 
 export interface MfaRowArguments {
@@ -211,3 +216,8 @@ export type TabTitlePreference = {
 
 export type Preference = VaultPreference | TabTitlePreference
 export type Preferences = VaultPreference & TabTitlePreference
+
+// interface of untyped module...
+export interface SplitCa {
+  (filepath: number | fs.PathLike, split?: string, encoding?: string): Array<string>
+}

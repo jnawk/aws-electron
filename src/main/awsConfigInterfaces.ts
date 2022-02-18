@@ -5,6 +5,7 @@ export interface AwsConfigProfile {
     mfa_serial?: string,
     region?: string,
     duration_seconds?: number,
+    ca_bundle?: string,
     [key: string]: unknown
   }
 
