@@ -3,7 +3,7 @@ import {
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
-import { ConfigProfile } from './awsConfigInterfaces';
+import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
 export interface ApplicationState {
   windows: {[key: string]: any},
@@ -19,13 +19,17 @@ export interface ApplicationState {
   launchWindowBoundsChangedHandlerBound: boolean
 }
 
-export interface Config {
-  [key: string]: ConfigProfile
+export interface AwsConfigFile {
+  [key: string]: AwsConfigProfile
+}
+
+export interface AwsCredentialsFile {
+  [key: string]: AwsCredentialsProfile
 }
 
 export interface Configs {
-  awsConfig: Config,
-  vaultConfig?: Config,
+  awsConfig: AwsConfigFile,
+  vaultConfig?: AwsConfigFile,
   credentialsProfiles: Array<string>,
   longTermCredentialsProfiles: Array<string>,
 }
@@ -37,7 +41,7 @@ export interface LaunchConsoleArguments {
 }
 
 export interface GetUsableProfilesArguments {
-  config: Config,
+  config: AwsConfigFile,
   credentialsProfiles: Array<string>
 }
 
@@ -60,7 +64,7 @@ export interface DoMfaArguments {
 }
 
 export interface GetRoleDataArguments {
-    profile: ConfigProfile,
+    profile: AwsConfigProfile,
     mfaCode: string
 }
 
@@ -82,7 +86,7 @@ export interface LaunchButton {
 
 export interface MfaRowArguments {
     profileName: string,
-    profile: ConfigProfile,
+    profile: AwsConfigProfile,
     mfaButton: LaunchButton
 }
 
@@ -100,13 +104,13 @@ export interface ProfileRowArguments {
   roleRegexResult: Array<string>,
   fullRoleName: string,
   shortRoleName: string,
-  profile: ConfigProfile,
+  profile: AwsConfigProfile,
   launchButton: LaunchButton
 }
 
 export interface ProfileRowsArguments {
     usableProfiles: Array<string>,
-    config: Config,
+    config: AwsConfigFile,
     configType: string,
     mfaCode: string,
     clearMfaCode: {(): void},
@@ -132,6 +136,7 @@ export interface AWSCredentials {
   SecretAccessKey: string,
   SessionToken: string
 }
+
 export interface GetSigninTokenArguments {
   credentials: AWSCredentials,
   httpAgent: https.Agent

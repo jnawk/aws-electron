@@ -4,6 +4,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { GetSessionTokenCommand, STSClient } from '@aws-sdk/client-sts';
+import { AwsConfigFile, AwsCredentialsFile } from './types';
 
 const readFileOptions = {
   encoding: 'utf-8', flags: 'r',
@@ -41,7 +42,7 @@ type GetAwsConfigArguments = {
 
 async function getAWSConfig({
   awsConfigFile,
-}: GetAwsConfigArguments): Promise<any> {
+}: GetAwsConfigArguments): Promise<AwsConfigFile> {
   const awsConfigFileContent = await fs.readFile(
     getAWSConfigFile({ awsConfigFile }),
     readFileOptions,
@@ -56,7 +57,7 @@ type GetAwsCredentialsArguments = {
 
 async function getAWSCredentials({
   awsCredentialsFile,
-}: GetAwsCredentialsArguments): Promise<any> { // TODO not any
+}: GetAwsCredentialsArguments): Promise<AwsCredentialsFile> {
   const awsCredentialsFileContent = await fs.readFile(
     getAWSCredentialsFile({ awsCredentialsFile }),
     readFileOptions,
@@ -80,7 +81,8 @@ export async function doMfa({
 
   let profile: string;
   if (profileName in credentials) {
-    if (credentials[profileName].aws_access_key_id.startsWith('ASIA')) {
+    const credentialsProfile = credentials[profileName];
+    if (credentialsProfile && credentialsProfile.aws_access_key_id && credentialsProfile.aws_access_key_id.startsWith('ASIA')) {
       profile = `${profileName}::source-profile`;
     } else {
       profile = profileName;

@@ -10,7 +10,7 @@ import {
   IAMClient,
   UpdateAccessKeyCommand,
 } from '@aws-sdk/client-iam';
-import { CredentialsProfile } from './awsConfigInterfaces';
+import { AwsCredentialsFile } from './types';
 
 const readFileOptions = {
   encoding: 'utf-8', flags: 'r',
@@ -36,7 +36,7 @@ type GetAwsCredentialsArguments = {
 
 async function getAWSCredentials({
   awsCredentialsFile,
-}: GetAwsCredentialsArguments): Promise<{[key:string]: CredentialsProfile}> {
+}: GetAwsCredentialsArguments): Promise<AwsCredentialsFile> {
   const awsCredentialsFileContent = await fs.readFile(
     getAWSCredentialsFile({ awsCredentialsFile }),
     readFileOptions,

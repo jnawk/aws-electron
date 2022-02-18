@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Col, Row } from 'reactstrap';
-import { ConfigProfile } from '_/main/awsConfigInterfaces';
+import { AwsConfigProfile } from '_/main/awsConfigInterfaces';
 import { LaunchButton, MfaRowArguments, ProfileRowArguments } from '_/main/types';
 
 interface RowGeneratorArguments {
-    profile: ConfigProfile,
+    profile: AwsConfigProfile,
     profileName: string,
     roleRegexResult?: Array<string>,
     fullRoleName?:string,

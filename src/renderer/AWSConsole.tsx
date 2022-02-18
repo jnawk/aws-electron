@@ -10,7 +10,7 @@ import './profileList.css';
 import './mfaBox.css';
 import './tt.css';
 
-import { Config } from '_/main/types';
+import { AwsConfigFile } from '_/main/types';
 import { profileRows } from './getRoleData';
 import { launchButtonGenerator } from './mfaAwareButtonGenerator';
 import { profileRow } from './profileListGenerator';
@@ -21,8 +21,8 @@ interface AWSConsoleState {
   mfaCode: string,
   remember: boolean,
   usableProfiles?: Array<string>,
-  awsConfig?: Config,
-  vaultConfig?: Config,
+  awsConfig?: AwsConfigFile,
+  vaultConfig?: AwsConfigFile,
   credentialsProfiles?: Array<string>,
   explicitTreatConfigProperly?: boolean,
 }
@@ -76,7 +76,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
 
     const usingAwsConfig = properly || vaultConfig === undefined;
     const config = usingAwsConfig ? awsConfig : vaultConfig;
-    if (config) {
+    if (config && credentialsProfiles) {
       const usableProfiles = backend.getUsableProfiles({ config, credentialsProfiles });
       this.setState({ usableProfiles });
     }

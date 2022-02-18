@@ -4,15 +4,12 @@ import * as os from 'os';
 import * as path from 'path';
 
 import {
-  Config,
+  AwsConfigFile,
+  AwsCredentialsFile,
   Configs,
   GetCachableProfilesArguments,
   GetUsableProfilesArguments,
 } from './types';
-
-import {
-  CredentialsProfile, ConfigProfile,
-} from './awsConfigInterfaces';
 
 // Wow some bull shit going on here.
 const readFileOptions = {
@@ -23,7 +20,7 @@ function cleanProfileKey(key: string): string {
   return key.replace('profile ', '');
 }
 
-export function isLikelyVaultV4Config(config: Config): boolean {
+export function isLikelyVaultV4Config(config: AwsConfigFile): boolean {
   /*
       AWS Vault version 4 (and earlier, I dunno?) caused things like
       mfa_serial to be inheritable from the source_profile.  They have since
@@ -59,8 +56,8 @@ export function getAWSConfig(
     awsCredentialsFile || path.join(os.homedir(), '.aws', 'credentials'),
     readFileOptions,
   );
-  const awsConfig: Config = ini.parse(awsConfigFileContent);
-  const awsCredentials: {[key: string]: CredentialsProfile} = ini.parse(awsCredentialsFileContent);
+  const awsConfig: AwsConfigFile = ini.parse(awsConfigFileContent);
+  const awsCredentials: AwsCredentialsFile = ini.parse(awsCredentialsFileContent);
   for (const key in awsConfig) {
     const value = awsConfig[key];
     delete awsConfig[key];
@@ -81,7 +78,7 @@ export function getAWSConfig(
   };
   if (isLikelyVaultV4Config(awsConfig)) {
     // this feels yuck // yes but why are we doing this?
-    const vaultConfig: Config = JSON.parse(JSON.stringify(awsConfig));
+    const vaultConfig: AwsConfigFile = JSON.parse(JSON.stringify(awsConfig));
 
     for (const profile in vaultConfig) {
       const vaultProfile = vaultConfig[profile];
@@ -150,7 +147,7 @@ function isSingleRoleAssumingProfile({
 }
 
 type IsMultiStageRoleAssumingProfileArguments = {
-  config: Config,
+  config: AwsConfigFile,
   profileName: string
 }
 
