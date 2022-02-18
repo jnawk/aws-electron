@@ -4,14 +4,15 @@ import {
 } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './tt.css';
+import { AwsAction, LocalAction } from '_/main/types';
 
 const { backend } = window; // defined in preload.js
 
 interface KeyRotationState {
     profiles?: Array<string>,
     settings: {
-        aws: 'RETAIN' | 'DISABLE' | 'DELETE',
-        local: 'BACKUP' | 'DELETE'
+        aws: AwsAction,
+        local: LocalAction
     },
     log?: Array<string>
 }

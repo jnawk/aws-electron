@@ -37,18 +37,21 @@ export interface LaunchConsoleArguments {
 }
 
 export interface GetUsableProfilesArguments {
-  config: any, // TOD not any
-  credentialsProfiles: any // TODO not any
+  config: Config,
+  credentialsProfiles: Array<string>
 }
+
+export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
+export type LocalAction = 'BACKUP' | 'DELETE'
 
 export interface RotateKeyArguments {
   profile: string,
-  aws: any, // TODO not any
-  local: any // TODO not any
+  aws: AwsAction,
+  local: LocalAction
 }
 
 export interface GetMfaProfilesArguments {
-  config: any // TODO not any
+  config: Configs
 }
 
 export interface DoMfaArguments {

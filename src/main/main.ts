@@ -26,7 +26,7 @@ import {
 } from './AWSConfigReader';
 
 import { getConsoleUrl } from './getConsoleURL';
-import { ApplicationState } from './types';
+import { ApplicationState, GetMfaProfilesArguments, GetUsableProfilesArguments } from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
 
@@ -264,12 +264,12 @@ ipcMain.handle(
   'get-usable-profiles',
   (
     _event,
-    { config, credentialsProfiles },
+    { config, credentialsProfiles }: GetUsableProfilesArguments,
   ) => getUsableProfiles({ config, credentialsProfiles }),
 );
 ipcMain.handle(
   'get-mfa-profiles',
-  (_event, { config }) => getCachableProfiles({ config }),
+  (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
 interface GetTitleArguments {

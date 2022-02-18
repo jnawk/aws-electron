@@ -53,7 +53,7 @@ contextBridge.exposeInMainWorld(
 
     getPreferences: () => ipcRenderer.invoke('get-preferences'),
 
-    setPreference: (preference: Record<string, any>) => ipcRenderer.send('set-preference', preference),
+    setPreference: (preference: Preference): void => ipcRenderer.send('set-preference', preference),
 
     rotateKey: ({
       profile,
@@ -61,7 +61,7 @@ contextBridge.exposeInMainWorld(
       local,
     }: RotateKeyArguments) => ipcRenderer.invoke('rotate-key', { profile, aws, local }),
 
-    getMfaProfiles: ({ config }: GetMfaProfilesArguments) => ipcRenderer.invoke('get-mfa-profiles', { config }),
+    getMfaProfiles: ({ config }: GetMfaProfilesArguments): Promise<Configs> => ipcRenderer.invoke('get-mfa-profiles', { config }) as Promise<Configs>,
 
     doMfa: ({ profileName, mfaCode }: DoMfaArguments) => ipcRenderer.send('do-mfa', { profileName, mfaCode }),
   },
