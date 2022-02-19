@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as ini from 'ini';
 import * as os from 'os';
 import * as path from 'path';
+import { AwsCredentialsProfile } from './awsConfigInterfaces';
 
 import {
   AwsConfigFile,
@@ -46,6 +47,14 @@ export function isLikelyVaultV4Config(config: AwsConfigFile): boolean {
   });
 }
 
+function getAwsCredentials(awsCredentialsFile?: string) {
+  const awsCredentialsFileContent = fs.readFileSync(
+    awsCredentialsFile || path.join(os.homedir(), '.aws', 'credentials'),
+    readFileOptions,
+  );
+  return ini.parse(awsCredentialsFileContent) as AwsCredentialsFile;
+}
+
 export function getAWSConfig(
   awsConfigFile?: string,
   awsCredentialsFile?: string,
@@ -54,12 +63,8 @@ export function getAWSConfig(
     awsConfigFile || path.join(os.homedir(), '.aws', 'config'),
     readFileOptions,
   );
-  const awsCredentialsFileContent = fs.readFileSync(
-    awsCredentialsFile || path.join(os.homedir(), '.aws', 'credentials'),
-    readFileOptions,
-  );
   const awsConfig = ini.parse(awsConfigFileContent) as AwsConfigFile;
-  const awsCredentials = ini.parse(awsCredentialsFileContent) as AwsCredentialsFile;
+  const awsCredentials = getAwsCredentials(awsCredentialsFile);
 
   // replace [profile foo] with [foo]
   const profileNames = Object.keys(awsConfig);
@@ -96,7 +101,7 @@ export function getAWSConfig(
       const vaultProfile = vaultConfig[profile];
       if (vaultProfile.source_profile) {
         const sourceProfile = vaultConfig[vaultProfile.source_profile];
-        if(sourceProfile){
+        if (sourceProfile) {
           const sourceProfileKeys = Object.keys(sourceProfile);
           for (let keyNumber = 0;
             keyNumber < sourceProfileKeys.length;
@@ -227,4 +232,9 @@ export function getCachableProfiles({
   });
   delete newConfig.vaultConfig;
   return newConfig;
+}
+
+export function getAwsCredentialsProfile(profile: string, awsCredentialsFile?: string): AwsCredentialsProfile {
+  const awsCredentials = getAwsCredentials(awsCredentialsFile);
+  return awsCredentials[profile];
 }

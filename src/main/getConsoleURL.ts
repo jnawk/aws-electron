@@ -8,11 +8,9 @@ import {
   STSClient,
   Credentials as AwsCredentials,
 } from '@aws-sdk/client-sts';
-import { CredentialProvider } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
-import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { session } from 'electron';
-import { getProfileList } from './AWSConfigReader';
+import { getAwsCredentialsProfile, getProfileList } from './AWSConfigReader';
 import {
   AssumeRoleParams, AwsConfigFile, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult, SplitCa,
 } from './types';
@@ -22,7 +20,7 @@ const defaultConsoleUrl = 'https://console.aws.amazon.com';
 const stsEndpoint = 'https://sts.amazonaws.com';
 
 function getConsoleUrlForRegion(region: string): string {
-  return `https://${region}.console.aws.amazon.com`
+  return `https://${region}.console.aws.amazon.com`;
 }
 
 export async function getHttpAgent({ url, ca }: GetHttpAgentArguments): Promise<https.Agent> {
@@ -58,7 +56,7 @@ async function getRoleCredentials(
   config: AwsConfigFile,
   tokenCode: string,
   profileName: string,
-): Promise<CredentialProvider | AwsCredentials> {
+): Promise<AwsCredentials> {
   const profileList = getProfileList(config, profileName);
 
   // set the long-term credentials
@@ -76,9 +74,27 @@ async function getRoleCredentials(
   const httpAgent = await configureProxy(config);
   const requestHandler = new NodeHttpHandler({ httpAgent });
 
-  let credentials: CredentialProvider | AwsCredentials;
-  credentials = fromIni({ profile });
-  let sts = new STSClient({ credentials, requestHandler });
+  const iniCredentials = getAwsCredentialsProfile(profile);
+  let credentials: AwsCredentials = {
+    AccessKeyId: iniCredentials.aws_access_key_id,
+    SecretAccessKey: iniCredentials.aws_secret_access_key,
+    SessionToken: iniCredentials.aws_session_token,
+    Expiration: undefined,
+  };
+
+  if (credentials.AccessKeyId === undefined
+    || credentials.SecretAccessKey === undefined) {
+    throw new Error('No credeitnals');
+  }
+
+  let sts = new STSClient({
+    credentials: {
+      accessKeyId: credentials.AccessKeyId,
+      secretAccessKey: credentials.SecretAccessKey,
+      sessionToken: credentials.SessionToken,
+    },
+    requestHandler,
+  });
 
   for (let profileNumber = 0; profileNumber < profileList.length; profileNumber += 1) {
     profile = profileList[profileNumber];
@@ -173,13 +189,13 @@ export async function getConsoleUrl(
 
   const roleCredentials = await getRoleCredentials(config, tokenCode, profileName);
   const signinToken = await getSigninToken(
-    { credentials: roleCredentials as AwsCredentials, httpAgent },
+    { credentials: roleCredentials, httpAgent },
   );
 
-  let consoleUrl: string = defaultConsoleUrl
-  const region = config[profileName].region
-  if (region && region !== 'us-east-1') {    
-    consoleUrl = getConsoleUrlForRegion(region as string)
+  let consoleUrl: string = defaultConsoleUrl;
+  const { region } = config[profileName];
+  if (region && region !== 'us-east-1') {
+    consoleUrl = getConsoleUrlForRegion(region);
   }
 
   return getFederationUrl({
