@@ -18,8 +18,12 @@ import {
 } from './types';
 import { AwsConfigProfile } from './awsConfigInterfaces';
 
-const consoleURL = 'https://console.aws.amazon.com';
+const defaultConsoleUrl = 'https://console.aws.amazon.com';
 const stsEndpoint = 'https://sts.amazonaws.com';
+
+function getConsoleUrlForRegion(region: string): string {
+  return `https://${region}.console.aws.amazon.com`
+}
 
 export async function getHttpAgent({ url, ca }: GetHttpAgentArguments): Promise<https.Agent> {
   let proxy = await session.defaultSession.resolveProxy(url);
@@ -172,10 +176,16 @@ export async function getConsoleUrl(
     { credentials: roleCredentials as AwsCredentials, httpAgent },
   );
 
+  let consoleUrl: string = defaultConsoleUrl
+  const region = config[profileName].region
+  if (region && region !== 'us-east-1') {    
+    consoleUrl = getConsoleUrlForRegion(region as string)
+  }
+
   return getFederationUrl({
     Action: 'login',
     SigninToken: signinToken,
-    Destination: consoleURL,
+    Destination: consoleUrl,
     SessionDuration: 43200,
   });
 }
