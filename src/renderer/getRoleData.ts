@@ -1,16 +1,19 @@
-import { Row } from 'reactstrap';
+import React from 'react';
 import {
   GetRoleDataArguments,
   GetRoleDataResult,
   MfaRowsArguments,
   ProfileRowsArguments,
-} from './types';
+} from '_main/types';
 
 const roleRegex = /arn:aws:iam::(\d{12}):role\/(.*)/;
 
 function getRoleData({
   profile, mfaCode,
 }: GetRoleDataArguments): GetRoleDataResult {
+  if (profile.role_arn === undefined) {
+    throw new Error('need a role arn'); // ??
+  }
   const roleRegexResult = roleRegex.exec(profile.role_arn);
   const shouldDisable = (profile.mfa_serial !== undefined
     && mfaCode.length !== 6);
@@ -47,7 +50,7 @@ export function profileRows({
   launchConsole,
   launchButtonGenerator,
   profileRowGenerator,
-}: ProfileRowsArguments): Array<Row> {
+}: ProfileRowsArguments): Array<React.ReactElement> {
   return usableProfiles.map((profileName: string) => {
     const profile = config[profileName];
     const launchProfile = () => {
@@ -83,8 +86,8 @@ export function mfaRows({
   doMfa,
   mfaButtonGenerator,
   mfaRowGenerator,
-}: MfaRowsArguments): Array<Row> {
-  return Object.keys(config.awsConfig).map((profileName): Row => {
+}: MfaRowsArguments): Array<React.ReactElement> {
+  return Object.keys(config.awsConfig).map((profileName): React.ReactElement => {
     const profile = config.awsConfig[profileName];
     const launchProfile = () => {
       doMfa({ profileName, mfaCode });
@@ -101,5 +104,3 @@ export function mfaRows({
     });
   });
 }
-
-module.exports = { profileRows, mfaRows };

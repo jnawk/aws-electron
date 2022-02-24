@@ -3,14 +3,16 @@ import {
   Button, ButtonGroup, Col, Container, Row,
 } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
+import './tt.css';
+import { AwsAction, LocalAction } from '_/main/types';
 
 const { backend } = window; // defined in preload.js
 
 interface KeyRotationState {
     profiles?: Array<string>,
     settings: {
-        aws: 'RETAIN' | 'DISABLE' | 'DELETE',
-        local: 'BACKUP' | 'DELETE'
+        aws: AwsAction,
+        local: LocalAction
     },
     log?: Array<string>
 }
@@ -36,16 +38,17 @@ class KeyRotation extends React.Component<Record<string, never>, KeyRotationStat
   }
 
   rotateKey(profile: string): void {
+    const { settings: { aws, local } } = this.state;
     void backend.rotateKey({
       profile,
-      aws: this.state.settings.aws,
-      local: this.state.settings.local,
+      aws,
+      local,
     }).then((log: Array<string>) => {
       this.setState({ log });
     });
   }
 
-  render(): React.Component {
+  render(): React.ReactElement {
     const { profiles, settings: { aws, local }, log } = this.state;
     if (!profiles) {
       return <>Loading...</>;
@@ -94,7 +97,7 @@ class KeyRotation extends React.Component<Record<string, never>, KeyRotationStat
         </Row>
         <Row>
           <Col md={3}>
-            <tt>~/.aws/credentials</tt>
+            <span className="tt">~/.aws/credentials</span>
             {' '}
             options
           </Col>

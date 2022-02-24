@@ -1,24 +1,19 @@
 import * as React from 'react';
-import {
-  Button, Col, Container, Row,
-} from 'reactstrap';
+import { Col, Container, Row } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import './profileList.css';
 import './mfaBox.css';
+import { Configs } from '_main/types';
 import { mfaRows } from './getRoleData';
 
-import {
-  LaunchButton,
-  LaunchButtonGeneratorArguments,
-  MfaRowArguments,
-
-} from './types';
+import { mfaButtonGenerator } from './mfaAwareButtonGenerator';
+import { mfaRow } from './profileListGenerator';
 
 const { backend } = window; // defined in preload.js
 
 interface MfaCacheState {
     mfaCode: string,
-    config?: any, // TODO not any
+    config?: Configs,
 }
 
 class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
@@ -38,47 +33,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
     );
   }
 
-  // TODO component
-  mfaButtonGenerator({
-    launchProfile, shouldDisable,
-  }: LaunchButtonGeneratorArguments): LaunchButton {
-    return function (buttonText?: string): Button {
-      return (
-        <Button
-          onClick={launchProfile}
-          disabled={shouldDisable}
-          title={(shouldDisable
-            ? 'Enter your 6-digit MFA code first!' : undefined)}
-        >
-          {buttonText || 'MFA'}
-        </Button>
-      );
-    };
-  }
-
-  // TODO component
-  mfaRow({
-    profileName,
-    profile,
-    mfaButton,
-  }: MfaRowArguments): Row {
-    return (
-      <Row className="d-table-row" key={profileName}>
-        <Col className="d-none d-sm-table-cell" sm={2} md={3}>
-          {profileName.replace(/-/g, String.fromCharCode(0x2011))}
-        </Col>
-        <Col className="d-none d-lg-table-cell" lg={2}>
-          {(profile.mfa_serial
-            ? profile.mfa_serial.replace(/arn:aws:iam::/, '') : '')}
-        </Col>
-        <Col className="d-none d-sm-table-cell launchButton" sm={2} md={2}>
-          {mfaButton()}
-        </Col>
-      </Row>
-    );
-  }
-
-  render(): React.Component {
+  render(): React.ReactElement {
     const {
       config,
       mfaCode,
@@ -105,8 +60,8 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
           mfaCode,
           clearMfaCode: () => this.setState({ mfaCode: '' }),
           doMfa: backend.doMfa,
-          mfaButtonGenerator: this.mfaButtonGenerator,
-          mfaRowGenerator: this.mfaRow,
+          mfaButtonGenerator,
+          mfaRowGenerator: mfaRow,
         })}
         <Row className="mfaBox">
           <Col>
@@ -115,7 +70,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
               value={mfaCode}
               placeholder="MFA Code"
               onChange={(
-                event: any, // TODO not any
+                event: React.ChangeEvent<HTMLInputElement>,
               ) => this.setState({ mfaCode: event.target.value })}
             />
           </Col>

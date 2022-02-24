@@ -20,13 +20,13 @@ import Settings from './Settings';
 const app = (
   <Router>
     <Routes>
-      <Route path="/" element={<AWSConsole />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/keyRotation" element={<KeyRotation />} />
-      <Route path="/mfaCache" element={<MfaCache />} />
+      <Route path="/" element={<AWSConsole /> as React.ReactNode} />
+      <Route path="/settings" element={<Settings /> as React.ReactNode} />
+      <Route path="/keyRotation" element={<KeyRotation /> as React.ReactNode} />
+      <Route path="/mfaCache" element={<MfaCache /> as React.ReactNode} />
     </Routes>
   </Router>
-);
+) as React.ReactElement;
 
 ReactDOM.render(
   app,

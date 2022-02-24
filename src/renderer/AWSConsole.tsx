@@ -8,24 +8,23 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './vaultMessage.css';
 import './profileList.css';
 import './mfaBox.css';
+import './tt.css';
 
+import { AwsConfigFile } from '_/main/types';
 import { profileRows } from './getRoleData';
-import {
-  LaunchButton,
-  LaunchButtonGeneratorArguments,
-  ProfileRowArguments,
-} from './types';
+import { launchButtonGenerator } from './mfaAwareButtonGenerator';
+import { profileRow } from './profileListGenerator';
 
 const { backend } = window; // defined in preload.js
 
 interface AWSConsoleState {
   mfaCode: string,
   remember: boolean,
-  usableProfiles?: any, // TODO not any
-  awsConfig?: any, // TODO not any
-  vaultConfig?: any, // TODO not any
-  credentialsProfiles?: any, // TODO not any
-  explicitTreatConfigProperly?: any, // TODO not any
+  usableProfiles?: Array<string>,
+  awsConfig?: AwsConfigFile,
+  vaultConfig?: AwsConfigFile,
+  credentialsProfiles?: Array<string>,
+  explicitTreatConfigProperly?: boolean,
 }
 
 export default class AWSConsole extends React.Component<Record<string, never>, AWSConsoleState> {
@@ -48,15 +47,17 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
         ? 'ask' : preferences.vaultPreference || 'ask');
       const properly = (vaultPreference === 'ask'
         ? undefined : vaultPreference === 'aws');
-      this.setState({ ...configs, explicitTreatConfigProperly: properly });
       const {
         awsConfig,
         vaultConfig,
         credentialsProfiles,
       } = configs;
+      this.setState({
+        awsConfig, vaultConfig, credentialsProfiles, explicitTreatConfigProperly: properly,
+      });
 
       const usingAwsConfig = vaultConfig === undefined || properly;
-      const config = usingAwsConfig ? awsConfig : vaultConfig;
+      const config = usingAwsConfig ? awsConfig : vaultConfig || awsConfig;
       return backend.getUsableProfiles({ config, credentialsProfiles });
     }).then(
       (usableProfiles) => this.setState({ usableProfiles }),
@@ -75,16 +76,18 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
 
     const usingAwsConfig = properly || vaultConfig === undefined;
     const config = usingAwsConfig ? awsConfig : vaultConfig;
-    if (config) {
+    if (config && credentialsProfiles) {
       void backend.getUsableProfiles({ config, credentialsProfiles })
-        .then((usableProfiles) => this.setState({ usableProfiles }));
+        .then((usableProfiles) => {
+          this.setState({ usableProfiles });
+        });
     }
     if (remember) {
       backend.setPreference({ vaultPreference: properly ? 'aws' : 'vault' });
     }
   }
 
-  vaultMessage(): React.Component | null {
+  vaultMessage(): React.ReactElement | null {
     const { explicitTreatConfigProperly, vaultConfig, remember } = this.state;
 
     const displayVaultMessage = (
@@ -105,7 +108,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             Your config file has at least one role-assuming profile
             which defines a
             {' '}
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             {' '}
             that exists as a
             {'\u0020'}
@@ -113,7 +116,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             <i>config</i>
             {' '}
             profile.  (
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             {'\u0020'}
             {' '}
             canonically refers to a
@@ -131,14 +134,14 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             the config from the config profile matching the
             {' '}
             {'\u0020'}
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             , while with aws-vault (version 4),
             the profile
             <b>will</b>
             {' '}
             inherit the config from the config
             profile matching the
-            <tt>source_profile</tt>
+            <span className="tt">source_profile</span>
             .  (The authors
             of aws-vault have since realised the error of their ways,
             and version 5 behaves canonically, if their documentation is
@@ -174,65 +177,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     );
   }
 
-  // TODO component?
-  launchButtonGenerator({
-    launchProfile, shouldDisable,
-  }: LaunchButtonGeneratorArguments): LaunchButton {
-    return (buttonText?: string) => (
-      <Button
-        onClick={launchProfile}
-        disabled={shouldDisable}
-        title={shouldDisable ? 'Enter your 6-digit MFA code first!' : undefined}
-      >
-        {buttonText || 'Launch'}
-      </Button>
-    );
-  }
-
-  // TODO component?
-  profileRow({
-    profileName,
-    roleRegexResult,
-    fullRoleName,
-    shortRoleName,
-    profile,
-    launchButton,
-  }: ProfileRowArguments): Row {
-    return (
-      <Row className="d-table-row" key={profileName}>
-        <Col className="d-none d-sm-table-cell" sm={2} md={3}>
-          {profileName.replace(/-/g, String.fromCharCode(0x2011))}
-        </Col>
-        <Col className="d-none d-md-table-cell" md={3}>
-          {roleRegexResult[1]}
-          {' '}
-          {/* role account */}
-        </Col>
-        <Col className="d-none d-md-table-cell" md={2}>
-          <div title={(fullRoleName === shortRoleName
-            ? null : fullRoleName)}
-          >
-            {shortRoleName}
-          </div>
-        </Col>
-        <Col className="d-none d-lg-table-cell" lg={2}>
-          {(profile.mfa_serial
-            ? profile.mfa_serial.replace(/arn:aws:iam::/, '') : '')}
-        </Col>
-        <Col className="d-none d-md-table-cell" md={2}>
-          {profile.source_profile.replace(/-/g, String.fromCharCode(0x2011))}
-        </Col>
-        <Col className="d-table-cell d-sm-none launchButton">
-          {launchButton(profileName)}
-        </Col>
-        <Col className="d-none d-sm-table-cell launchButton" sm={2} md={2}>
-          {launchButton()}
-        </Col>
-      </Row>
-    );
-  }
-
-  render(): React.Component {
+  render(): React.ReactElement {
     const {
       awsConfig,
       vaultConfig,
@@ -250,7 +195,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     const usingAwsConfig = (explicitTreatConfigProperly
       || vaultConfig === undefined);
 
-    const config = usingAwsConfig ? awsConfig : vaultConfig;
+    const config = usingAwsConfig ? awsConfig : vaultConfig || awsConfig;
     const configType = usingAwsConfig ? 'awsConfig' : 'vaultConfig';
 
     return (
@@ -283,13 +228,11 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             mfaCode,
             clearMfaCode: () => this.setState({ mfaCode: '' }),
             launchConsole: backend.launchConsole,
-            launchButtonGenerator: this.launchButtonGenerator,
-            profileRowGenerator: this.profileRow,
+            launchButtonGenerator,
+            profileRowGenerator: profileRow,
           })}
           {usableProfiles.some(
-            (profile: string) => config[
-              profile
-            ].mfa_serial,
+            (profile: string) => config[profile].mfa_serial !== undefined,
           ) ? (
             <Row className="mfaBox">
               <Col>
@@ -298,7 +241,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
                   value={mfaCode}
                   placeholder="MFA Code"
                   onChange={(
-                    event: any, // TODO not any
+                    event: React.ChangeEvent<HTMLInputElement>,
                   ) => this.setState({
                     mfaCode: event.target.value,
                   })}

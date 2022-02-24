@@ -6,29 +6,25 @@ import * as urllib from 'urllib';
 import {
   AssumeRoleCommand,
   STSClient,
-  Credentials as TemporaryCredentials,
+  Credentials as AwsCredentials,
 } from '@aws-sdk/client-sts';
-import { CredentialProvider, Credentials } from '@aws-sdk/types';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
-import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { session } from 'electron';
-import { getProfileList } from './AWSConfigReader';
+import { getAwsCredentialsProfile, getProfileList } from './AWSConfigReader';
+import {
+  AssumeRoleParams, AwsConfigFile, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult, SplitCa,
+} from './types';
+import { AwsConfigProfile } from './awsConfigInterfaces';
 
-const consoleURL = 'https://console.aws.amazon.com';
+const defaultConsoleUrl = 'https://console.aws.amazon.com';
 const stsEndpoint = 'https://sts.amazonaws.com';
 
-type GetHttpAgentArguments = {
-  sessionDriver?: any,
-  url: string,
-  ca?: any
+function getConsoleUrlForRegion(region: string): string {
+  return `https://${region}.console.aws.amazon.com`;
 }
 
-export async function getHttpAgent({
-  sessionDriver,
-  url,
-  ca,
-}: GetHttpAgentArguments): Promise<https.Agent> {
-  let proxy = await (sessionDriver || session).defaultSession.resolveProxy(url);
+export async function getHttpAgent({ url, ca }: GetHttpAgentArguments): Promise<https.Agent> {
+  let proxy = await session.defaultSession.resolveProxy(url);
 
   if (proxy === 'DIRECT') {
     return new https.Agent({
@@ -45,30 +41,22 @@ export async function getHttpAgent({
   return new ProxyAgent(proxy);
 }
 
-async function configureProxy(
-  config: any,
-): Promise<https.Agent> { // TODO rename
+async function configureProxy( // TODO rename
+  config: AwsConfigProfile,
+): Promise<https.Agent> {
   // assume same proxy & CA bundle for all AWS endpoints
   const httpAgent = await getHttpAgent({
     url: stsEndpoint,
-    ca: config.ca_bundle ? splitCa(config.ca_bundle) : undefined,
+    ca: config.ca_bundle ? (splitCa as SplitCa)(config.ca_bundle) : undefined,
   });
   return httpAgent;
 }
 
-type AssumeRoleParams = {
-  RoleArn: string,
-  RoleSessionName: string,
-  SerialNumber?: string,
-  TokenCode?: string,
-  DurationSeconds?: number
-}
-
 async function getRoleCredentials(
-  config: any,
+  config: AwsConfigFile,
   tokenCode: string,
   profileName: string,
-): Promise<any> { // TODO not any
+): Promise<AwsCredentials> {
   const profileList = getProfileList(config, profileName);
 
   // set the long-term credentials
@@ -80,21 +68,38 @@ async function getRoleCredentials(
   } else {
     // the first profile in profileList contains the credentials,
     // (and maybe a role to assume)
-    profile = profileList[0];
+    [profile] = profileList;
   }
 
   const httpAgent = await configureProxy(config);
   const requestHandler = new NodeHttpHandler({ httpAgent });
 
-  let credentials: Credentials | CredentialProvider | TemporaryCredentials;
-  credentials = fromIni({ profile });
+  const iniCredentials = getAwsCredentialsProfile(profile);
+  let credentials: AwsCredentials = {
+    AccessKeyId: iniCredentials.aws_access_key_id,
+    SecretAccessKey: iniCredentials.aws_secret_access_key,
+    SessionToken: iniCredentials.aws_session_token,
+    Expiration: undefined,
+  };
 
-  let sts = new STSClient({ credentials, requestHandler });
+  if (credentials.AccessKeyId === undefined
+    || credentials.SecretAccessKey === undefined) {
+    throw new Error('No credeitnals');
+  }
 
-  for (const profileNumber in profileList) {
+  let sts = new STSClient({
+    credentials: {
+      accessKeyId: credentials.AccessKeyId,
+      secretAccessKey: credentials.SecretAccessKey,
+      sessionToken: credentials.SessionToken,
+    },
+    requestHandler,
+  });
+
+  for (let profileNumber = 0; profileNumber < profileList.length; profileNumber += 1) {
     profile = profileList[profileNumber];
     const profileConfig = config[profile];
-    if (profileConfig !== undefined && 'role_arn' in profileConfig) {
+    if (profileConfig !== undefined && profileConfig.role_arn) {
       // assume the role
       const assumeRoleParams: AssumeRoleParams = {
         RoleArn: profileConfig.role_arn,
@@ -148,33 +153,10 @@ async function getRoleCredentials(
   return credentials;
 }
 
-interface GetFederationUrlArguments {
-  Action: string,
-  SigninToken?: string,
-  Destination?: string,
-  SessionDuration?: number,
-  DurationSeconds?: number,
-  SessionType?: string,
-  Session?: string,
-}
 function getFederationUrl(
   params: GetFederationUrlArguments,
 ): string {
   return `https://signin.aws.amazon.com/federation?${QueryString.stringify(params)}`;
-}
-
-type AWSCredentials = {
-  AccessKeyId: string,
-  SecretAccessKey: string,
-  SessionToken: string
-}
-type GetSigninTokenArguments = {
-  credentials: AWSCredentials,
-  httpAgent: https.Agent
-}
-
-type SigninResult = {
-    SigninToken: string
 }
 
 async function getSigninToken(
@@ -191,14 +173,14 @@ async function getSigninToken(
     }),
   });
 
-  const response = await urllib.request(getSigninTokenUrl, { agent: httpAgent });
-  const responseData = response.data.toString();
-  const json: SigninResult = JSON.parse(responseData);
+  const response = await urllib.request<string>(getSigninTokenUrl, { agent: httpAgent });
+  const responseData = response.data;
+  const json = JSON.parse(responseData) as SigninResult;
   return json.SigninToken;
 }
 
 export async function getConsoleUrl(
-  config: any,
+  config: AwsConfigFile,
   tokenCode: string,
   profileName: string,
 ): Promise<string> {
@@ -210,10 +192,16 @@ export async function getConsoleUrl(
     { credentials: roleCredentials, httpAgent },
   );
 
+  let consoleUrl: string = defaultConsoleUrl;
+  const { region } = config[profileName];
+  if (region && region !== 'us-east-1') {
+    consoleUrl = getConsoleUrlForRegion(region);
+  }
+
   return getFederationUrl({
     Action: 'login',
     SigninToken: signinToken,
-    Destination: consoleURL,
+    Destination: consoleUrl,
     SessionDuration: 43200,
   });
 }

@@ -10,6 +10,7 @@ import {
   IAMClient,
   UpdateAccessKeyCommand,
 } from '@aws-sdk/client-iam';
+import { AwsCredentialsFile, RotateKeyArguments } from './types';
 
 const readFileOptions = {
   encoding: 'utf-8', flags: 'r',
@@ -35,7 +36,7 @@ type GetAwsCredentialsArguments = {
 
 async function getAWSCredentials({
   awsCredentialsFile,
-}: GetAwsCredentialsArguments): Promise<any> { // TODO not any
+}: GetAwsCredentialsArguments): Promise<AwsCredentialsFile> {
   const awsCredentialsFileContent = await fs.readFile(
     getAWSCredentialsFile({ awsCredentialsFile }),
     readFileOptions,
@@ -44,16 +45,9 @@ async function getAWSCredentials({
   return awsCredentials;
 }
 
-type AsyncRotateKeyArguments = {
-  awsCredentialsFile?: string,
-  profile: string,
-  aws: string,
-  local: string
-}
-
 export default async function rotateKey({
   awsCredentialsFile, profile, aws, local,
-}: AsyncRotateKeyArguments): Promise<Array<string>> {
+}: RotateKeyArguments): Promise<Array<string>> {
   const credentials = await getAWSCredentials({ awsCredentialsFile });
   const existingKeyId = credentials[profile].aws_access_key_id;
 
