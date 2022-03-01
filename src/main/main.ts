@@ -135,6 +135,7 @@ let mainWindow: Electron.BrowserWindow | null;
 function createWindow(): void {
   Menu.setApplicationMenu(buildAppMenu(state));
 
+  console.log(`settings file: ${settings.file()}`)
   const launchWindowBoundsSetting = (settings.getSync('launchWindowBounds') || {}) as BoundsPreference;
 
   const options = {
