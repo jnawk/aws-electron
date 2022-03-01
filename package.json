@@ -3,7 +3,7 @@
   "author": "Philip Dowie <philip@jnawk.nz>",
   "description": "AWS Console",
   "license": "ISC",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "./dist/main.bundle.js",
   "repository": {
     "type": "git",
@@ -57,7 +57,7 @@
     "dev": "rimraf dist && cross-env NODE_ENV=development webpack --watch --progress --color",
     "devOne": "rimraf dist && cross-env NODE_ENV=development webpack --progress --color",
     "prod": "rimraf dist && cross-env NODE_ENV=production webpack --progress --color",
-    "dist": "npm i; npm run prod; electron-builder build --linux --mac --x64; npm run dist:win",
+    "dist": "npm i; npm run prod; electron-builder build --linux --mac --x64; npm run dist:win; npm i",
     "dist:mac": "electron-builder build --mac --x64",
     "dist:linux": "electron-builder build --linux --x64",
     "dist:win": "bash -c \"docker run --rm -ti --env-file <(env | grep -iE 'DEBUG|NODE_|ELECTRON_|YARN_|NPM_|CI|CIRCLE|TRAVIS_TAG|TRAVIS|TRAVIS_REPO_|TRAVIS_BUILD_|TRAVIS_BRANCH|TRAVIS_PULL_REQUEST_|APPVEYOR_|CSC_|GH_|GITHUB_|BT_|AWS_|STRIP|BUILD_') --env ELECTRON_CACHE=/.cache/electron --env ELECTRON_BUILDER_CACHE=/.cache/electron-builder -v ${PWD}:/project -v ${PWD##*/}-node-modules:/project/node_modules -v ~/.cache/electron:/.cache/electron -v ~/.cache/electron-builder:/.cache/electron-builder electronuserland/builder:wine bash -c \\\"chown -R 1000 /root; chown root /root/.wine -R; npm i -g npm && npm i && npm run dist:win:docker\\\"\"",

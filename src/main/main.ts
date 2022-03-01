@@ -378,7 +378,7 @@ async function launchConsole({
       );
 
       if (bounds) {
-        if (profileBounds.maximised) {
+        if (profileBounds && profileBounds.maximised) {
           win.maximize();
         }
       }
