@@ -171,7 +171,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
           />
           {'\u0020'}
           {' '}
-          Remember this
+          <span onClick={() => this.setState({ remember: !remember })}>&nbsp; Remember this</span>
         </Alert>
       </CSSTransition>
     );
