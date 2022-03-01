@@ -3,7 +3,7 @@
   "author": "Philip Dowie <philip@jnawk.nz>",
   "description": "AWS Console",
   "license": "ISC",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "main": "./dist/main.bundle.js",
   "repository": {
     "type": "git",
