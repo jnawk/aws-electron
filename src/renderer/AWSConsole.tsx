@@ -167,7 +167,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
           <input
             type="checkbox"
             checked={remember}
-            onClick={() => this.setState({ remember: !remember })}
+            onChange={() => this.setState({ remember: !remember })}
           />
           {'\u0020'}
           {' '}
