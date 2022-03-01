@@ -105,72 +105,46 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
         <Alert variant="info">
           <h1>Vault V4 Style config detected!</h1>
           <p>
-            Your config file has at least one role-assuming profile
-            which defines a
-            {' '}
+            Your config file has at least one role-assuming profile which defines a &nbsp;
             <span className="tt">source_profile</span>
-            {' '}
-            that exists as a
-            {'\u0020'}
-            {' '}
+            &nbsp; that exists as a &nbsp;
             <i>config</i>
-            {' '}
-            profile.  (
+            &nbsp; profile.  (
             <span className="tt">source_profile</span>
-            {'\u0020'}
-            {' '}
-            canonically refers to a
+            &nbsp; canonically refers to a &nbsp; 
             <i>credentials</i>
-            {'\u0020'}
-            {' '}
-            profile).
+            &nbsp; profile).
           </p>
           <p>
-            When using the awscli, this profile will
-            {' '}
+            When using the awscli, this profile will &nbsp;
             <b>not</b>
-            {' '}
-            inherit
-            the config from the config profile matching the
-            {' '}
-            {'\u0020'}
+            &nbsp; inherit the config from the config profile matching the &nbsp;
             <span className="tt">source_profile</span>
-            , while with aws-vault (version 4),
-            the profile
+            , while with aws-vault (version 4), the profile &nbsp; 
             <b>will</b>
-            {' '}
-            inherit the config from the config
-            profile matching the
+            &nbsp; inherit the config from the config profile matching the
             <span className="tt">source_profile</span>
-            .  (The authors
-            of aws-vault have since realised the error of their ways,
-            and version 5 behaves canonically, if their documentation is
-            to be trusted.)
+            .  (The authors of aws-vault have since realised the error of their ways,
+            and version 5 behaves canonically, if their documentation is to be trusted.)
           </p>
           <p>
-            This software will treat configs that
-            {' '}
+            This software will treat configs that &nbsp;
             <i>look</i>
-            {' '}
-            like vault
-            configs as vault configs, unless you tell it not to.
+            &nbsp; like vault configs as vault configs, unless you tell it not to.
           </p>
           <Button onClick={() => this.treatConfigProperly(true)}>
             Please treat my config file properly.
           </Button>
-          {' '}
-          {'\u0020'}
+          &nbsp;
           <Button onClick={() => this.treatConfigProperly(false)}>
             Please treat my config file as a V4 Vault config.
           </Button>
-          {'\u0020'}
+          &nbsp;
           <input
             type="checkbox"
             checked={remember}
             onChange={() => this.setState({ remember: !remember })}
           />
-          {'\u0020'}
-          {' '}
           <span onClick={() => this.setState({ remember: !remember })}>&nbsp; Remember this</span>
         </Alert>
       </CSSTransition>
