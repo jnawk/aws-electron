@@ -403,7 +403,7 @@ ipcMain.on(
     void settings.get('preferences').then(
       (preferences) => {
         const newPreference = JSON.parse(JSON.stringify(preference)) as {[key: string]: string };
-        const existingPreferences = JSON.parse(JSON.stringify(preferences)) as {[key: string]: string};
+        const existingPreferences = JSON.parse(JSON.stringify(preferences || {})) as {[key: string]: string};
 
         return settings.set('preferences', {
           ...existingPreferences,
