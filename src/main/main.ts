@@ -32,6 +32,7 @@ import {
   AddTabArguments,
   ApplicationState,
   BoundsPreference,
+  CloseTabArguments,
   FrontendLaunchConsoleArguments,
   GetMfaProfilesArguments,
   GetTitleArguments,
@@ -40,9 +41,13 @@ import {
   Preference,
   RotateKeyArguments,
   TabTitleOptions,
+  WindowBoundsChangedArguments,
 } from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
+
+let mainWindow: Electron.BrowserWindow | null;
+let nextTabNumber = 0;
 
 const state: ApplicationState = {
   windows: {},
@@ -129,8 +134,6 @@ const state: ApplicationState = {
     }
   },
 };
-
-let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow(): void {
   Menu.setApplicationMenu(buildAppMenu(state));
@@ -236,8 +239,6 @@ app.on('activate', () => {
   }
 });
 
-let nextTabNumber = 0;
-
 app.on('web-contents-created', (_wccEvent, contents) => {
   contents.on('new-window', (newWindowEvent, initialUrl) => {
     if (newWindowEvent) {
@@ -261,20 +262,19 @@ app.on('web-contents-created', (_wccEvent, contents) => {
 ipcMain.handle('get-aws-config', () => getAWSConfig());
 
 ipcMain.handle('get-preferences', () => settings.get('preferences'));
-ipcMain.handle(
-  'get-usable-profiles',
+
+ipcMain.handle('get-usable-profiles',
   (
     _event,
     { config, credentialsProfiles }: GetUsableProfilesArguments,
   ) => getUsableProfiles({ config, credentialsProfiles }),
 );
-ipcMain.handle(
-  'get-mfa-profiles',
+
+ipcMain.handle('get-mfa-profiles',
   (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
-ipcMain.handle(
-  'get-title',
+ipcMain.handle('get-title',
   async (_event, { title, profile }: GetTitleArguments): Promise<string> => {
     const tabTitlePreference = await settings.get(
       'preferences.tabTitlePreference',
@@ -288,15 +288,10 @@ ipcMain.handle(
     return title;
   },
 );
-ipcMain.handle(
-  'rotate-key',
+
+ipcMain.handle('rotate-key',
   (_event, { profile, aws, local }: RotateKeyArguments) => rotateKey({ profile, aws, local }),
 );
-
-type WindowBoundsChangedArguments = {
-  window: Electron.BrowserWindow,
-  profileName: string
-}
 
 function windowBoundsChanged({
   window, profileName,
@@ -398,8 +393,7 @@ async function launchConsole({
 }
 
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
-ipcMain.on(
-  'set-preference',
+ipcMain.on('set-preference',
   (_event, preference: Preference) => {
     void settings.get('preferences').then(
       (preferences) => {
@@ -415,8 +409,7 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(
-  'launch-console',
+ipcMain.on('launch-console',
   (
     _event,
     { profileName, mfaCode, configType }: FrontendLaunchConsoleArguments,
@@ -439,8 +432,7 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(
-  'do-mfa',
+ipcMain.on('do-mfa',
   (_event, {
     profileName,
     mfaCode,
@@ -449,8 +441,7 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(
-  'add-tab',
+ipcMain.on('add-tab',
   (_event, { profileName, tabNumber }: AddTabArguments): void => {
   // we want to track the tabs a profile has open so when the last one closes
   // we can close the window.
@@ -458,8 +449,7 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(
-  'add-zoom-handlers',
+ipcMain.on('add-zoom-handlers',
   (_event, { contentsId, profile }: AddHandlersArguments): void => {
     const contents = webContents.fromId(contentsId);
 
@@ -495,8 +485,7 @@ ipcMain.on(
   },
 );
 
-ipcMain.on(
-  'add-forward-back-handlers',
+ipcMain.on('add-forward-back-handlers',
   (_event, { contentsId, profile }: AddHandlersArguments): void => {
     state.windows[profile].window.on(
       'app-command',
@@ -556,13 +545,7 @@ ipcMain.on('add-context-menu', (_event, { contentsId }: AddContextMenuParameters
   });
 });
 
-type CloseTabArguments = {
-  profileName: string,
-  tabNumber: number
-}
-
-ipcMain.on(
-  'close-tab',
+ipcMain.on('close-tab',
   (_event, {
     profileName, tabNumber,
   }: CloseTabArguments): void => {

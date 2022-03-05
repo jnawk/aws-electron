@@ -56,6 +56,11 @@ export interface BoundsPreference {
   maximised?: boolean,
 }
 
+export interface CloseTabArguments {
+  profileName: string,
+  tabNumber: number
+}
+
 export interface Configs {
   awsConfig: AwsConfigFile,
   vaultConfig?: AwsConfigFile,
@@ -207,6 +212,11 @@ export interface WindowDetails {
     tabs: Array<number>,
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean
+}
+
+export interface WindowBoundsChangedArguments {
+  window: Electron.BrowserWindow,
+  profileName: string
 }
 
 export type ConfigType = 'awsConfig' | 'vaultConfig'
