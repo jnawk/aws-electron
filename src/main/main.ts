@@ -1,4 +1,5 @@
 import * as contextMenu from 'electron-context-menu';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
 
@@ -141,9 +142,17 @@ function createWindow(): void {
   console.log(`settings file: ${settings.file()}`)
   const launchWindowBoundsSetting = (settings.getSync('launchWindowBounds') || {}) as BoundsPreference;
 
+  const readFileOptions = {
+    encoding: 'utf-8' as const, flag: 'r' as const,
+  };
+  const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions)
+  const packageJson = JSON.parse(packageJsonFile)
+  const version = packageJson.version
+
   const options = {
     width: 1280,
     height: 1024,
+    title: `AWS Console (v${version})`,
     webPreferences: {
       contextIsolation: true,
       devTools: process.env.NODE_ENV !== 'production',
