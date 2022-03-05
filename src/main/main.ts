@@ -215,6 +215,13 @@ function createWindow(): void {
   });
 }
 
+const useGPU = settings.getSync('preferences.useGPUPreference')
+console.log(`useGPU: ${useGPU}`)
+if(useGPU !== undefined && useGPU === false) {
+  console.log("disabling hardware accelaration")
+  app.disableHardwareAcceleration()
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

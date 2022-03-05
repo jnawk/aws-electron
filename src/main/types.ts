@@ -235,8 +235,12 @@ export type TabTitlePreference = {
   tabTitlePreference?: TabTitleOptions,
 }
 
-export type Preference = VaultPreference | TabTitlePreference
-export type Preferences = VaultPreference & TabTitlePreference
+export type UseGPUPreference = {
+  useGPUPreference?: boolean
+}
+
+export type Preference = VaultPreference | TabTitlePreference | UseGPUPreference
+export type Preferences = VaultPreference & TabTitlePreference & UseGPUPreference
 
 // interface of untyped module...
 export interface SplitCa {

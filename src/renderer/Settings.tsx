@@ -37,6 +37,7 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
     const {
       vaultPreference,
       tabTitlePreference,
+      useGPUPreference,
     } = preferences;
     return (
       <Container fluid>
@@ -123,6 +124,38 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
                 }}
               >
                 {'{title} - {profile}'}
+              </Button>
+            </ButtonGroup>
+          </Col>
+        </Row>
+        <Row>
+          <Col>
+            Use hardware accelaration (if available)
+          </Col>
+          <Col>
+            <ButtonGroup>
+            <Button
+                color={((useGPUPreference === undefined
+                    || useGPUPreference === true)
+                  ? 'success' : 'secondary')}
+                onClick={() => {
+                  this.setPreference({
+                    useGPUPreference: true,
+                  });
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                color={(useGPUPreference === false
+                  ? 'success' : 'secondary')}
+                onClick={() => {
+                  this.setPreference({
+                    useGPUPreference: false,
+                  });
+                }}
+              >
+                No
               </Button>
             </ButtonGroup>
           </Col>
