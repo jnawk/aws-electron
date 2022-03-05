@@ -26,6 +26,7 @@ interface Backend {
     (args: GetMfaProfilesArguments): Promise<Configs>
   },
   doMfa: {(args: DoMfaArguments): void}
+  restart: {(): void}
 }
 
 declare global {
@@ -64,6 +65,8 @@ const backend: Backend = {
   getMfaProfiles: ({ config }): Promise<Configs> => ipcRenderer.invoke('get-mfa-profiles', { config }) as Promise<Configs>,
 
   doMfa: ({ profileName, mfaCode }) => ipcRenderer.send('do-mfa', { profileName, mfaCode }),
+
+  restart: () => ipcRenderer.send('restart'),
 };
 
 contextBridge.exposeInMainWorld(

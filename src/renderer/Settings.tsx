@@ -29,6 +29,10 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
     backend.setPreference(preference);
   }
 
+  restartApp(): void {
+    backend.restart();
+  }
+
   render(): React.Component| React.ReactElement {
     const { preferences } = this.state;
     if (!preferences) {
@@ -42,11 +46,11 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
     return (
       <Container fluid>
         <Row>
-          <Col>
+          <Col xs={6}>
             How to treat the AWS Configuration file if it appears to
             use features from aws-vault (v4)
           </Col>
-          <Col>
+          <Col xs={4}>
             <ButtonGroup>
               <Button
                 color={((vaultPreference === undefined
@@ -86,10 +90,10 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col xs={6}>
             Tab title format
           </Col>
-          <Col>
+          <Col xs={4}>
             <ButtonGroup>
               <Button
                 color={((tabTitlePreference === undefined
@@ -129,10 +133,10 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
           </Col>
         </Row>
         <Row>
-          <Col>
-            Use hardware accelaration (if available)
+          <Col xs={6}>
+            Use hardware accelaration (if available) - requires restart
           </Col>
-          <Col>
+          <Col xs={4}>
             <ButtonGroup>
             <Button
                 color={((useGPUPreference === undefined
@@ -158,6 +162,14 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
                 No
               </Button>
             </ButtonGroup>
+          </Col>
+          <Col xs={2}>
+            <Button color='danger'
+              onClick={() => {
+                this.restartApp()
+              }}>
+              Restart
+            </Button>
           </Col>
         </Row>
       </Container>

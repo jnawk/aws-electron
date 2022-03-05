@@ -568,3 +568,9 @@ ipcMain.on('close-tab',
     }
   },
 );
+
+ipcMain.on('restart', (_event): void => {
+  console.log('restarting')
+  app.relaunch()
+  app.quit()
+})
