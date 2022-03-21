@@ -50,14 +50,25 @@ import buildAppMenu from './menu';
 let mainWindow: Electron.BrowserWindow | null;
 let nextTabNumber = 0;
 
+function getApplicationVersion(): string {
+  const readFileOptions = {
+    encoding: 'utf-8' as const, flag: 'r' as const,
+  };
+  const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions)
+  const packageJson = JSON.parse(packageJsonFile)
+  return packageJson.version
+}
+
 const state: ApplicationState = {
   windows: {},
-  launchWindowBoundsChangedHandlerBound: false,
+  launchWindowBoundsChangedHandlerBound: false,  
+  version: getApplicationVersion(),
   openPreferences(): void {
     if (state.preferencesWindow === undefined) {
       const options = {
         width: 1280,
         height: 1024,
+        title: `AWS Console (v${state.version}) - Preferences`,
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
           // worldSafeExecuteJavaScript: true,
@@ -85,6 +96,7 @@ const state: ApplicationState = {
       const options = {
         width: 1280,
         height: 1024,
+        title: `AWS Console (v${state.version}) - Key Rotation`,
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
           // worldSafeExecuteJavaScript: true,
@@ -112,6 +124,7 @@ const state: ApplicationState = {
       const options = {
         width: 1280,
         height: 1024,
+        title: `AWS Console (v${state.version}) - MFA Cache`,
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
           // worldSafeExecuteJavaScript: true,
@@ -142,17 +155,11 @@ function createWindow(): void {
   console.log(`settings file: ${settings.file()}`)
   const launchWindowBoundsSetting = (settings.getSync('launchWindowBounds') || {}) as BoundsPreference;
 
-  const readFileOptions = {
-    encoding: 'utf-8' as const, flag: 'r' as const,
-  };
-  const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions)
-  const packageJson = JSON.parse(packageJsonFile)
-  const version = packageJson.version
-
+  
   const options = {
     width: 1280,
     height: 1024,
-    title: `AWS Console (v${version})`,
+    title: `AWS Console (v${state.version})`,
     webPreferences: {
       contextIsolation: true,
       devTools: process.env.NODE_ENV !== 'production',

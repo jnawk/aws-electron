@@ -18,7 +18,8 @@ export interface ApplicationState {
   keyRotationWindow?: BrowserWindow,
   preferencesWindow?: BrowserWindow,
 
-  launchWindowBoundsChangedHandlerBound: boolean
+  launchWindowBoundsChangedHandlerBound: boolean,
+  version: string
 }
 
 export interface AddContextMenuParameters {
