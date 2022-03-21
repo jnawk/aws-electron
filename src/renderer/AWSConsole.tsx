@@ -111,7 +111,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             <i>config</i>
             &nbsp; profile.  (
             <span className="tt">source_profile</span>
-            &nbsp; canonically refers to a &nbsp; 
+            &nbsp; canonically refers to a &nbsp;
             <i>credentials</i>
             &nbsp; profile).
           </p>
@@ -120,7 +120,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             <b>not</b>
             &nbsp; inherit the config from the config profile matching the &nbsp;
             <span className="tt">source_profile</span>
-            , while with aws-vault (version 4), the profile &nbsp; 
+            , while with aws-vault (version 4), the profile &nbsp;
             <b>will</b>
             &nbsp; inherit the config from the config profile matching the
             <span className="tt">source_profile</span>
