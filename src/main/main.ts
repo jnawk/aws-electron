@@ -39,6 +39,7 @@ import {
   GetMfaProfilesArguments,
   GetTitleArguments,
   GetUsableProfilesArguments,
+  HasVersion,
   LaunchConsoleArguments,
   Preference,
   RotateKeyArguments,
@@ -55,14 +56,14 @@ function getApplicationVersion(): string {
   const readFileOptions = {
     encoding: 'utf-8' as const, flag: 'r' as const,
   };
-  const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions)
-  const packageJson = JSON.parse(packageJsonFile)
-  return packageJson.version
+  const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions);
+  const packageJson = JSON.parse(packageJsonFile) as HasVersion;
+  return packageJson.version;
 }
 
 const state: ApplicationState = {
   windows: {},
-  launchWindowBoundsChangedHandlerBound: false,  
+  launchWindowBoundsChangedHandlerBound: false,
   version: getApplicationVersion(),
   openPreferences(): void {
     if (state.preferencesWindow === undefined) {

@@ -144,6 +144,10 @@ export interface FrontendLaunchConsoleArguments {
   configType: ConfigType
 }
 
+export interface HasVersion {
+  version: string
+}
+
 export interface IsMultiStageRoleAssumingProfileArguments {
   config: AwsConfigFile,
   profileName: string
