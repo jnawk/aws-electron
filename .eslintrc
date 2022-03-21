@@ -17,15 +17,7 @@
         "ignoreVoid": true
       }
     ],
-    "no-console": [
-      "warn", 
-      { 
-        "allow": [
-          "warn",
-          "error"
-        ]          
-      }
-    ],
+    "no-console": "off",
     "import/no-extraneous-dependencies": [
       "error",
       {
