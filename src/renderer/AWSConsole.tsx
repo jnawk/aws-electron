@@ -141,11 +141,12 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
           </Button>
           &nbsp;
           <input
+            id="remember"
             type="checkbox"
             checked={remember}
             onChange={() => this.setState({ remember: !remember })}
           />
-          <span onClick={() => this.setState({ remember: !remember })}>&nbsp; Remember this</span>
+          <label htmlFor="remember">&nbsp; Remember this</label>
         </Alert>
       </CSSTransition>
     );
