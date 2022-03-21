@@ -1,10 +1,11 @@
 import * as fs from 'fs';
 import {
-  BrowserWindow,
+  BrowserWindow, WebContents,
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
 import { Credentials as AwsCredentials } from '@aws-sdk/client-sts';
+import { Event } from 'electron/main';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
 export interface ApplicationState {
