@@ -29,10 +29,6 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
     backend.setPreference(preference);
   }
 
-  restartApp(): void {
-    backend.restart();
-  }
-
   render(): React.Component| React.ReactElement {
     const { preferences } = this.state;
     if (!preferences) {
@@ -138,7 +134,7 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
           </Col>
           <Col xs={4}>
             <ButtonGroup>
-            <Button
+              <Button
                 color={((useGPUPreference === undefined
                     || useGPUPreference === true)
                   ? 'success' : 'secondary')}
@@ -164,10 +160,12 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
             </ButtonGroup>
           </Col>
           <Col xs={2}>
-            <Button color='danger'
+            <Button
+              color="danger"
               onClick={() => {
-                this.restartApp()
-              }}>
+                backend.restart();
+              }}
+            >
               Restart
             </Button>
           </Col>
