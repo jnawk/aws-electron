@@ -27,13 +27,17 @@ export interface AddContextMenuParameters {
 }
 
 export interface AddHandlersArguments {
-  contentsId: number,
+  contentsId?: number,
   profile: string
 }
 
 export interface AddTabArguments {
   profileName: string,
   tabNumber: number
+}
+
+export interface AppEvent extends Event {
+  sender: WebContents
 }
 
 export interface AssumeRoleParams {

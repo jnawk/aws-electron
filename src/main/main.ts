@@ -31,6 +31,7 @@ import {
   AddContextMenuParameters,
   AddHandlersArguments,
   AddTabArguments,
+  AppEvent,
   ApplicationState,
   BoundsPreference,
   CloseTabArguments,
@@ -508,21 +509,13 @@ ipcMain.on('add-zoom-handlers',
   },
 );
 
-ipcMain.on('add-forward-back-handlers',
-  (_event, { contentsId, profile }: AddHandlersArguments): void => {
+ipcMain.on(
+  'add-forward-back-handlers',
+  (_event, { profile }: AddHandlersArguments): void => {
     state.windows[profile].window.on(
       'app-command',
-      (__event, command: string) => {
-        const contents = webContents.fromId(contentsId);
-        if (command === 'browser-backward') {
-          if (contents.canGoBack()) {
-            contents.goBack();
-          }
-        } else if (command === 'browser-forward') {
-          if (contents.canGoForward()) {
-            contents.goForward();
-          }
-        }
+      (event: AppEvent, command: string) => {
+        event.sender.send(command);
       },
     );
   },

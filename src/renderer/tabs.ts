@@ -24,12 +24,31 @@ interface OpenTab {
   expiryTime: number
 }
 
+ipcRenderer.on('browser-backward', (): void => {
+  const contents = tabGroup.getActiveTab()?.webview;
+  if (contents?.canGoBack()) {
+    contents.goBack();
+  }
+});
+
+ipcRenderer.on('browser-forward', (): void => {
+  const contents = tabGroup.getActiveTab()?.webview;
+  if (contents?.canGoForward()) {
+    contents.goForward();
+  }
+});
+
 ipcRenderer.on('open-tab', (_event, {
   url, tabNumber, profile, expiryTime,
 }: OpenTab) => {
   if (profile !== undefined) {
     // we are given a window number when opening the winow
     windowState.profile = profile;
+
+    ipcRenderer.send(
+      'add-forward-back-handlers',
+      { profile: windowState.profile },
+    );
 
     if (expiryTime !== undefined) {
       windowState.expiryTime = expiryTime;
@@ -95,10 +114,6 @@ ipcRenderer.on('open-tab', (_event, {
           );
           ipcRenderer.send(
             'add-zoom-handlers',
-            { contentsId, profile: windowState.profile },
-          );
-          ipcRenderer.send(
-            'add-forward-back-handlers',
             { contentsId, profile: windowState.profile },
           );
           windowState.contentsHandlers.push(contentsId);
