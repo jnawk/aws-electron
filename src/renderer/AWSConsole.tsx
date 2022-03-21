@@ -140,13 +140,15 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             Please treat my config file as a V4 Vault config.
           </Button>
           &nbsp;
-          <input
-            id="remember"
-            type="checkbox"
-            checked={remember}
-            onChange={() => this.setState({ remember: !remember })}
-          />
-          <label htmlFor="remember">&nbsp; Remember this</label>
+          <label htmlFor="remember">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={remember}
+              onChange={() => this.setState({ remember: !remember })}
+            />
+            &nbsp; Remember this
+          </label>
         </Alert>
       </CSSTransition>
     );
