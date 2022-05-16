@@ -236,6 +236,7 @@ const useGPU = settings.getSync('preferences.useGPUPreference');
 if (useGPU !== undefined && useGPU === false) {
   console.log('disabling hardware accelaration');
   app.disableHardwareAcceleration();
+  app.commandLine.appendSwitch('disable-gpu-sandbox');
 }
 
 // This method will be called when Electron has finished
