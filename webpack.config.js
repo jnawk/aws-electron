@@ -98,14 +98,14 @@ rendererConfig.plugins = [
     template: path.resolve(__dirname, './public/tabs.html'),
     filename: "tabs.html"
   }),
-  new CopyPlugin({
-    patterns: [
-      {
-        from: "node_modules/electron-tabs/electron-tabs.css",
-        to: "electron-tabs.css"
-      }
-    ]
-  })
+//   new CopyPlugin({
+//     patterns: [
+//       {
+//         from: "node_modules/electron-tabs/electron-tabs.css",
+//         to: "electron-tabs.css"
+//       }
+//     ]
+//   })
 ];
 
 module.exports = [mainConfig, rendererConfig, preloadConfig, tabsConfig];

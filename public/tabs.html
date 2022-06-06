@@ -7,7 +7,7 @@
     <meta content="utf-8" http-equiv="encoding">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'">
     <!-- <link rel="stylesheet" href="node_modules/electron-tabs/electron-tabs.css"> -->
-    <link rel="stylesheet" href="electron-tabs.css">
+    <!-- <link rel="stylesheet" href="electron-tabs.css"> -->
     <style>
         body{
             margin: 0;
@@ -22,12 +22,14 @@
 </head>
 
 <body>
-  <div id="timeRemaining">Time remaining</div>
-  <div class="etabs-tabgroup">
-      <div class="etabs-tabs"></div>
-      <div class="etabs-buttons"></div>
-  </div>
-  <div class="etabs-views"></div>
-  <script type="text/javascript" src="tabs.js"></script>
+    <div id="timeRemaining">Time remaining</div>
+    <!--<div class="etabs-tabgroup">
+        <div class="etabs-tabs"></div>
+        <div class="etabs-buttons"></div>
+    </div>
+    <div class="etabs-views"></div>-->
+    <tab-group></tab-group>
+    <!-- <script src="node_modules/electron-tabs/dist/electron-tabs.js"></script>
+    <script type="text/javascript" src="tabs.js"></script> -->
 </body>
 </html>

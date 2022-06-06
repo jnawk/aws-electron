@@ -337,87 +337,98 @@ async function launchConsole({
   consoleUrl,
   expiryTime,
 }: LaunchConsoleArguments): Promise<void> {
-  const openTabArguments = {
-    url: consoleUrl,
-    profile: profileName,
-    tabNumber: nextTabNumber += 1,
-    expiryTime,
-  };
+    const openTabArguments = {
+        url: consoleUrl,
+        profile: profileName,
+        tabNumber: nextTabNumber += 1,
+        expiryTime,
+    };
 
-  const profileSession = state.windows[profileName];
-  if (profileSession) {
-    // we already have a window open for this session, reuse it.
-    profileSession.window.webContents.send('open-tab', openTabArguments);
-    return;
-  }
-
-  const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
-  const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
-
-  // we do not have a window open for this session; need to open one
-  const windowOptions = {
-    width: 1280,
-    height: 1024,
-    title: `AWS Console - ${profileName}`,
-    webPreferences: {
-      partition: profileName,
-      nodeIntegration: true,
-      webviewTag: true, // TODO we aren't ready for this yet
-      // worldSafeExecuteJavaScript: true,
-      // contextIsolation: true
-    },
-    show: false,
-    ...bounds,
-  };
-
-  const win = new BrowserWindow(windowOptions);
-
-  // save details of this profile's wind
-  state.windows[profileName] = {
-    tabs: [],
-    window: win,
-  };
-
-  win.loadURL(
-    url.format({
-      pathname: path.join(__dirname, './tabs.html'),
-      protocol: 'file:',
-      slashes: true,
-    }),
-  ).finally(() => { /* no action */ });
-
-  win.webContents.on('did-finish-load', () => {
-    win.webContents.send('open-tab', openTabArguments);
-  });
-  win.on('close', () => {
-    // delete the window state from the app when it is closed
-    delete state.windows[profileName];
-  });
-
-  win.on('ready-to-show', () => {
-    if (!state.windows[profileName].boundsChangedHandlerBound) {
-      const boundsChangedFunction = debounce(
-        () => windowBoundsChanged({ window: win, profileName }),
-        100,
-      );
-
-      if (bounds) {
-        if (profileBounds && profileBounds.maximised) {
-          win.maximize();
-        }
-      }
-      win.show();
-
-      // ugh,
-      win.on('move', boundsChangedFunction);
-      win.on('restore', boundsChangedFunction);
-      win.on('maximize', boundsChangedFunction);
-      win.on('unmaximize', boundsChangedFunction);
-      win.on('resize', boundsChangedFunction);
-
-      state.windows[profileName].boundsChangedHandlerBound = true;
+    const profileSession = state.windows[profileName];
+    if (profileSession) {
+        // we already have a window open for this session, reuse it.
+        profileSession.window.webContents.send('open-tab', openTabArguments);
+        return;
     }
-  });
+
+    const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
+    const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
+
+    // we do not have a window open for this session; need to open one
+    const windowOptions = {
+        width: 1280,
+        height: 1024,
+        title: `AWS Console - ${profileName}`,
+        webPreferences: {
+        partition: profileName,
+        // nodeIntegration: true,
+        webviewTag: true, // TODO we aren't ready for this yet
+        // worldSafeExecuteJavaScript: true,
+        // contextIsolation: true
+        },
+        show: false,
+        ...bounds,
+    };
+
+    const win = new BrowserWindow(windowOptions);
+
+    // save details of this profile's wind
+    state.windows[profileName] = {
+        tabs: [],
+        window: win,
+    };
+
+    win.loadURL(
+        url.format({
+            pathname: path.join(__dirname, './tabs.html'),
+            protocol: 'file:',
+            slashes: true,
+        }),
+    ).finally(() => { /* no action */ });
+
+    win.webContents.on('did-finish-load', () => {
+        console.log(openTabArguments)
+        win.webContents.openDevTools();
+        let devtools = new BrowserWindow()
+        win.webContents.setDevToolsWebContents(devtools.webContents)
+        win.webContents.openDevTools({ mode: 'detach' })
+
+
+        console.log("devtools open?")
+        win.webContents.send('open-tab', openTabArguments);
+        console.log("sent")
+        
+    });
+
+    win.on('close', () => {
+        // delete the window state from the app when it is closed
+        delete state.windows[profileName];
+    });
+
+    win.on('ready-to-show', () => {
+        if (!state.windows[profileName].boundsChangedHandlerBound) {
+        const boundsChangedFunction = debounce(
+            () => windowBoundsChanged({ window: win, profileName }),
+            100,
+        );
+
+        if (bounds) {
+            if (profileBounds && profileBounds.maximised) {
+            win.maximize();
+            }
+        }
+        win.show();
+
+        // ugh,
+        win.on('move', boundsChangedFunction);
+        win.on('restore', boundsChangedFunction);
+        win.on('maximize', boundsChangedFunction);
+        win.on('unmaximize', boundsChangedFunction);
+        win.on('resize', boundsChangedFunction);
+
+        state.windows[profileName].boundsChangedHandlerBound = true;
+        }
+    });
 }
 
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
