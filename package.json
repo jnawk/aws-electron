@@ -73,7 +73,7 @@
     "debounce": "^1.2.1",
     "electron-context-menu": "^3",
     "electron-settings": "^4.0.2",
-    "electron-tabs": "^0.15.0",
+    "electron-tabs": "^1.0.1",
     "ini": "^2.0.0",
     "proxy-agent": "^4",
     "query-string": "^7",
