@@ -7,11 +7,11 @@ import { GetSessionTokenCommand, STSClient } from '@aws-sdk/client-sts';
 import { AwsConfigFile, AwsCredentialsFile } from './types';
 
 const readFileOptions = {
-  encoding: 'utf-8', flags: 'r',
+  encoding: 'utf-8' as 'utf-8', flags: 'r',
 };
 
 const writeFileOptions = {
-  encoding: 'utf-8', mode: 0o600,
+  encoding: 'utf-8' as 'utf-8', mode: 0o600,
 };
 
 type GetAwsCredentialsFileArguments = {
