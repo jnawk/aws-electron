@@ -1,16 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 import {
-  Configs,
-  DoMfaArguments,
-  FrontendLaunchConsoleArguments,
-  GetMfaProfilesArguments,
-  GetUsableProfilesArguments,
-  Preference,
-  RotateKeyArguments,
+    Configs,
+    DoMfaArguments,
+    FrontendLaunchConsoleArguments,
+    GetMfaProfilesArguments,
+    GetUsableProfilesArguments,
     OpenTabArguments,
+    Preference,
     // Preferences,
+    RotateKeyArguments,
     SwitchTabArguments,
+    UpdateTabTitleArguments,
 } from './types';
 
 // interface IBackend {

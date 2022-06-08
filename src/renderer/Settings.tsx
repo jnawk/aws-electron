@@ -8,7 +8,7 @@ import { Preference, Preferences } from '_/main/types';
 const { backend } = window; // defined in preload.js
 
 interface SettingsState {
-  preferences?: Preferences
+    preferences?: Preferences
 }
 
 class Settings extends React.Component<Record<string, never>, SettingsState> {
