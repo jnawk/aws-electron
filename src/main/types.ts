@@ -232,6 +232,11 @@ export interface SwitchTabArguments {
     tab: string
 }
 
+export interface UpdateTabTitleArguments {
+    tabNumber: string,
+    title: string
+}
+
 export interface WindowDetails {
     tabs: Array<number>,
     window: BrowserWindow,

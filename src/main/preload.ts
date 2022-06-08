@@ -44,9 +44,14 @@ declare global {
 class Backend /* implements IBackend */ {
     openTab: {(args: OpenTabArguments): void};
 
+    updateTabTitle: {(args: UpdateTabTitleArguments): void};
+
     constructor() {
         ipcRenderer.on('open-tab', (_event, args: OpenTabArguments) => {
             this.openTab(args);
+        });
+        ipcRenderer.on('update-tab-title', (_event, args: UpdateTabTitleArguments) => {
+            this.updateTabTitle(args);
         });
     }
 
@@ -62,7 +67,13 @@ class Backend /* implements IBackend */ {
 
     launchConsole = (args: FrontendLaunchConsoleArguments) => ipcRenderer.send('launch-console', args)
 
-    register = (callback: {(args: OpenTabArguments): void}) => { this.openTab = callback; };
+    register = (
+        openTab: {(args: OpenTabArguments): void},
+        updateTabTitle: {(args: UpdateTabTitleArguments): void},
+    ) => {
+        this.openTab = openTab;
+        this.updateTabTitle = updateTabTitle;
+    };
 
     restart = () => ipcRenderer.send('restart')
 
