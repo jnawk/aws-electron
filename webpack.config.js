@@ -82,10 +82,6 @@ const preloadConfig = lodash.cloneDeep(commonConfig);
 preloadConfig.target = 'electron-preload';
 preloadConfig.entry = { preload: './src/main/preload.ts' }
 
-const tabsConfig = lodash.cloneDeep(commonConfig);
-tabsConfig.target = 'electron-renderer';
-tabsConfig.entry = { tabs: './src/renderer/tabs.ts' }
-
 const rendererConfig = lodash.cloneDeep(commonConfig);
 rendererConfig.entry = './src/renderer/renderer.tsx';
 rendererConfig.target = 'electron-renderer';
@@ -94,18 +90,6 @@ rendererConfig.plugins = [
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './public/index.html'),
   }),
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, './public/tabs.html'),
-    filename: "tabs.html"
-  }),
-//   new CopyPlugin({
-//     patterns: [
-//       {
-//         from: "node_modules/electron-tabs/electron-tabs.css",
-//         to: "electron-tabs.css"
-//       }
-//     ]
-//   })
 ];
 
-module.exports = [mainConfig, rendererConfig, preloadConfig, tabsConfig];
+module.exports = [mainConfig, rendererConfig, preloadConfig];

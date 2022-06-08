@@ -189,7 +189,7 @@ export interface MfaRowsArguments {
 export interface OpenTabArguments {
     url: string,
     profile: string,
-    tabNumber: number,
+    tabNumber: string,
     expiryTime: number
 }
 

@@ -1,78 +1,87 @@
 {
-  "root": true,
-  "env": {
-    "browser": true,
-    "node": true
-  },
-  "extends": [
-    "airbnb",
-    "airbnb/hooks"
-  ],
-  "rules": {
-    "import/extensions": "off",
-    "no-void": "off",
-    "@typescript-eslint/no-floating-promises": [
-      "warn",
-      {
-        "ignoreVoid": true
-      }
+    "root": true,
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "extends": [
+        "airbnb",
+        "airbnb/hooks"
     ],
-    "no-console": "off",
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": [
-          "**/webpack.*",
-          "test/**/*"
-        ]
-      }
-    ],
-    "max-len": "off",
-    "sort-imports": "off"
-  },
-  "settings": {
-    "import/core-modules": ["electron"],
-    "import/resolver": {
-      "node": {
-        "extensions": [
-          ".js",
-          ".jsx",
-          ".ts",
-          ".tsx"
-        ]
-      },
-      "webpack": {
-        "config": "./webpack.config.js"
-      }
-    }
-  },
-  "overrides": [
-    {
-      "files": [
-        "**/*.ts",
-        "**/*.tsx"
-      ],
-      "parser": "@typescript-eslint/parser",
-      "parserOptions": {
-        "project": ["./tsconfig.json"]
-      },
-      "plugins": [
-        "@typescript-eslint"
-      ],
-      "extends": [
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
-      ],
-      "rules": {
-        // This rule is already covered by the TypeScript compiler.
-        "import/default": "off",
-        // This rule is already covered by the TypeScript compiler.
-        "import/no-unresolved": "off",
-        "no-use-before-define": "off",
-        "@typescript-eslint/no-use-before-define": "warn",
-        "react/jsx-filename-extension": "off"
-      }
-    }
-  ]
+    "rules": {
+        "no-void": "off",
+        "@typescript-eslint/no-floating-promises": [
+            "warn",
+            {
+                "ignoreVoid": true
+            }
+        ],
+        "import/extensions": "off",
+        "no-console": "off",
+        "import/no-extraneous-dependencies": [
+            "error",
+            {
+                "devDependencies": [
+                    "**/webpack.*",
+                    "test/**/*"
+                ]
+            }
+        ],
+        "max-len": "off",
+        "sort-imports": "off"
+    },
+    "settings": {
+        "import/core-modules": ["electron"],
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            },
+            "webpack": {
+                "config": "./webpack.config.js"
+            }
+        }
+    },
+    "overrides": [
+        {
+            "files": [
+                "**/*.ts",
+                "**/*.tsx"
+            ],
+            "parser": "@typescript-eslint/parser",
+            "parserOptions": {
+                "project": ["./tsconfig.json"]
+            },
+            "plugins": [
+                "@typescript-eslint"
+            ],
+            "extends": [
+                "plugin:@typescript-eslint/eslint-recommended",
+                "plugin:@typescript-eslint/recommended",
+                "plugin:@typescript-eslint/recommended-requiring-type-checking"
+            ],
+            "rules": {
+                // This rule is already covered by the TypeScript compiler.
+                "import/default": "off",
+                // This rule is already covered by the TypeScript compiler.
+                "import/no-unresolved": "off",
+                "no-use-before-define": "off",
+                "@typescript-eslint/no-use-before-define": "warn",
+                "react/jsx-filename-extension": "off"
+            }
+        },
+        {
+            "files": [
+                "**/*.ts"                
+            ],
+            "rules": {
+                "indent": "off",
+                "@typescript-eslint/indent": ["error", 4],        
+            }
+        }
+    ]
 }

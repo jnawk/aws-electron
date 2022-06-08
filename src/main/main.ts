@@ -46,6 +46,7 @@ import {
   RotateKeyArguments,
   TabTitleOptions,
   WindowBoundsChangedArguments,
+    OpenTabArguments,
     SwitchTabArguments,
 } from './types';
 import rotateKey from './rotateKey';
@@ -317,7 +318,7 @@ ipcMain.handle(
     return title;
   },
 
-ipcMain.handle(
+ipcMain.on(
     'switch-tab',
     (_event, { profile, tab }: SwitchTabArguments) => {
         const windowDetails = state.windows[profile];
@@ -346,71 +347,27 @@ async function launchConsole({
   consoleUrl,
   expiryTime,
 }: LaunchConsoleArguments): Promise<void> {
-    const openTabArguments = {
+    const tabNumber = (nextTabNumber += 1).toString();
+    const openTabArguments: OpenTabArguments = {
         url: consoleUrl,
         profile: profileName,
-        tabNumber: nextTabNumber += 1,
+        tabNumber,
         expiryTime,
     };
 
     const profileSession = state.windows[profileName];
-    if (profileSession) {
-        // we already have a window open for this session, reuse it.
-        profileSession.window.webContents.send('open-tab', openTabArguments);
-        return;
-    }
+    let win: BrowserWindow;
 
-    const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
-    const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
-
-    // we do not have a window open for this session; need to open one
-    const windowOptions = {
-        width: 1280,
-        height: 1024,
-        title: `AWS Console - ${profileName}`,
-        webPreferences: {
-        partition: profileName,
-        // worldSafeExecuteJavaScript: true,
-            nodeIntegration: false,
-            // webviewTag: true, // TODO we aren't ready for this yet
-            contextIsolation: true,
-        },
-        show: false,
-        ...bounds,
-    };
-
-    const win = new BrowserWindow(windowOptions);
-
-    // save details of this profile's wind
-    state.windows[profileName] = {
-        tabs: [],
-        window: win,
-        browserViews: {},
-    };
-
-    win.loadURL(
-        url.format({ // TODO replace this
-            pathname: path.join(__dirname, './index.html'),
-            protocol: 'file:',
-            hash: `/tabs/${profileName}`,
-            slashes: true,
-        }),
-    ).finally(() => { /* no action */ });
-
-    win.webContents.on('did-finish-load', () => {
-        console.log(openTabArguments)
-        win.webContents.openDevTools();
-        console.log("devtools open?")
+    const openTab = () => {
         win.webContents.send('open-tab', openTabArguments);
-        console.log("sent")
-        
+
         const windowBounds = win.getBounds();
         const view = new BrowserView();
         const tabHeight = 50;
         view.setBounds({
             x: 0,
             y: tabHeight,
-            width: windowBounds.width,
+            width: windowBounds.width - 800,
             height: windowBounds.height - tabHeight,
         });
         void view.webContents.loadURL(consoleUrl);
@@ -419,37 +376,85 @@ async function launchConsole({
             return { action: 'deny' };
         });
         win.setBrowserView(view);
-    });
+        state.windows[profileName].browserViews[tabNumber] = view;
+    };
 
-    win.on('close', () => {
-        // delete the window state from the app when it is closed
-        delete state.windows[profileName];
-    });
+    if (profileSession) {
+        // we already have a window open for this session, reuse it.
+        // profileSession.window.webContents.send('open-tab', openTabArguments);
+        win = profileSession.window;
+        openTab();
+    } else {
+        // we do not have a window open for this session; need to open one
+        const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
+        const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
 
-    win.on('ready-to-show', () => {
-        if (!state.windows[profileName].boundsChangedHandlerBound) {
-        const boundsChangedFunction = debounce(
-            () => windowBoundsChanged({ window: win, profileName }),
-            100,
-        );
+        const windowOptions = {
+            width: 1280,
+            height: 1024,
+            title: `AWS Console - ${profileName}`,
+            webPreferences: {
+                partition: profileName,
+                nodeIntegration: false,
+                preload: path.join(__dirname, 'preload.js'),
+                // worldSafeExecuteJavaScript: true,
+                contextIsolation: true,
+            },
+            show: false,
+            ...bounds,
+        };
+        win = new BrowserWindow(windowOptions);
 
-        if (bounds) {
-            if (profileBounds && profileBounds.maximised) {
-            win.maximize();
+        // save details of this profile's wind
+        state.windows[profileName] = {
+            tabs: [],
+            window: win,
+            browserViews: {},
+        };
+        win.loadURL(
+            url.format({ // TODO replace this
+                pathname: path.join(__dirname, './index.html'),
+                protocol: 'file:',
+                hash: `/tabs/${profileName}`,
+                slashes: true,
+            }),
+        ).catch((e) => {
+            console.log(e);
+        }).finally(() => { /* no action */ });
+        win.webContents.on('did-finish-load', () => {
+            win.webContents.openDevTools();
+            openTab();
+        });
+        win.on('close', () => {
+            // delete the window state from the app when it is closed
+            delete state.windows[profileName];
+        });
+
+        win.on('ready-to-show', () => {
+            if (!state.windows[profileName].boundsChangedHandlerBound) {
+                const boundsChangedFunction = debounce(
+                    () => windowBoundsChanged({ window: win, profileName }),
+                    100,
+                );
+
+                if (bounds) {
+                    if (profileBounds && profileBounds.maximised) {
+                        win.maximize();
+                    }
+                }
+                win.show();
+
+                // ugh,
+                win.on('move', boundsChangedFunction);
+                win.on('restore', boundsChangedFunction);
+                win.on('maximize', boundsChangedFunction);
+                win.on('unmaximize', boundsChangedFunction);
+                win.on('resize', boundsChangedFunction);
+
+                state.windows[profileName].boundsChangedHandlerBound = true;
             }
-        }
-        win.show();
-
-        // ugh,
-        win.on('move', boundsChangedFunction);
-        win.on('restore', boundsChangedFunction);
-        win.on('maximize', boundsChangedFunction);
-        win.on('unmaximize', boundsChangedFunction);
-        win.on('resize', boundsChangedFunction);
-
-        state.windows[profileName].boundsChangedHandlerBound = true;
-        }
-    });
+        });
+    }
 }
 
 // ipcMain.on deals with ipcRenderer.send - these things don't want an answer
