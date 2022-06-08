@@ -339,7 +339,7 @@ async function launchConsole({
             tabNumber,
             expiryTime,
         };
-    
+
         win.webContents.send('open-tab', openTabArguments);
 
         const windowBounds = win.getBounds();
@@ -354,8 +354,11 @@ async function launchConsole({
         void view.webContents.loadURL(url);
         view.webContents.setWindowOpenHandler((details) => {
             console.log(details);
-            openTab(details.url)
+            openTab(details.url);
             return { action: 'deny' };
+        });
+        view.webContents.on('page-title-updated', (event) => {
+            win.webContents.send('update-tab-title', { tabNumber, title: view.webContents.getTitle() });
         });
         win.setBrowserView(view);
         state.windows[profileName].browserViews[tabNumber] = view;

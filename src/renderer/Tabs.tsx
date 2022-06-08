@@ -7,7 +7,7 @@ import {
 
 import 'bootstrap/dist/css/bootstrap.css';
 import classnames from 'classnames';
-import { OpenTabArguments } from '_/main/types';
+import { OpenTabArguments, UpdateTabTitleArguments } from '_/main/types';
 
 const { backend } = window; // defined in preload.js
 
@@ -15,8 +15,13 @@ interface TabsProps {
     profile: string
 }
 
+interface TabDetails {
+    tabNumber: string,
+    title?: string
+}
+
 interface TabsState {
-    tabs: Array<string>,
+    tabs: Array<TabDetails>,
     activeTab: string,
 }
 
@@ -31,10 +36,23 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
   }
 
   componentDidMount(): void {
-    backend.register((args: OpenTabArguments) => {
-      const { tabs } = this.state;
-      this.setState({ tabs: tabs.concat(args.tabNumber), activeTab: args.tabNumber });
-    });
+    backend.register((args) => { this.openTab(args); }, (args) => { this.updateTabTitle(args); });
+  }
+
+  openTab({ tabNumber }: OpenTabArguments) {
+    const { tabs } = this.state;
+    this.setState({ tabs: tabs.concat({ tabNumber }), activeTab: tabNumber });
+  }
+
+  updateTabTitle({ tabNumber, title }: UpdateTabTitleArguments) {
+    const { tabs } = this.state;
+    const newTabs = tabs.map((tabDetails) => {
+      if (tabDetails.tabNumber === tabNumber) {
+        return { tabNumber, title };
+      }
+      return tabDetails;
+    }).sort((left, right) => parseInt(left.tabNumber) - parseInt(right.tabNumber));
+    this.setState({ tabs: newTabs });
   }
 
   toggle(tab: string) {
@@ -48,23 +66,16 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
 
   render(): React.ReactElement {
     const { activeTab, tabs } = this.state;
-    const { profile } = this.props;
 
     return (
       <Nav tabs>
         {tabs.map((tab) => (
-          <NavItem key={tab}>
+          <NavItem key={tab.tabNumber}>
             <NavLink
-              className={classnames({ active: activeTab === tab })}
-              onClick={() => { this.toggle(tab); }}
+              className={classnames({ active: activeTab === tab.tabNumber })}
+              onClick={() => { this.toggle(tab.tabNumber); }}
             >
-              Tab
-              {' '}
-              {tab}
-              {' '}
-              -
-              {' '}
-              {profile}
+              {tab.title}
             </NavLink>
           </NavItem>
         ))}
