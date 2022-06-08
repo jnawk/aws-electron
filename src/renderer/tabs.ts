@@ -1,9 +1,7 @@
-import * as ElectronTabs from 'electron-tabs';
-import { ipcRenderer, WebviewTag } from 'electron';
+import { ipcRenderer } from 'electron';
 import timeRemainingMessage from './timeRemaining';
 
 //const tabGroup = new ElectronTabs({});
-const tabGroup = document.querySelector("tab-group") as any;
 
 type WindowState = {
     contentsHandlers: Array<number>,
@@ -92,41 +90,41 @@ ipcRenderer.on('open-tab', (_event, {
         }
   }
 
-  tabGroup?.addTab({
-    title: 'AWS Console',
-    src: url,
-    active: true,
-    visible: true,
-    webviewAttributes: {
-        nodeintegration: false,
-        partition: windowState.profile,
-    },
-    ready: (tab: ElectronTabs.Tab) => {
-      tab.on('webview-dom-ready', () => {
-            const webViewTag = tab.webview as WebviewTag;
-            const title = webViewTag.getTitle();
-            if (!title.toLowerCase().startsWith('http')) {
-                void ipcRenderer.invoke(
-                    'get-title',
-                    { title, profile: windowState.profile },
-                ).then((newTitle: string) => { tab.setTitle(newTitle); });
-            }
+//   tabGroup?.addTab({
+//     title: 'AWS Console',
+//     src: url,
+//     active: true,
+//     visible: true,
+//     webviewAttributes: {
+//         nodeintegration: false,
+//         partition: windowState.profile,
+//     },
+//     ready: (tab: ElectronTabs.Tab) => {
+//       tab.on('webview-dom-ready', () => {
+//             const webViewTag = tab.webview as WebviewTag;
+//             const title = webViewTag.getTitle();
+//             if (!title.toLowerCase().startsWith('http')) {
+//                 void ipcRenderer.invoke(
+//                     'get-title',
+//                     { title, profile: windowState.profile },
+//                 ).then((newTitle: string) => { tab.setTitle(newTitle); });
+//             }
 
-            const contentsId = webViewTag.getWebContentsId();
-            if (!windowState.contentsHandlers.includes(contentsId)) {
-                ipcRenderer.send(
-                    'add-context-menu',
-                    { contentsId },
-                );
-                ipcRenderer.send(
-                    'add-zoom-handlers',
-                    { contentsId, profile: windowState.profile },
-                );
-                windowState.contentsHandlers.push(contentsId);
-            }
-      });
-      tab.on('close', () => ipcRenderer.send('close-tab', { profileName: windowState.profile, tabNumber }));
-    },
-  });
+//             const contentsId = webViewTag.getWebContentsId();
+//             if (!windowState.contentsHandlers.includes(contentsId)) {
+//                 ipcRenderer.send(
+//                     'add-context-menu',
+//                     { contentsId },
+//                 );
+//                 ipcRenderer.send(
+//                     'add-zoom-handlers',
+//                     { contentsId, profile: windowState.profile },
+//                 );
+//                 windowState.contentsHandlers.push(contentsId);
+//             }
+//       });
+//       tab.on('close', () => ipcRenderer.send('close-tab', { profileName: windowState.profile, tabNumber }));
+//     },
+//   });
   ipcRenderer.send('add-tab', { profileName: windowState.profile, tabNumber });
 });
