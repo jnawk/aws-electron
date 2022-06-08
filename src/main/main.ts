@@ -331,7 +331,7 @@ async function launchConsole({
     const profileSession = state.windows[profileName];
     let win: BrowserWindow;
 
-    const openTab = (url: string) => {
+    const openTab = (urlToOpen: string) => {
         const tabNumber = (nextTabNumber += 1).toString();
         const openTabArguments: OpenTabArguments = {
             url: consoleUrl,
@@ -351,7 +351,7 @@ async function launchConsole({
             width: windowBounds.width - 800,
             height: windowBounds.height - tabHeight,
         });
-        void view.webContents.loadURL(url);
+        void view.webContents.loadURL(urlToOpen);
         view.webContents.setWindowOpenHandler((details) => {
             console.log(details);
             openTab(details.url);
