@@ -51,7 +51,7 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
         return { tabNumber, title };
       }
       return tabDetails;
-    }).sort((left, right) => parseInt(left.tabNumber) - parseInt(right.tabNumber));
+    }).sort((left, right) => parseInt(left.tabNumber, 10) - parseInt(right.tabNumber, 10));
     this.setState({ tabs: newTabs });
   }
 
