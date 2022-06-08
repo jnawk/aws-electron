@@ -264,26 +264,7 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
-});
-
-app.on('web-contents-created', (_wccEvent, contents) => {
-  contents.on('new-window', (newWindowEvent, initialUrl) => {
-    if (newWindowEvent) {
-      // if we receive a new window event, we want to cancel it and ...
-      newWindowEvent.preventDefault();
     }
-    // ... open a tab in our current window instead.
-    // (assumes windows are only created in response to the user actually
-    // doing something - seems reasonable)
-    const focusedWindow: Electron.BrowserWindow | null = BrowserWindow.getFocusedWindow();
-
-    if (focusedWindow) {
-      focusedWindow.webContents.send(
-        'open-tab',
-        { url: initialUrl, tabNumber: nextTabNumber += 1 },
-      );
-    }
-  });
 });
 
 ipcMain.handle('get-aws-config', () => getAWSConfig());
