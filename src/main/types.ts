@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import {
   BrowserWindow, WebContents,
+    BrowserView,
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
@@ -185,6 +186,13 @@ export interface MfaRowsArguments {
     mfaRowGenerator: {(args: MfaRowArguments): React.ReactElement}
 }
 
+export interface OpenTabArguments {
+    url: string,
+    profile: string,
+    tabNumber: number,
+    expiryTime: number
+}
+
 export interface ProfileRowArguments {
   profileName: string,
   roleRegexResult: Array<string>,
@@ -218,10 +226,16 @@ export interface SigninResult {
     SigninToken: string
 }
 
+export interface SwitchTabArguments {
+    profile: string
+    tab: string
+}
+
 export interface WindowDetails {
     tabs: Array<number>,
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean
+    browserViews: {[key: string]: BrowserView}
 }
 
 export interface WindowBoundsChangedArguments {

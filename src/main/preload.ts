@@ -7,69 +7,69 @@ import {
   GetMfaProfilesArguments,
   GetUsableProfilesArguments,
   Preference,
-  Preferences,
   RotateKeyArguments,
+    OpenTabArguments,
+    // Preferences,
+    SwitchTabArguments,
 } from './types';
 
-interface Backend {
-  getAWSConfig: {(): Promise<Configs>},
-  launchConsole: {(args: FrontendLaunchConsoleArguments): void},
-  getUsableProfiles: {
-    (args: GetUsableProfilesArguments): Promise<Array<string>>
-  },
-  getPreferences: {(): Promise<Preferences> },
-  setPreference: {(preference: Preference): void},
-  rotateKey: {
-    (args: RotateKeyArguments): Promise<Array<string>>
-  },
-  getMfaProfiles: {
-    (args: GetMfaProfilesArguments): Promise<Configs>
-  },
-  doMfa: {(args: DoMfaArguments): void}
-  restart: {(): void}
-}
+// interface IBackend {
+//     getAWSConfig: {(): Promise<Configs>},
+//     launchConsole: {(args: FrontendLaunchConsoleArguments): void},
+//     getUsableProfiles: {
+//         (args: GetUsableProfilesArguments): Promise<Array<string>>
+//     },
+//     getPreferences: {(): Promise<Preferences> },
+//     setPreference: {(preference: Preference): void},
+//     rotateKey: {
+//         (args: RotateKeyArguments): Promise<Array<string>>
+//     },
+//     getMfaProfiles: {
+//         (args: GetMfaProfilesArguments): Promise<Configs>
+//     },
+//     doMfa: {(args: DoMfaArguments): void}
+//     restart: {(): void}
+
+//     register: {(callback: {(args: OpenTabArguments): void}): void}
+//     switchTab: {(args: SwitchTabsArguments): void}
+// }
 
 declare global {
     interface Window {
-      backend: Backend;
+        backend: Backend;
     }
-  }
+}
 
-const backend: Backend = {
-  getAWSConfig: () => ipcRenderer.invoke('get-aws-config'),
+class Backend /* implements IBackend */ {
+    openTab: {(args: OpenTabArguments): void};
 
-  launchConsole: ({
-    profileName,
-    mfaCode,
-    configType,
-  }) => ipcRenderer.send(
-    'launch-console',
-    { profileName, mfaCode, configType },
-  ),
+    constructor() {
+        ipcRenderer.on('open-tab', (_event, args: OpenTabArguments) => {
+            this.openTab(args);
+        });
+    }
 
-  getUsableProfiles: ({
-    config,
-    credentialsProfiles,
-  }) => ipcRenderer.invoke('get-usable-profiles', { config, credentialsProfiles }),
+    doMfa = (args: DoMfaArguments) => ipcRenderer.send('do-mfa', args)
 
-  getPreferences: () => ipcRenderer.invoke('get-preferences'),
+    getAWSConfig = () => ipcRenderer.invoke('get-aws-config')
 
-  setPreference: (preference): void => ipcRenderer.send('set-preference', preference),
+    getMfaProfiles = (args: GetMfaProfilesArguments): Promise<Configs> => ipcRenderer.invoke('get-mfa-profiles', args) as Promise<Configs>
 
-  rotateKey: ({
-    profile,
-    aws,
-    local,
-  }) => ipcRenderer.invoke('rotate-key', { profile, aws, local }),
+    getPreferences = () => ipcRenderer.invoke('get-preferences')
 
-  getMfaProfiles: ({ config }): Promise<Configs> => ipcRenderer.invoke('get-mfa-profiles', { config }) as Promise<Configs>,
+    getUsableProfiles = (args: GetUsableProfilesArguments) => ipcRenderer.invoke('get-usable-profiles', args)
 
-  doMfa: ({ profileName, mfaCode }) => ipcRenderer.send('do-mfa', { profileName, mfaCode }),
+    launchConsole = (args: FrontendLaunchConsoleArguments) => ipcRenderer.send('launch-console', args)
 
-  restart: () => ipcRenderer.send('restart'),
-};
+    register = (callback: {(args: OpenTabArguments): void}) => { this.openTab = callback; };
 
-contextBridge.exposeInMainWorld(
-  'backend',
-  backend,
-);
+    restart = () => ipcRenderer.send('restart')
+
+    rotateKey = (args: RotateKeyArguments) => ipcRenderer.invoke('rotate-key', args)
+
+    setPreference = (preference: Preference): void => ipcRenderer.send('set-preference', preference)
+
+    switchTab = (args: SwitchTabArguments) => ipcRenderer.send('switch-tab', args)
+}
+
+contextBridge.exposeInMainWorld('backend', new Backend());

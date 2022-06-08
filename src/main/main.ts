@@ -9,6 +9,7 @@ import {
   app,
   ipcMain,
   webContents,
+    BrowserView,
 } from 'electron';
 
 // these can't be default imports
@@ -45,6 +46,7 @@ import {
   RotateKeyArguments,
   TabTitleOptions,
   WindowBoundsChangedArguments,
+    SwitchTabArguments,
 } from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
@@ -314,6 +316,13 @@ ipcMain.handle(
     }
     return title;
   },
+
+ipcMain.handle(
+    'switch-tab',
+    (_event, { profile, tab }: SwitchTabArguments) => {
+        const windowDetails = state.windows[profile];
+        windowDetails.window.setBrowserView(windowDetails.browserViews[tab]);
+    },
 );
 
 ipcMain.handle(
@@ -361,10 +370,10 @@ async function launchConsole({
         title: `AWS Console - ${profileName}`,
         webPreferences: {
         partition: profileName,
-        // nodeIntegration: true,
-        webviewTag: true, // TODO we aren't ready for this yet
         // worldSafeExecuteJavaScript: true,
-        // contextIsolation: true
+            nodeIntegration: false,
+            // webviewTag: true, // TODO we aren't ready for this yet
+            contextIsolation: true,
         },
         show: false,
         ...bounds,
@@ -376,12 +385,14 @@ async function launchConsole({
     state.windows[profileName] = {
         tabs: [],
         window: win,
+        browserViews: {},
     };
 
     win.loadURL(
-        url.format({
-            pathname: path.join(__dirname, './tabs.html'),
+        url.format({ // TODO replace this
+            pathname: path.join(__dirname, './index.html'),
             protocol: 'file:',
+            hash: `/tabs/${profileName}`,
             slashes: true,
         }),
     ).finally(() => { /* no action */ });
@@ -389,15 +400,25 @@ async function launchConsole({
     win.webContents.on('did-finish-load', () => {
         console.log(openTabArguments)
         win.webContents.openDevTools();
-        let devtools = new BrowserWindow()
-        win.webContents.setDevToolsWebContents(devtools.webContents)
-        win.webContents.openDevTools({ mode: 'detach' })
-
-
         console.log("devtools open?")
         win.webContents.send('open-tab', openTabArguments);
         console.log("sent")
         
+        const windowBounds = win.getBounds();
+        const view = new BrowserView();
+        const tabHeight = 50;
+        view.setBounds({
+            x: 0,
+            y: tabHeight,
+            width: windowBounds.width,
+            height: windowBounds.height - tabHeight,
+        });
+        void view.webContents.loadURL(consoleUrl);
+        view.webContents.setWindowOpenHandler((details) => {
+            console.log(details);
+            return { action: 'deny' };
+        });
+        win.setBrowserView(view);
     });
 
     win.on('close', () => {
