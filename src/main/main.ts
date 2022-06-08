@@ -284,11 +284,6 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
-ipcMain.on(
-    'switch-tab',
-    (_event, { profile, tab }: SwitchTabArguments) => {
-        const windowDetails = state.windows[profile];
-        windowDetails.window.setBrowserView(windowDetails.browserViews[tab]);
     'get-title',
     async (_event, { title, profile }: GetTitleArguments): Promise<string> => {
         const tabTitlePreference = await settings.get(
@@ -593,6 +588,11 @@ ipcMain.on('add-context-menu', (_event, { contentsId }: AddContextMenuParameters
     });
 });
 
+ipcMain.on(
+    'switch-tab',
+    (_event, { profile, tab }: SwitchTabArguments) => {
+        const windowDetails = state.windows[profile];
+        windowDetails.window.setBrowserView(windowDetails.browserViews[tab]);
     },
 );
 
