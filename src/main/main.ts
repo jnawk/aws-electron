@@ -357,8 +357,9 @@ async function launchConsole({
             openTab(details.url);
             return { action: 'deny' };
         });
-        view.webContents.on('page-title-updated', (event) => {
-            win.webContents.send('update-tab-title', { tabNumber, title: view.webContents.getTitle() });
+        view.webContents.on('page-title-updated', () => {
+            win.webContents.send('update-tab-title', 
+            { tabNumber, title: view.webContents.getTitle() });
         });
         win.setBrowserView(view);
         state.windows[profileName].browserViews[tabNumber] = view;
