@@ -347,18 +347,18 @@ async function launchConsole({
   consoleUrl,
   expiryTime,
 }: LaunchConsoleArguments): Promise<void> {
-    const tabNumber = (nextTabNumber += 1).toString();
-    const openTabArguments: OpenTabArguments = {
-        url: consoleUrl,
-        profile: profileName,
-        tabNumber,
-        expiryTime,
-    };
-
     const profileSession = state.windows[profileName];
     let win: BrowserWindow;
 
-    const openTab = () => {
+    const openTab = (url: string) => {
+        const tabNumber = (nextTabNumber += 1).toString();
+        const openTabArguments: OpenTabArguments = {
+            url: consoleUrl,
+            profile: profileName,
+            tabNumber,
+            expiryTime,
+        };
+    
         win.webContents.send('open-tab', openTabArguments);
 
         const windowBounds = win.getBounds();
@@ -370,9 +370,10 @@ async function launchConsole({
             width: windowBounds.width - 800,
             height: windowBounds.height - tabHeight,
         });
-        void view.webContents.loadURL(consoleUrl);
+        void view.webContents.loadURL(url);
         view.webContents.setWindowOpenHandler((details) => {
             console.log(details);
+            openTab(details.url)
             return { action: 'deny' };
         });
         win.setBrowserView(view);
@@ -383,7 +384,7 @@ async function launchConsole({
         // we already have a window open for this session, reuse it.
         // profileSession.window.webContents.send('open-tab', openTabArguments);
         win = profileSession.window;
-        openTab();
+        openTab(consoleUrl);
     } else {
         // we do not have a window open for this session; need to open one
         const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
@@ -423,7 +424,7 @@ async function launchConsole({
         }).finally(() => { /* no action */ });
         win.webContents.on('did-finish-load', () => {
             win.webContents.openDevTools();
-            openTab();
+            openTab(consoleUrl);
         });
         win.on('close', () => {
             // delete the window state from the app when it is closed
