@@ -82,6 +82,14 @@
                 "indent": "off",
                 "@typescript-eslint/indent": ["error", 4]
             }
+        },
+        {
+            "files": [
+                "src/main/preload.ts"
+            ],
+            "rules": {
+                "class-methods-use-this": "off"
+            }
         }
     ]
 }
