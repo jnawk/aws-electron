@@ -8,7 +8,6 @@ import {
     Menu,
     app,
     ipcMain,
-    webContents,
     BrowserView,
 } from 'electron';
 
@@ -359,9 +358,8 @@ async function launchConsole({
         win.setBrowserView(view);
         state.windows[profileName].browserViews[tabNumber] = view;
 
-        const contents = view.webContents;
         contextMenu({
-            window: contents,
+            window: view.webContents,
             prepend: (
                 _defaultActions,
                 parameters,
@@ -376,15 +374,52 @@ async function launchConsole({
                 },
                 {
                     label: 'Back',
-                    click: () => contents.goBack(),
-                    visible: contents.canGoBack(),
+                    click: () => view.webContents.goBack(),
+                    visible: view.webContents.canGoBack(),
                 },
                 {
                     label: 'Forwards',
-                    click: () => contents.goForward(),
-                    visible: contents.canGoForward(),
+                    click: () => view.webContents.goForward(),
+                    visible: view.webContents.canGoForward(),
                 },
             ],
+        });
+
+        const setNewZoomLevel = (newZoomLevel: number, save?: boolean) => {
+            [win.webContents, view.webContents].forEach((contents1) => {
+                contents1.setZoomLevel(newZoomLevel);
+            });
+            if (save) {
+                void settings.set(`zoomLevels.${profileName}`, newZoomLevel);
+            }
+        };
+
+        [win.webContents, view.webContents].forEach((contents) => {
+            contents.on('zoom-changed', (__event, direction) => {
+                let newZoomLevel = contents.getZoomLevel();
+                if (direction === 'in') {
+                    newZoomLevel += 1;
+                } else {
+                    newZoomLevel -= 1;
+                }
+                setNewZoomLevel(newZoomLevel, true);
+            });
+
+            contents.on('before-input-event', (__event, input) => {
+                if (input.control
+                && input.type === 'keyUp'
+                && (input.key === '+' || input.key === '-')) {
+                    setNewZoomLevel(contents.getZoomLevel(), true);
+                }
+            });
+        });
+
+        void settings.get(
+            `zoomLevels.${profileName}`,
+        ).then((zoomLevel: number) => {
+            [win.webContents, view.webContents].forEach((contents) => {
+                contents.setZoomLevel(zoomLevel || 0);
+            });
         });
     };
 
@@ -534,46 +569,6 @@ ipcMain.on(
     // we want to track the tabs a profile has open so when the last one closes
     // we can close the window.
         state.windows[profileName].tabs.push(tabNumber);
-    },
-);
-
-ipcMain.on(
-    'add-zoom-handlers',
-    (_event, { contentsId, profile }: AddHandlersArguments): void => {
-        if (contentsId === undefined) {
-            throw new Error('Contents ID required');
-        }
-        const contents = webContents.fromId(contentsId);
-
-        contents.on('zoom-changed', (__event, direction) => {
-            let newZoomLevel = contents.getZoomLevel();
-            if (direction === 'in') {
-                newZoomLevel += 1;
-            } else {
-                newZoomLevel -= 1;
-            }
-            contents.setZoomLevel(newZoomLevel);
-            void settings.set(`zoomLevels.${profile}`, newZoomLevel);
-        });
-
-        contents.on('before-input-event', (__event, input) => {
-            if (input.control) {
-                if (input.type === 'keyUp') {
-                    if (input.key === '+' || input.key === '-') {
-                        void settings.set(
-                            `zoomLevels.${profile}`,
-                            contents.getZoomLevel(),
-                        );
-                    }
-                }
-            }
-        });
-
-        void settings.get(
-            `zoomLevels.${profile}`,
-        ).then((zoomLevel: number) => {
-            contents.setZoomLevel(zoomLevel || 0);
-        });
     },
 );
 
