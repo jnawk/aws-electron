@@ -500,9 +500,9 @@ async function launchConsole({
 
                 // ugh,
                 win.on('move', boundsChangedFunction);
-                win.on('restore', boundsChangedFunction);
-                win.on('maximize', boundsChangedFunction);
-                win.on('unmaximize', boundsChangedFunction);
+                win.on('restore', resizeFunction);
+                win.on('maximize', resizeFunction);
+                win.on('unmaximize', resizeFunction);
                 win.on('resize', resizeFunction);
 
                 state.windows[profileName].boundsChangedHandlerBound = true;
