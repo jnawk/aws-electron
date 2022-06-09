@@ -8,7 +8,7 @@ import {
     GetUsableProfilesArguments,
     OpenTabArguments,
     Preference,
-    // Preferences,
+    Preferences,
     RotateKeyArguments,
     SwitchTabArguments,
     UpdateTabTitleArguments,
@@ -36,13 +36,13 @@ class Backend /* implements IBackend */ {
 
     doMfa = (args: DoMfaArguments) => ipcRenderer.send('do-mfa', args)
 
-    getAWSConfig = () => ipcRenderer.invoke('get-aws-config')
+    getAWSConfig = () => ipcRenderer.invoke('get-aws-config') as Promise<Configs>
 
     getMfaProfiles = (args: GetMfaProfilesArguments): Promise<Configs> => ipcRenderer.invoke('get-mfa-profiles', args) as Promise<Configs>
 
-    getPreferences = () => ipcRenderer.invoke('get-preferences')
+    getPreferences = () => ipcRenderer.invoke('get-preferences') as Promise<Preferences>
 
-    getUsableProfiles = (args: GetUsableProfilesArguments) => ipcRenderer.invoke('get-usable-profiles', args)
+    getUsableProfiles = (args: GetUsableProfilesArguments) => ipcRenderer.invoke('get-usable-profiles', args) as Promise<Array<string>>
 
     launchConsole = (args: FrontendLaunchConsoleArguments) => ipcRenderer.send('launch-console', args)
 
