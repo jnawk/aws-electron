@@ -536,18 +536,6 @@ ipcMain.on(
     },
 );
 
-ipcMain.on(
-    'add-forward-back-handlers',
-    (_event, { profile }: AddHandlersArguments): void => {
-        state.windows[profile].window.on(
-            'app-command',
-            (event: AppEvent, command: string) => {
-                event.sender.send(command);
-            },
-        );
-    },
-);
-
 ipcMain.on('add-context-menu', (_event, { contentsId }: AddContextMenuParameters): void => {
     const contents = webContents.fromId(contentsId);
     contextMenu({
