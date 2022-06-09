@@ -2,12 +2,10 @@ import * as fs from 'fs';
 import {
     BrowserView,
     BrowserWindow,
-    WebContents,
 } from 'electron';
 import React, { MouseEventHandler } from 'react';
 import * as https from 'https';
 import { Credentials as AwsCredentials } from '@aws-sdk/client-sts';
-import { Event } from 'electron/main';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
 export interface ApplicationState {
@@ -25,23 +23,23 @@ export interface ApplicationState {
     version: string
 }
 
-export interface AddContextMenuParameters {
-    contentsId: number
-}
+// export interface AddContextMenuParameters {
+//     contentsId: number
+// }
 
-export interface AddHandlersArguments {
-    contentsId?: number,
-    profile: string
-}
+// export interface AddHandlersArguments {
+//     contentsId?: number,
+//     profile: string
+// }
 
 export interface AddTabArguments {
     profileName: string,
     tabNumber: number
 }
 
-export interface AppEvent extends Event {
-    sender: WebContents
-}
+// export interface AppEvent extends Event {
+//     sender: WebContents
+// }
 
 export interface AssumeRoleParams {
     RoleArn: string,
@@ -167,10 +165,10 @@ export interface LaunchConsoleArguments {
     expiryTime: number,
 }
 
-export interface LaunchWindowBoundsSettings {
-    bounds: Electron.Rectangle,
-    maximised?: boolean
-}
+// export interface LaunchWindowBoundsSettings {
+//     bounds: Electron.Rectangle,
+//     maximised?: boolean
+// }
 
 export interface MfaRowArguments {
     profileName: string,
