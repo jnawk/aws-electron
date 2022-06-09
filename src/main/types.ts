@@ -79,6 +79,12 @@ export interface DoMfaArguments {
     mfaCode: string
 }
 
+export interface FrontendLaunchConsoleArguments {
+    profileName: string,
+    mfaCode: string,
+    configType: ConfigType
+}
+
 export interface GetCachableProfilesArguments {
     config: Configs
 }
@@ -129,21 +135,6 @@ export interface GetUsableProfilesArguments {
     credentialsProfiles: Array<string>
 }
 
-export interface LaunchButtonGeneratorArguments {
-    launchProfile: MouseEventHandler<HTMLButtonElement>,
-    shouldDisable: boolean
-}
-
-export interface LaunchButton {
-    (text?: string): React.ReactElement
-}
-
-export interface FrontendLaunchConsoleArguments {
-    profileName: string,
-    mfaCode: string,
-    configType: ConfigType
-}
-
 export interface HasVersion {
     version: string
 }
@@ -157,6 +148,15 @@ export interface IsSingleRoleAssumingProfileArguments {
     profile: AwsConfigProfile,
     profileName: string,
     credentialsProfiles: Array<string>
+}
+
+export interface LaunchButton {
+    (text?: string): React.ReactElement
+}
+
+export interface LaunchButtonGeneratorArguments {
+    launchProfile: MouseEventHandler<HTMLButtonElement>,
+    shouldDisable: boolean
 }
 
 export interface LaunchConsoleArguments {
@@ -247,17 +247,16 @@ export interface WindowBoundsChangedArguments {
     profileName: string
 }
 
+export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
+
 export type ConfigType = 'awsConfig' | 'vaultConfig'
 
-export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
 export type LocalAction = 'BACKUP' | 'DELETE'
 
-export type VaultOptions = 'ask' | 'aws' | 'vault'
-export type TabTitleOptions = '{title}' | '{title} - {profile}' | '{profile} - {title}'
+export type Preference = VaultPreference | TabTitlePreference | UseGPUPreference
+export type Preferences = VaultPreference & TabTitlePreference & UseGPUPreference
 
-export type VaultPreference = {
-    vaultPreference?: VaultOptions,
-}
+export type TabTitleOptions = '{title}' | '{title} - {profile}' | '{profile} - {title}'
 
 export type TabTitlePreference = {
     tabTitlePreference?: TabTitleOptions,
@@ -267,8 +266,11 @@ export type UseGPUPreference = {
     useGPUPreference?: boolean
 }
 
-export type Preference = VaultPreference | TabTitlePreference | UseGPUPreference
-export type Preferences = VaultPreference & TabTitlePreference & UseGPUPreference
+export type VaultOptions = 'ask' | 'aws' | 'vault'
+
+export type VaultPreference = {
+    vaultPreference?: VaultOptions,
+}
 
 // interface of untyped module...
 export interface SplitCa {
