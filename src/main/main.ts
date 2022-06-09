@@ -28,8 +28,6 @@ import {
 
 import { getConsoleUrl } from './getConsoleURL';
 import {
-    AddContextMenuParameters,
-    AddHandlersArguments,
     AddTabArguments,
     ApplicationState,
     BoundsPreference,
@@ -322,15 +320,15 @@ async function launchConsole({
     let win: BrowserWindow;
     const tabHeight = 50;
 
-    const getBrowserViewBounds = (win: BrowserWindow) => {
-        const windowBounds = win.getBounds();
+    const getBrowserViewBounds = (window: BrowserWindow) => {
+        const windowBounds = window.getBounds();
         return {
             x: 0,
             y: tabHeight,
             width: windowBounds.width - 800,
             height: windowBounds.height - (tabHeight + 30),
-        }
-    }
+        };
+    };
 
     const openTab = (urlToOpen: string) => {
         const tabNumber = (nextTabNumber += 1).toString();
@@ -352,8 +350,10 @@ async function launchConsole({
             return { action: 'deny' };
         });
         view.webContents.on('page-title-updated', () => {
-            win.webContents.send('update-tab-title', 
-            { tabNumber, title: view.webContents.getTitle() });
+            win.webContents.send(
+                'update-tab-title',
+                { tabNumber, title: view.webContents.getTitle() },
+            );
         });
         win.setBrowserView(view);
         state.windows[profileName].browserViews[tabNumber] = view;
@@ -455,7 +455,7 @@ async function launchConsole({
             window: win,
             browserViews: {},
         };
-        win.loadURL(            
+        win.loadURL(
             url.format({ // TODO replace this
                 pathname: path.join(__dirname, './index.html'),
                 protocol: 'file:',
@@ -481,15 +481,12 @@ async function launchConsole({
                     100,
                 );
 
-                const resizeFunction = debounce(
-                    () => {
-                        windowBoundsChanged({ window: win, profileName });
-                        
-                        for (const [_, view] of Object.entries(state.windows[profileName].browserViews)) {
-                            view.setBounds(getBrowserViewBounds(win));
-                        }
-                    }, 100,
-                );
+                const resizeFunction = debounce(() => {
+                    windowBoundsChanged({ window: win, profileName });
+                    Object.values(state.windows[profileName].browserViews).forEach((view) => {
+                        view.setBounds(getBrowserViewBounds(win));
+                    });
+                }, 100);
 
                 if (bounds) {
                     if (profileBounds && profileBounds.maximised) {
