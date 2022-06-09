@@ -120,7 +120,7 @@
     "style-loader": "^3",
     "ts-loader": "^9",
     "ts-node": "^10",
-    "tsconfig-paths": "^3",
+    "tsconfig-paths": "^4.0.0",
     "typescript": "^4",
     "webpack": "^5",
     "webpack-cli": "^4"
