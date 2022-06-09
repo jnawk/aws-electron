@@ -14,27 +14,6 @@ import {
     UpdateTabTitleArguments,
 } from './types';
 
-// interface IBackend {
-//     getAWSConfig: {(): Promise<Configs>},
-//     launchConsole: {(args: FrontendLaunchConsoleArguments): void},
-//     getUsableProfiles: {
-//         (args: GetUsableProfilesArguments): Promise<Array<string>>
-//     },
-//     getPreferences: {(): Promise<Preferences> },
-//     setPreference: {(preference: Preference): void},
-//     rotateKey: {
-//         (args: RotateKeyArguments): Promise<Array<string>>
-//     },
-//     getMfaProfiles: {
-//         (args: GetMfaProfilesArguments): Promise<Configs>
-//     },
-//     doMfa: {(args: DoMfaArguments): void}
-//     restart: {(): void}
-
-//     register: {(callback: {(args: OpenTabArguments): void}): void}
-//     switchTab: {(args: SwitchTabsArguments): void}
-// }
-
 declare global {
     interface Window {
         backend: Backend;
