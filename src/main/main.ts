@@ -32,7 +32,6 @@ import {
     AddContextMenuParameters,
     AddHandlersArguments,
     AddTabArguments,
-    AppEvent,
     ApplicationState,
     BoundsPreference,
     CloseTabArguments,
@@ -259,7 +258,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    // On OS X it"s common to re-create a window in the app when the
+    // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
         createWindow();
@@ -322,6 +321,17 @@ async function launchConsole({
 }: LaunchConsoleArguments): Promise<void> {
     const profileSession = state.windows[profileName];
     let win: BrowserWindow;
+    const tabHeight = 50;
+
+    const getBrowserViewBounds = (win: BrowserWindow) => {
+        const windowBounds = win.getBounds();
+        return {
+            x: 0,
+            y: tabHeight,
+            width: windowBounds.width - 800,
+            height: windowBounds.height - (tabHeight + 30),
+        }
+    }
 
     const openTab = (urlToOpen: string) => {
         const tabNumber = (nextTabNumber += 1).toString();
@@ -334,15 +344,8 @@ async function launchConsole({
 
         win.webContents.send('open-tab', openTabArguments);
 
-        const windowBounds = win.getBounds();
         const view = new BrowserView();
-        const tabHeight = 50;
-        view.setBounds({
-            x: 0,
-            y: tabHeight,
-            width: windowBounds.width - 800,
-            height: windowBounds.height - tabHeight,
-        });
+        view.setBounds(getBrowserViewBounds(win));
         void view.webContents.loadURL(urlToOpen);
         view.webContents.setWindowOpenHandler((details) => {
             console.log(details);
@@ -415,6 +418,16 @@ async function launchConsole({
                     100,
                 );
 
+                const resizeFunction = debounce(
+                    () => {
+                        windowBoundsChanged({ window: win, profileName });
+                        
+                        for (const [_, view] of Object.entries(state.windows[profileName].browserViews)) {
+                            view.setBounds(getBrowserViewBounds(win));
+                        }
+                    }, 100,
+                );
+
                 if (bounds) {
                     if (profileBounds && profileBounds.maximised) {
                         win.maximize();
@@ -427,7 +440,7 @@ async function launchConsole({
                 win.on('restore', boundsChangedFunction);
                 win.on('maximize', boundsChangedFunction);
                 win.on('unmaximize', boundsChangedFunction);
-                win.on('resize', boundsChangedFunction);
+                win.on('resize', resizeFunction);
 
                 state.windows[profileName].boundsChangedHandlerBound = true;
             }
