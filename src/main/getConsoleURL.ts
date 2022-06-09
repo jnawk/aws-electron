@@ -12,7 +12,13 @@ import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { session } from 'electron';
 import { getAwsCredentialsProfile, getProfileList } from './AWSConfigReader';
 import {
-    AssumeRoleParams, AwsConfigFile, GetFederationUrlArguments, GetHttpAgentArguments, GetSigninTokenArguments, SigninResult, SplitCa,
+    AssumeRoleParams,
+    AwsConfigFile,
+    GetFederationUrlArguments,
+    GetHttpAgentArguments,
+    GetSigninTokenArguments,
+    SigninResult,
+    SplitCa,
 } from './types';
 import { AwsConfigProfile } from './awsConfigInterfaces';
 
