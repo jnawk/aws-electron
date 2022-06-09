@@ -45,12 +45,7 @@ ipcRenderer.on('open-tab', (_event, {
 }: OpenTab) => {
     if (profile !== undefined) {
     // we are given a window number when opening the winow
-        windowState.profile = profile;
-
-        ipcRenderer.send(
-            'add-forward-back-handlers',
-            { profile: windowState.profile },
-        );
+        windowState.profile = profile;       
 
         if (expiryTime !== undefined) {
             windowState.expiryTime = expiryTime;
@@ -111,10 +106,6 @@ ipcRenderer.on('open-tab', (_event, {
 
     //             const contentsId = webViewTag.getWebContentsId();
     //             if (!windowState.contentsHandlers.includes(contentsId)) {
-    //                 ipcRenderer.send(
-    //                     'add-context-menu',
-    //                     { contentsId },
-    //                 );
     //                 ipcRenderer.send(
     //                     'add-zoom-handlers',
     //                     { contentsId, profile: windowState.profile },

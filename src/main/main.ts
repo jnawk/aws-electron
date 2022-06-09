@@ -358,6 +358,34 @@ async function launchConsole({
         });
         win.setBrowserView(view);
         state.windows[profileName].browserViews[tabNumber] = view;
+
+        const contents = view.webContents;
+        contextMenu({
+            window: contents,
+            prepend: (
+                _defaultActions,
+                parameters,
+            ) => [
+                {
+                    label: 'Open in new tab',
+                    click: () => {
+                        openTab(parameters.linkURL);
+                    },
+                    // Only show it when right-clicking links
+                    visible: parameters.linkURL !== '',
+                },
+                {
+                    label: 'Back',
+                    click: () => contents.goBack(),
+                    visible: contents.canGoBack(),
+                },
+                {
+                    label: 'Forwards',
+                    click: () => contents.goForward(),
+                    visible: contents.canGoForward(),
+                },
+            ],
+        });
     };
 
     if (profileSession) {
@@ -548,46 +576,6 @@ ipcMain.on(
         });
     },
 );
-
-ipcMain.on('add-context-menu', (_event, { contentsId }: AddContextMenuParameters): void => {
-    const contents = webContents.fromId(contentsId);
-    contextMenu({
-        window: contents,
-        prepend: (
-            _defaultActions,
-            parameters,
-        ) => [
-            {
-                label: 'Open in new tab',
-                click: () => {
-                    const focusedWindow = BrowserWindow.getFocusedWindow();
-                    if (focusedWindow === null) {
-                        throw new Error("Shouldn't happen");
-                    }
-                    focusedWindow.webContents.send(
-                        'open-tab',
-                        {
-                            url: parameters.linkURL,
-                            tabNumber: nextTabNumber += 1,
-                        },
-                    );
-                },
-                // Only show it when right-clicking links
-                visible: parameters.linkURL !== '',
-            },
-            {
-                label: 'Back',
-                click: () => contents.goBack(),
-                visible: contents.canGoBack(),
-            },
-            {
-                label: 'Forwards',
-                click: () => contents.goForward(),
-                visible: contents.canGoForward(),
-            },
-        ],
-    });
-});
 
 ipcMain.on(
     'switch-tab',
