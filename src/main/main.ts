@@ -313,7 +313,7 @@ async function launchConsole({
 }: LaunchConsoleArguments): Promise<void> {
     const profileSession = state.windows[profileName];
     let win: BrowserWindow;
-    const tabHeight = 50;
+    const tabHeight = 55;
     const dev = process.env.NODE_ENV !== 'production';
 
     const getBrowserViewBounds = (window: BrowserWindow) => {
@@ -327,8 +327,8 @@ async function launchConsole({
         return {
             x: 0,
             y: tabHeight,
-            height: windowBounds.height - (tabHeight + 30),
             width: windowBounds.width - (dev ? devToolsWidth : 0),
+            height: windowBounds.height - (tabHeight + 25),
         };
     };
 
