@@ -314,14 +314,21 @@ async function launchConsole({
     const profileSession = state.windows[profileName];
     let win: BrowserWindow;
     const tabHeight = 50;
+    const dev = process.env.NODE_ENV !== 'production';
 
     const getBrowserViewBounds = (window: BrowserWindow) => {
         const windowBounds = window.getBounds();
+
+        // devtools is actually not 800px wide, it could be anything, including not docked to the side!
+        // https://stackoverflow.com/questions/43652253/how-to-set-electron-browser-window-devtools-width
+        // this will do for now.
+        const devToolsWidth = 800;
+
         return {
             x: 0,
             y: tabHeight,
-            width: windowBounds.width - 800,
             height: windowBounds.height - (tabHeight + 30),
+            width: windowBounds.width - (dev ? devToolsWidth : 0),
         };
     };
 
@@ -459,7 +466,9 @@ async function launchConsole({
             console.log(e);
         }).finally(() => { /* no action */ });
         win.webContents.on('did-finish-load', () => {
-            win.webContents.openDevTools();
+            if (dev) {
+                win.webContents.openDevTools();
+            }
             openTab(consoleUrl);
         });
         win.on('close', () => {
