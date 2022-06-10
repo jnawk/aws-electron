@@ -445,7 +445,6 @@ async function launchConsole({
 
         // save details of this profile's window
         state.windows[profileName] = {
-            tabs: [],
             window: win,
             browserViews: {},
         };
