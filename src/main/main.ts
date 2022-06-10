@@ -425,7 +425,6 @@ async function launchConsole({
 
     if (profileSession) {
         // we already have a window open for this session, reuse it.
-        // profileSession.window.webContents.send('open-tab', openTabArguments);
         win = profileSession.window;
         openTab(consoleUrl);
     } else {
@@ -449,7 +448,7 @@ async function launchConsole({
         };
         win = new BrowserWindow(windowOptions);
 
-        // save details of this profile's wind
+        // save details of this profile's window
         state.windows[profileName] = {
             tabs: [],
             window: win,

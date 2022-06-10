@@ -20,7 +20,7 @@ declare global {
     }
 }
 
-class Backend /* implements IBackend */ {
+class Backend {
     openTab: {(args: OpenTabArguments): void};
 
     updateTabTitle: {(args: UpdateTabTitleArguments): void};
