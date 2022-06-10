@@ -96,6 +96,15 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
               {tab.title}
               <span
                 onClick={() => { this.close(tab.tabNumber); }}
+                role="link"
+                tabIndex={-1}
+                onKeyDown={(event) => {
+                  if (event.ctrlKey && event.key === 'w') {
+                    if (tab.tabNumber === activeTab) {
+                      this.close(tab.tabNumber);
+                    }
+                  }
+                }}
               >
                 &#215;
               </span>
