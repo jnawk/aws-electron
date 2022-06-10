@@ -90,6 +90,7 @@ class Settings extends React.Component<Record<string, never>, SettingsState> {
             Tab title format
           </Col>
           <Col xs={4}>
+            {/* TODO Gonna use sprintf here */}
             <ButtonGroup>
               <Button
                 color={((tabTitlePreference === undefined
