@@ -343,7 +343,11 @@ async function launchConsole({
 
         win.webContents.send('open-tab', openTabArguments);
 
-        const view = new BrowserView();
+        const view = new BrowserView({
+            webPreferences: {
+                partition: profileName,
+            },
+        });
         view.setBounds(getBrowserViewBounds(win));
         void view.webContents.loadURL(urlToOpen);
         view.webContents.setWindowOpenHandler((details) => {
