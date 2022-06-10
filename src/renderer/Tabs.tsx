@@ -5,9 +5,10 @@ import {
   NavLink,
 } from 'reactstrap';
 
-import 'bootstrap/dist/css/bootstrap.css';
 import classnames from 'classnames';
 import { OpenTabArguments, UpdateTabTitleArguments } from '_/main/types';
+import './tabs.css';
+import 'bootstrap/dist/css/bootstrap.css';
 
 const { backend } = window; // defined in preload.js
 
@@ -88,13 +89,14 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
     return (
       <Nav tabs>
         {tabs.map((tab) => (
-          <NavItem key={tab.tabNumber}>
+          <NavItem key={tab.tabNumber} className={classnames('tab')}>
             <NavLink
-              className={classnames({ active: activeTab === tab.tabNumber })}
+              className={classnames('tab', { active: activeTab === tab.tabNumber })}
               onClick={() => { this.toggle(tab.tabNumber); }}
             >
               {tab.title}
               <span
+                className={classnames('tabClose')}
                 onClick={() => { this.close(tab.tabNumber); }}
                 role="link"
                 tabIndex={-1}
