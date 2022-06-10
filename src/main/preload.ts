@@ -61,6 +61,8 @@ class Backend {
     setPreference = (preference: Preference): void => ipcRenderer.send('set-preference', preference);
 
     switchTab = (args: SwitchTabArguments) => ipcRenderer.send('switch-tab', args);
+
+    closeTab = (args: SwitchTabArguments) => ipcRenderer.send('close-tab', args);
 }
 
 contextBridge.exposeInMainWorld('backend', new Backend());

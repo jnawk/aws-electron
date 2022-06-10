@@ -64,6 +64,24 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
     }
   }
 
+  close(tab: string) {
+    const { profile } = this.props;
+    const { activeTab, tabs } = this.state;
+
+    const index = tabs.findIndex((details) => details.tabNumber === tab);
+    const newTabs = tabs.filter((details) => details.tabNumber !== tab);
+    if (newTabs.length) {
+      let newActiveTab = activeTab;
+      if (activeTab === tab) {
+        // closing the active tab
+        newActiveTab = newTabs[Math.min(newTabs.length - 1, index)].tabNumber;
+        this.toggle(newActiveTab);
+      }
+      this.setState({ activeTab: newActiveTab, tabs: newTabs });
+    }
+    backend.closeTab({ profile, tab });
+  }
+
   render(): React.ReactElement {
     const { activeTab, tabs } = this.state;
 
@@ -76,6 +94,11 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
               onClick={() => { this.toggle(tab.tabNumber); }}
             >
               {tab.title}
+              <span
+                onClick={() => { this.close(tab.tabNumber); }}
+              >
+                &#215;
+              </span>
             </NavLink>
           </NavItem>
         ))}

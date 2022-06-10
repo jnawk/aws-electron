@@ -28,10 +28,8 @@ import {
 
 import { getConsoleUrl } from './getConsoleURL';
 import {
-    AddTabArguments,
     ApplicationState,
     BoundsPreference,
-    CloseTabArguments,
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
     GetTitleArguments,
@@ -560,15 +558,6 @@ ipcMain.on(
 );
 
 ipcMain.on(
-    'add-tab',
-    (_event, { profileName, tabNumber }: AddTabArguments): void => {
-    // we want to track the tabs a profile has open so when the last one closes
-    // we can close the window.
-        state.windows[profileName].tabs.push(tabNumber);
-    },
-);
-
-ipcMain.on(
     'switch-tab',
     (_event, { profile, tab }: SwitchTabArguments) => {
         const windowDetails = state.windows[profile];
@@ -576,23 +565,19 @@ ipcMain.on(
     },
 );
 
-ipcMain.on(
-    'close-tab',
-    (_event, {
-        profileName, tabNumber,
-    }: CloseTabArguments): void => {
-    // remove the tab tracking
-        state.windows[profileName].tabs = (
-            state.windows[profileName].tabs.filter((num: number) => tabNumber !== num)
-        );
+ipcMain.on('close-tab', (_event, { profile, tab }: SwitchTabArguments) => {
+    const view = state.windows[profile].browserViews[tab];
 
-        if (state.windows[profileName].tabs.length === 0) {
-            // no more tabs; close the window
-            state.windows[profileName].window.close();
-            // the close window handler will delete the window information
-        }
-    },
-);
+    // this casting is ugly as fuck.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+    (view.webContents as any).destroy();
+
+    delete state.windows[profile].browserViews[tab];
+    if (Object.keys(state.windows[profile].browserViews).length === 0) {
+        state.windows[profile].window.close();
+        // window's close handler will delete the window state.
+    }
+});
 
 ipcMain.on('restart', (): void => {
     console.log('restarting');
