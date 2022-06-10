@@ -23,24 +23,6 @@ export interface ApplicationState {
     version: string
 }
 
-// export interface AddContextMenuParameters {
-//     contentsId: number
-// }
-
-// export interface AddHandlersArguments {
-//     contentsId?: number,
-//     profile: string
-// }
-
-export interface AddTabArguments {
-    profileName: string,
-    tabNumber: number
-}
-
-// export interface AppEvent extends Event {
-//     sender: WebContents
-// }
-
 export interface AssumeRoleParams {
     RoleArn: string,
     RoleSessionName: string,
@@ -60,11 +42,6 @@ export interface AwsCredentialsFile {
 export interface BoundsPreference {
     bounds?: Electron.Rectangle,
     maximised?: boolean,
-}
-
-export interface CloseTabArguments {
-    profileName: string,
-    tabNumber: number
 }
 
 export interface Configs {
@@ -165,11 +142,6 @@ export interface LaunchConsoleArguments {
     expiryTime: number,
 }
 
-// export interface LaunchWindowBoundsSettings {
-//     bounds: Electron.Rectangle,
-//     maximised?: boolean
-// }
-
 export interface MfaRowArguments {
     profileName: string,
     profile: AwsConfigProfile,
@@ -236,7 +208,6 @@ export interface UpdateTabTitleArguments {
 }
 
 export interface WindowDetails {
-    tabs: Array<number>,
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean,
     browserViews: {[key: string]: BrowserView}
