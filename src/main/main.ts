@@ -277,21 +277,18 @@ ipcMain.handle(
     (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
-ipcMain.handle(
-    'get-title',
-    async (_event, { title, profile }: GetTitleArguments): Promise<string> => {
-        const tabTitlePreference = await settings.get(
-            'preferences.tabTitlePreference',
-        ) as TabTitleOptions;
-        if (tabTitlePreference === '{profile} - {title}') {
-            return [profile, title].join(' - ');
-        }
-        if (tabTitlePreference === '{title} - {profile}') {
-            return [title, profile].join(' - ');
-        }
-        return title;
-    },
-);
+async function getTitle(title: string, profile: string) {
+    const tabTitlePreference = await settings.get(
+        'preferences.tabTitlePreference',
+    ) as TabTitleOptions;
+    if (tabTitlePreference === '{profile} - {title}') {
+        return [profile, title].join(' - ');
+    }
+    if (tabTitlePreference === '{title} - {profile}') {
+        return [title, profile].join(' - ');
+    }
+    return title;
+}
 
 ipcMain.handle(
     'rotate-key',
@@ -433,7 +430,7 @@ async function launchConsole({
         const windowOptions = {
             width: 1280,
             height: 1024,
-            title: `AWS Console - ${profileName}`,
+            title: await getTitle("AWS Console", profileName),
             webPreferences: {
                 partition: profileName,
                 nodeIntegration: false,

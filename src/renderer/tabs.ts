@@ -67,38 +67,4 @@ ipcRenderer.on('open-tab', (_event, {
             }, 1000);
         }
     }
-
-    //   tabGroup?.addTab({
-    //     title: 'AWS Console',
-    //     src: url,
-    //     active: true,
-    //     visible: true,
-    //     webviewAttributes: {
-    //         nodeintegration: false,
-    //         partition: windowState.profile,
-    //     },
-    //     ready: (tab: ElectronTabs.Tab) => {
-    //       tab.on('webview-dom-ready', () => {
-    //             const webViewTag = tab.webview as WebviewTag;
-    //             const title = webViewTag.getTitle();
-    //             if (!title.toLowerCase().startsWith('http')) {
-    //                 void ipcRenderer.invoke(
-    //                     'get-title',
-    //                     { title, profile: windowState.profile },
-    //                 ).then((newTitle: string) => { tab.setTitle(newTitle); });
-    //             }
-
-    //             const contentsId = webViewTag.getWebContentsId();
-    //             if (!windowState.contentsHandlers.includes(contentsId)) {
-    //                 ipcRenderer.send(
-    //                     'add-zoom-handlers',
-    //                     { contentsId, profile: windowState.profile },
-    //                 );
-    //                 windowState.contentsHandlers.push(contentsId);
-    //             }
-    //       });
-    //       tab.on('close', () => ipcRenderer.send('close-tab', { profileName: windowState.profile, tabNumber }));
-    //     },
-    //   });
-    ipcRenderer.send('add-tab', { profileName: windowState.profile, tabNumber });
 });
