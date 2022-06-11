@@ -441,7 +441,7 @@ async function launchConsole({
         const windowOptions = {
             width: 1280,
             height: 1024,
-            title: await getTitle("AWS Console", profileName),
+            title: await getTitle('AWS Console', profileName),
             webPreferences: {
                 partition: profileName,
                 nodeIntegration: false,
