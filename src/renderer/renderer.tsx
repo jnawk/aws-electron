@@ -10,12 +10,22 @@ import {
   Route,
   HashRouter as Router,
   Routes,
+  useParams,
 } from 'react-router-dom';
 
 import AWSConsole from './AWSConsole';
 import KeyRotation from './KeyRotation';
 import MfaCache from './MfaCache';
 import Settings from './Settings';
+import Tabs from './Tabs';
+
+function ConsoleWindow() {
+  const { profile } = useParams();
+  if (profile) {
+    return (<Tabs profile={profile} />);
+  }
+  return null;
+}
 
 const app = (
   <Router>
@@ -24,6 +34,7 @@ const app = (
       <Route path="/settings" element={<Settings /> as React.ReactNode} />
       <Route path="/keyRotation" element={<KeyRotation /> as React.ReactNode} />
       <Route path="/mfaCache" element={<MfaCache /> as React.ReactNode} />
+      <Route path="/tabs/:profile" element={<ConsoleWindow />} />
     </Routes>
   </Router>
 ) as React.ReactElement;

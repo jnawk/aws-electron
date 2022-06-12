@@ -1,0 +1,23 @@
+.tab {
+    background-color: lightgrey;
+}
+.tabClose:hover {
+    font-weight: bold;
+}
+.tab.nav-link.active {
+    border: 1px solid black;
+}
+
+.tab, .tabClose {
+    cursor: default;
+}
+
+.tabClose {
+    padding-left: 5px;
+    font-size: x-large;
+}
+
+a.tab, a.tab:hover {
+    color: black;
+}
+

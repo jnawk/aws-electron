@@ -18,13 +18,13 @@ import { profileRow } from './profileListGenerator';
 const { backend } = window; // defined in preload.js
 
 interface AWSConsoleState {
-  mfaCode: string,
-  remember: boolean,
-  usableProfiles?: Array<string>,
-  awsConfig?: AwsConfigFile,
-  vaultConfig?: AwsConfigFile,
-  credentialsProfiles?: Array<string>,
-  explicitTreatConfigProperly?: boolean,
+    mfaCode: string,
+    remember: boolean,
+    usableProfiles?: Array<string>,
+    awsConfig?: AwsConfigFile,
+    vaultConfig?: AwsConfigFile,
+    credentialsProfiles?: Array<string>,
+    explicitTreatConfigProperly?: boolean,
 }
 
 export default class AWSConsole extends React.Component<Record<string, never>, AWSConsoleState> {
