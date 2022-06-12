@@ -2,6 +2,7 @@ import * as contextMenu from 'electron-context-menu';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
+import * as sprintf from 'sprintf-js';
 
 import {
     BrowserWindow,
@@ -32,12 +33,12 @@ import {
     BoundsPreference,
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
-    GetTitleArguments,
     GetUsableProfilesArguments,
     HasVersion,
     LaunchConsoleArguments,
     OpenTabArguments,
     Preference,
+    Preferences,
     RotateKeyArguments,
     SwitchTabArguments,
     TabTitleOptions,
@@ -45,6 +46,7 @@ import {
 } from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
+import timeRemainingMessage from './timeRemaining';
 
 let mainWindow: Electron.BrowserWindow | null;
 let nextTabNumber = 0;
@@ -262,7 +264,20 @@ app.on('activate', () => {
 
 ipcMain.handle('get-aws-config', () => getAWSConfig());
 
-ipcMain.handle('get-preferences', () => settings.get('preferences'));
+const getPreferences = async () => {
+    const translateTitlePreference = (title: TabTitleOptions) => title.replaceAll('}', ')s').replaceAll('{', '%(');
+    const preferences = (await settings.get('preferences')) as Preferences;
+    if (preferences.tabTitlePreferenceV2) {
+        return preferences;
+    }
+    if (preferences.tabTitlePreference) {
+        preferences.tabTitlePreferenceV2 = translateTitlePreference(preferences.tabTitlePreference);
+    }
+    console.log(preferences);
+    return preferences;
+};
+
+ipcMain.handle('get-preferences', getPreferences);
 
 ipcMain.handle(
     'get-usable-profiles',
@@ -277,15 +292,12 @@ ipcMain.handle(
     (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
-async function getTitle(title: string, profile: string) {
-    const tabTitlePreference = await settings.get(
-        'preferences.tabTitlePreference',
-    ) as TabTitleOptions;
-    if (tabTitlePreference === '{profile} - {title}') {
-        return [profile, title].join(' - ');
-    }
-    if (tabTitlePreference === '{title} - {profile}') {
-        return [title, profile].join(' - ');
+async function getTitle(title: string, profile: string, timeLeft: string) {
+    const preferences = await getPreferences();
+    if (preferences.tabTitlePreferenceV2) {
+        return sprintf.sprintf(preferences.tabTitlePreferenceV2, {
+            profile, title, timeLeft,
+        });
     }
     return title;
 }
@@ -306,12 +318,23 @@ function windowBoundsChanged({
     void settings.set(`bounds.${profileName}`, windowBounds);
 }
 
+const getTimeLeft = (profileName: string): string => {
+    const profileSession = state.windows[profileName];
+    const currentTime = new Date().getTime();
+    const timeToGo = profileSession.expiryTime - currentTime;
+    if (timeToGo < 1000 && profileSession.titleUpdateTimer) {
+        clearInterval(profileSession.titleUpdateTimer);
+        profileSession.titleUpdateTimer = undefined;
+        return profileSession.window.getTitle();
+    }
+    return timeRemainingMessage(timeToGo);
+};
+
 async function launchConsole({
     profileName,
     consoleUrl,
     expiryTime,
 }: LaunchConsoleArguments): Promise<void> {
-    const profileSession = state.windows[profileName];
     let win: BrowserWindow;
     const tabHeight = 55;
     const dev = process.env.NODE_ENV !== 'production';
@@ -333,6 +356,7 @@ async function launchConsole({
     };
 
     const openTab = (urlToOpen: string) => {
+        const profileSession = state.windows[profileName];
         const tabNumber = (nextTabNumber += 1).toString();
         const openTabArguments: OpenTabArguments = {
             url: consoleUrl,
@@ -340,7 +364,20 @@ async function launchConsole({
             tabNumber,
             expiryTime,
         };
-
+        if (profileSession.titleUpdateTimer) {
+            clearInterval(profileSession.titleUpdateTimer);
+        }
+        profileSession.titleUpdateTimer = setInterval(() => {
+            void (async () => {
+                win.setTitle(
+                    await getTitle(
+                        'AWS Console',
+                        profileName,
+                        getTimeLeft(profileName),
+                    ),
+                );
+            })();
+        }, 1000);
         win.webContents.send('open-tab', openTabArguments);
 
         const view = new BrowserView({
@@ -429,9 +466,11 @@ async function launchConsole({
         });
     };
 
+    const profileSession = state.windows[profileName];
     if (profileSession) {
         // we already have a window open for this session, reuse it.
         win = profileSession.window;
+        profileSession.expiryTime = expiryTime;
         openTab(consoleUrl);
     } else {
         // we do not have a window open for this session; need to open one
@@ -441,7 +480,7 @@ async function launchConsole({
         const windowOptions = {
             width: 1280,
             height: 1024,
-            title: await getTitle('AWS Console', profileName),
+            title: await getTitle('AWS Console', profileName, ''),
             webPreferences: {
                 partition: profileName,
                 nodeIntegration: false,
@@ -458,6 +497,7 @@ async function launchConsole({
         state.windows[profileName] = {
             window: win,
             browserViews: {},
+            expiryTime,
         };
         win.loadURL(
             url.format({ // TODO replace this
@@ -477,6 +517,9 @@ async function launchConsole({
         });
         win.on('close', () => {
             // delete the window state from the app when it is closed
+            if (state.windows[profileName].titleUpdateTimer) {
+                clearInterval(state.windows[profileName].titleUpdateTimer);
+            }
             delete state.windows[profileName];
         });
 

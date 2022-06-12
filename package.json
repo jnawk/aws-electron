@@ -84,7 +84,7 @@
     "react-transition-group": "^4.4.2",
     "reactstrap": "^9",
     "split-ca": "^1.0.1",
-    "urllib": "^2.38.0"
+    "urllib": "^2.38.0","sprintf-js": "^1.1.2"
   },
   "devDependencies": {
     "@types/debounce": "^1.2.1",
@@ -96,6 +96,7 @@
     "@types/react-router": "^5",
     "@types/react-router-dom": "^5",
     "@types/react-transition-group": "^4.4.4",
+    "@types/sprintf-js": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^5",
     "@typescript-eslint/parser": "^5",
     "copy-webpack-plugin": "^9",
@@ -117,7 +118,6 @@
     "rimraf": "^3.0.2",
     "source-map-loader": "^3",
     "spectron": "^19.0.0",
-    "sprintf-js": "^1.1.2",
     "style-loader": "^3",
     "ts-loader": "^9",
     "ts-node": "^10",

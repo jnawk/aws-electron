@@ -102,11 +102,6 @@ export interface GetSigninTokenArguments {
     httpAgent: https.Agent
 }
 
-export interface GetTitleArguments {
-    title: string,
-    profile: string
-}
-
 export interface GetUsableProfilesArguments {
     config: AwsConfigFile,
     credentialsProfiles: Array<string>
@@ -211,6 +206,8 @@ export interface WindowDetails {
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean,
     browserViews: {[key: string]: BrowserView}
+    expiryTime: number,
+    titleUpdateTimer?: NodeJS.Timer
 }
 
 export interface WindowBoundsChangedArguments {
@@ -231,6 +228,7 @@ export type TabTitleOptions = '{title}' | '{title} - {profile}' | '{profile} - {
 
 export type TabTitlePreference = {
     tabTitlePreference?: TabTitleOptions,
+    tabTitlePreferenceV2?: string,
 }
 
 export type UseGPUPreference = {
