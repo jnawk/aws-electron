@@ -573,12 +573,12 @@ ipcMain.on(
     },
 );
 
-ipcMain.on(
+ipcMain.handle(
     'launch-console',
     (
         _event,
         { profileName, mfaCode, configType }: FrontendLaunchConsoleArguments,
-    ): void => {
+    ): Promise<string | void> => {
         const config = getAWSConfig()[configType];
         if (config === undefined) {
             throw new Error("Config doesn't exist");
@@ -587,12 +587,16 @@ ipcMain.on(
             config[profileName].duration_seconds || 3600
         ) * 1000;
 
-        void getConsoleUrl(config, mfaCode, profileName).then(
+        return getConsoleUrl(config, mfaCode, profileName).then(
             (consoleUrl) => launchConsole(
                 { profileName, consoleUrl, expiryTime },
             ),
         ).catch((error: Error) => {
+            if (error.name === 'InvalidClientTokenId') {
+                return error.name;
+            }
             console.error(error, error.stack);
+            return undefined;
         });
     },
 );

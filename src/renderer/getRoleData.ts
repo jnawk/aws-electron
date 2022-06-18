@@ -15,8 +15,7 @@ function getRoleData({
         throw new Error('need a role arn'); // ??
     }
     const roleRegexResult = roleRegex.exec(profile.role_arn);
-    const shouldDisable = (profile.mfa_serial !== undefined
-    && mfaCode.length !== 6);
+    const shouldDisable = (profile.mfa_serial !== undefined && mfaCode.length !== 6);
 
     if (roleRegexResult === null) {
         throw new Error('WTF is going on');
@@ -46,16 +45,28 @@ export function profileRows({
     config,
     configType,
     mfaCode,
+    expiredCredentialsProfiles,
     clearMfaCode,
     launchConsole,
     launchButtonGenerator,
     profileRowGenerator,
+    onSuccess,
+    onError,
 }: ProfileRowsArguments): Array<React.ReactElement> {
     return usableProfiles.map((profileName: string) => {
         const profile = config[profileName];
         const launchProfile = () => {
-            launchConsole({ profileName, mfaCode, configType });
-            clearMfaCode();
+            launchConsole({ profileName, mfaCode, configType }).then(() => {
+                if (profile.source_profile) {
+                    onSuccess(profile.source_profile);
+                }
+            }).catch(() => {
+                if (profile.source_profile) {
+                    onError(profile.source_profile);
+                }
+            }).finally(() => {
+                clearMfaCode();
+            });
         };
 
         const {
@@ -63,9 +74,13 @@ export function profileRows({
             shouldDisable,
             fullRoleName,
             shortRoleName,
-        } = getRoleData({ profile, mfaCode });
+        } = getRoleData({
+            profile, mfaCode,
+        });
         const launchButton = launchButtonGenerator({
-            launchProfile, shouldDisable,
+            launchProfile,
+            shouldDisable,
+            wasExpired: profile.source_profile ? expiredCredentialsProfiles.includes(profile.source_profile) : undefined,
         });
 
         return profileRowGenerator({

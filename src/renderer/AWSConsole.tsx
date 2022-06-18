@@ -25,6 +25,7 @@ interface AWSConsoleState {
     vaultConfig?: AwsConfigFile,
     credentialsProfiles?: Array<string>,
     explicitTreatConfigProperly?: boolean,
+    expiredCredentialsProfiles: Array<string>
 }
 
 export default class AWSConsole extends React.Component<Record<string, never>, AWSConsoleState> {
@@ -34,6 +35,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     this.state = {
       mfaCode: '',
       remember: false,
+      expiredCredentialsProfiles: [],
     };
   }
 
@@ -62,6 +64,22 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
     }).then(
       (usableProfiles) => this.setState({ usableProfiles }),
     );
+  }
+
+  launchFailure(credentialsProfileName: string): void {
+    const { expiredCredentialsProfiles } = this.state;
+    if (!(expiredCredentialsProfiles.includes(credentialsProfileName))) {
+      this.setState({
+        expiredCredentialsProfiles: [credentialsProfileName, ...expiredCredentialsProfiles],
+      });
+    }
+  }
+
+  launchSuccess(credentialsProfileName: string): void {
+    const { expiredCredentialsProfiles } = this.state;
+    this.setState({
+      expiredCredentialsProfiles: expiredCredentialsProfiles.filter((value) => value !== credentialsProfileName),
+    });
   }
 
   treatConfigProperly(properly: boolean): void {
@@ -161,6 +179,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
       mfaCode,
       explicitTreatConfigProperly,
       usableProfiles,
+      expiredCredentialsProfiles,
     } = this.state;
 
     if (!awsConfig || !usableProfiles) {
@@ -203,10 +222,13 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             config,
             configType,
             mfaCode,
+            expiredCredentialsProfiles,
             clearMfaCode: () => this.setState({ mfaCode: '' }),
             launchConsole: backend.launchConsole,
             launchButtonGenerator,
             profileRowGenerator: profileRow,
+            onError: (credentialsProfileName) => { this.launchFailure(credentialsProfileName); },
+            onSuccess: (credentialsProfileName) => { this.launchSuccess(credentialsProfileName); },
           })}
           {usableProfiles.some(
             (profile: string) => config[profile].mfa_serial !== undefined,

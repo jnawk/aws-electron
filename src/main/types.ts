@@ -128,7 +128,8 @@ export interface LaunchButton {
 
 export interface LaunchButtonGeneratorArguments {
     launchProfile: MouseEventHandler<HTMLButtonElement>,
-    shouldDisable: boolean
+    shouldDisable: boolean,
+    wasExpired?: boolean
 }
 
 export interface LaunchConsoleArguments {
@@ -173,12 +174,15 @@ export interface ProfileRowsArguments {
     config: AwsConfigFile,
     configType: ConfigType,
     mfaCode: string,
+    expiredCredentialsProfiles: Array<string>,
     clearMfaCode: {(): void},
-    launchConsole: {(args: FrontendLaunchConsoleArguments): void},
+    launchConsole: {(args: FrontendLaunchConsoleArguments): Promise<void>},
     launchButtonGenerator: {
         (args: LaunchButtonGeneratorArguments): LaunchButton
     },
-    profileRowGenerator: {(args: ProfileRowArguments): React.ReactElement}
+    profileRowGenerator: {(args: ProfileRowArguments): React.ReactElement},
+    onSuccess: {(credentialsProfileName: string): void},
+    onError: {(credentialsProfileName: string): void}
 }
 
 export interface RotateKeyArguments {

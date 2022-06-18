@@ -44,7 +44,11 @@ class Backend {
 
     getUsableProfiles = (args: GetUsableProfilesArguments) => ipcRenderer.invoke('get-usable-profiles', args) as Promise<Array<string>>;
 
-    launchConsole = (args: FrontendLaunchConsoleArguments) => ipcRenderer.send('launch-console', args);
+    launchConsole = (args: FrontendLaunchConsoleArguments) => (ipcRenderer.invoke('launch-console', args) as Promise<string | void>).then((error) => {
+        if (error) {
+            throw new Error(error);
+        }
+    });
 
     register = (
         openTab: {(args: OpenTabArguments): void},
