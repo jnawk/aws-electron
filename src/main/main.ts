@@ -418,7 +418,7 @@ async function launchConsole({
                 {
                     label: 'Copy Page URL to clipboard',
                     click: () => {
-                        clipboard.writeText(view.webContents.getURL())
+                        clipboard.writeText(view.webContents.getURL());
                     },
                     // Don't show it when right-clicking links
                     visible: parameters.linkURL === '',
