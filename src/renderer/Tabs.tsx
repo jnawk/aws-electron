@@ -23,7 +23,7 @@ interface TabDetails {
 
 interface TabsState {
     tabs: Array<TabDetails>,
-    activeTab: string,
+    activeTab?: string,
 }
 
 export default class Tabs extends React.Component<TabsProps, TabsState> {
@@ -32,7 +32,6 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
 
     this.state = {
       tabs: [],
-      activeTab: '1',
     };
   }
 
@@ -113,7 +112,6 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
             </NavLink>
           </NavItem>
         ))}
-
       </Nav>
     );
   }

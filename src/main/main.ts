@@ -397,7 +397,8 @@ async function launchConsole({
             );
         });
         win.setBrowserView(view);
-        state.windows[profileName].browserViews[tabNumber] = view;
+        profileSession.browserViews[tabNumber] = view;
+        profileSession.currentView = tabNumber;
 
         contextMenu({
             window: view.webContents,
@@ -513,6 +514,7 @@ async function launchConsole({
             }
             openTab(consoleUrl);
         });
+
         win.on('close', () => {
             // delete the window state from the app when it is closed
             if (state.windows[profileName].titleUpdateTimer) {
@@ -615,6 +617,7 @@ ipcMain.on(
     'switch-tab',
     (_event, { profile, tab }: SwitchTabArguments) => {
         const windowDetails = state.windows[profile];
+        windowDetails.currentView = tab;
         windowDetails.window.setBrowserView(windowDetails.browserViews[tab]);
     },
 );

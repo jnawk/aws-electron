@@ -210,12 +210,13 @@ export interface WindowDetails {
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean,
     browserViews: {[key: string]: BrowserView}
+    currentView?: string
     expiryTime: number,
     titleUpdateTimer?: NodeJS.Timer
 }
 
 export interface WindowBoundsChangedArguments {
-    window: Electron.BrowserWindow,
+    window: BrowserWindow,
     profileName: string
 }
 
