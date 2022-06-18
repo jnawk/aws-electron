@@ -8,6 +8,7 @@ import {
     BrowserWindow,
     Menu,
     app,
+    clipboard,
     ipcMain,
     BrowserView,
 } from 'electron';
@@ -413,6 +414,14 @@ async function launchConsole({
                     },
                     // Only show it when right-clicking links
                     visible: parameters.linkURL !== '',
+                },
+                {
+                    label: 'Copy Page URL to clipboard',
+                    click: () => {
+                        clipboard.writeText(view.webContents.getURL())
+                    },
+                    // Don't show it when right-clicking links
+                    visible: parameters.linkURL === '',
                 },
                 {
                     label: 'Back',
