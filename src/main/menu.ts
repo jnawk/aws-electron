@@ -9,14 +9,16 @@ const isMac = process.platform === 'darwin';
 export default function buildAppMenu(state: ApplicationState): Menu {
     const handleReload = (browserWindow: BrowserWindow, force: boolean) => {
         let thingToReload: WebContents = browserWindow.webContents;
-        for (const profileName in state.windows) {
-            const windowDetails = state.windows[profileName];
-            if (browserWindow === windowDetails.window) {
-                if (windowDetails.currentView) {
-                    thingToReload = windowDetails.browserViews[windowDetails.currentView].webContents;
-                } else {
-                    return;
-                }
+
+        const currentProfileName = Object.keys(state.windows).find((profileName) => {
+            return browserWindow === state.windows[profileName].window;
+        });
+        if (currentProfileName) {
+            const windowDetails = state.windows[currentProfileName];
+            if (windowDetails.currentView) {
+                thingToReload = windowDetails.browserViews[windowDetails.currentView].webContents;
+            } else {
+                return;
             }
         }
 
