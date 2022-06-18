@@ -273,7 +273,6 @@ const getPreferences = async () => {
     if (preferences.tabTitlePreference) {
         preferences.tabTitlePreferenceV2 = translateTitlePreference(preferences.tabTitlePreference);
     }
-    console.log(preferences);
     return preferences;
 };
 
@@ -388,7 +387,6 @@ async function launchConsole({
         view.setBounds(getBrowserViewBounds(win));
         void view.webContents.loadURL(urlToOpen);
         view.webContents.setWindowOpenHandler((details) => {
-            console.log(details);
             openTab(details.url);
             return { action: 'deny' };
         });
