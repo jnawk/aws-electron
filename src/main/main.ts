@@ -46,6 +46,7 @@ import buildAppMenu from './menu';
 import timeRemainingMessage from './timeRemaining';
 import { getApplicationVersion } from './getApplicationVersion';
 import { getWindowURL } from './getWindowURL';
+import getPreferences from './getPreferences';
 import ApplicationState from './applicationState';
 
 let mainWindow: Electron.BrowserWindow | null;
@@ -160,18 +161,6 @@ app.on('activate', () => {
 });
 
 ipcMain.handle('get-aws-config', () => getAWSConfig());
-
-const getPreferences = async () => {
-    const translateTitlePreference = (title: TabTitleOptions) => title.replaceAll('}', ')s').replaceAll('{', '%(');
-    const preferences = (await settings.get('preferences')) as Preferences;
-    if (preferences.tabTitlePreferenceV2) {
-        return preferences;
-    }
-    if (preferences.tabTitlePreference) {
-        preferences.tabTitlePreferenceV2 = translateTitlePreference(preferences.tabTitlePreference);
-    }
-    return preferences;
-};
 
 ipcMain.handle('get-preferences', getPreferences);
 
