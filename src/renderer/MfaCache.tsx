@@ -59,7 +59,7 @@ class MfaCache extends React.Component<Record<string, never>, MfaCacheState> {
           config,
           mfaCode,
           clearMfaCode: () => this.setState({ mfaCode: '' }),
-          doMfa: (args) => backend.doMfa(args),
+          doMfa: backend.doMfa,
           mfaButtonGenerator,
           mfaRowGenerator: mfaRow,
         })}
