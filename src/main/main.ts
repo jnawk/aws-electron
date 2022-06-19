@@ -28,7 +28,6 @@ import {
 
 import { getConsoleUrl } from './getConsoleURL';
 import {
-    ApplicationState,
     BoundsPreference,
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
@@ -47,81 +46,11 @@ import buildAppMenu from './menu';
 import timeRemainingMessage from './timeRemaining';
 import { getApplicationVersion } from './getApplicationVersion';
 import { getWindowURL } from './getWindowURL';
+import ApplicationState from './applicationState';
 
 let mainWindow: Electron.BrowserWindow | null;
-let nextTabNumber = 0;
 
-const state: ApplicationState = {
-    windows: {},
-    launchWindowBoundsChangedHandlerBound: false,
-    version: getApplicationVersion(),
-    openPreferences(): void {
-        if (state.preferencesWindow === undefined) {
-            const options = {
-                width: 1280,
-                height: 1024,
-                title: `AWS Console (v${state.version}) - Preferences`,
-                webPreferences: {
-                    preload: path.join(__dirname, 'preload.js'),
-                    contextIsolation: true,
-                },
-            };
-
-            state.preferencesWindow = new BrowserWindow(options);
-            void state.preferencesWindow.loadURL(
-                getWindowURL("settings")
-            );
-            state.preferencesWindow.on('close', () => {
-                delete state.preferencesWindow;
-            });
-        }
-    },
-
-    openKeyRotation(): void {
-        if (state.keyRotationWindow === undefined) {
-            const options = {
-                width: 1280,
-                height: 1024,
-                title: `AWS Console (v${state.version}) - Key Rotation`,
-                webPreferences: {
-                    preload: path.join(__dirname, 'preload.js'),
-                    contextIsolation: true,
-                },
-            };
-
-            state.keyRotationWindow = new BrowserWindow(options);
-            void state.keyRotationWindow.loadURL(
-                getWindowURL("keyRotation")
-            );
-            state.keyRotationWindow.on('close', () => {
-                delete state.keyRotationWindow;
-            });
-        }
-    },
-
-    openMfaCache(): void {
-        if (state.mfaCacheWindow === undefined) {
-            const options = {
-                width: 1280,
-                height: 1024,
-                title: `AWS Console (v${state.version}) - MFA Cache`,
-                webPreferences: {
-                    preload: path.join(__dirname, 'preload.js'),
-                    contextIsolation: true,
-                },
-            };
-
-            state.mfaCacheWindow = new BrowserWindow(options);
-
-            void state.mfaCacheWindow.loadURL(
-                getWindowURL("mfaCache")
-            );
-            state.mfaCacheWindow.on('close', () => {
-                delete state.mfaCacheWindow;
-            });
-        }
-    },
-};
+const state = new ApplicationState();
 
 function createWindow(): void {
     Menu.setApplicationMenu(buildAppMenu(state));

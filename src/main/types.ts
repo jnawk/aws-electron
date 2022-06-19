@@ -8,21 +8,6 @@ import * as https from 'https';
 import { Credentials as AwsCredentials } from '@aws-sdk/client-sts';
 import { AwsCredentialsProfile, AwsConfigProfile } from './awsConfigInterfaces';
 
-export interface ApplicationState {
-    windows: {[key: string]: WindowDetails},
-
-    openPreferences: {(): void},
-    openKeyRotation: {(): void},
-    openMfaCache: {(): void},
-
-    mfaCacheWindow?: BrowserWindow,
-    keyRotationWindow?: BrowserWindow,
-    preferencesWindow?: BrowserWindow,
-
-    launchWindowBoundsChangedHandlerBound: boolean,
-    version: string
-}
-
 export interface AssumeRoleParams {
     RoleArn: string,
     RoleSessionName: string,

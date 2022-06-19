@@ -1,8 +1,7 @@
 import {
     Menu, app, BrowserWindow, WebContents,
 } from 'electron';
-
-import { ApplicationState } from './types';
+import ApplicationState from './applicationState';
 
 const isMac = process.platform === 'darwin';
 
