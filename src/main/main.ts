@@ -1,14 +1,10 @@
-import * as contextMenu from 'electron-context-menu';
 import * as path from 'path';
-import * as sprintf from 'sprintf-js';
 
 import {
     BrowserWindow,
     Menu,
     app,
-    clipboard,
     ipcMain,
-    BrowserView,
 } from 'electron';
 
 // these can't be default imports
@@ -33,20 +29,15 @@ import {
     GetMfaProfilesArguments,
     GetUsableProfilesArguments,
     LaunchConsoleArguments,
-    OpenTabArguments,
     Preference,
-    Preferences,
     RotateKeyArguments,
     SwitchTabArguments,
-    TabTitleOptions,
-    WindowBoundsChangedArguments,
 } from './types';
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
-import timeRemainingMessage from './timeRemaining';
-import { getApplicationVersion } from './getApplicationVersion';
 import getWindowURL from './getWindowURL';
 import getPreferences from './getPreferences';
+import { openTab, openConsoleWindow } from './consoleWindow';
 import ApplicationState from './applicationState';
 
 let mainWindow: Electron.BrowserWindow | null;
@@ -177,271 +168,24 @@ ipcMain.handle(
     (_event, { config }: GetMfaProfilesArguments) => getCachableProfiles({ config }),
 );
 
-async function getTitle(title: string, profile: string, timeLeft: string) {
-    const preferences = await getPreferences();
-    if (preferences.tabTitlePreferenceV2) {
-        return sprintf.sprintf(preferences.tabTitlePreferenceV2, {
-            profile, title, timeLeft,
-        });
-    }
-    return title;
-}
-
 ipcMain.handle(
     'rotate-key',
     (_event, { profile, aws, local }: RotateKeyArguments) => rotateKey({ profile, aws, local }),
 );
 
-function windowBoundsChanged({
-    window, profileName,
-}: WindowBoundsChangedArguments): void {
-    const windowBounds = {
-        bounds: { ...window.getBounds() },
-        maximised: window.isMaximized(),
-    };
-
-    void settings.set(`bounds.${profileName}`, windowBounds);
-}
-
-const getTimeLeft = (profileName: string): string => {
-    const profileSession = state.windows[profileName];
-    const currentTime = new Date().getTime();
-    const timeToGo = profileSession.expiryTime - currentTime;
-    if (timeToGo < 1000 && profileSession.titleUpdateTimer) {
-        clearInterval(profileSession.titleUpdateTimer);
-        profileSession.titleUpdateTimer = undefined;
-        return profileSession.window.getTitle();
-    }
-    return timeRemainingMessage(timeToGo);
-};
-
-async function launchConsole({
+function launchConsole({
     profileName,
     consoleUrl,
     expiryTime,
-}: LaunchConsoleArguments): Promise<void> {
-    let win: BrowserWindow;
-    const tabHeight = 55;
-    const dev = process.env.NODE_ENV !== 'production';
-
-    const getBrowserViewBounds = (window: BrowserWindow) => {
-        const windowBounds = window.getBounds();
-
-        // devtools is actually not 800px wide, it could be anything, including not docked to the side!
-        // https://stackoverflow.com/questions/43652253/how-to-set-electron-browser-window-devtools-width
-        // this will do for now.
-        const devToolsWidth = 800;
-
-        return {
-            x: 0,
-            y: tabHeight,
-            width: windowBounds.width - (dev ? devToolsWidth : 0),
-            height: windowBounds.height - (tabHeight + 25),
-        };
-    };
-
-    const openTab = (urlToOpen: string) => {
-        const profileSession = state.windows[profileName];
-        const tabNumber = (nextTabNumber += 1).toString();
-        const openTabArguments: OpenTabArguments = {
-            url: consoleUrl,
-            profile: profileName,
-            tabNumber,
-            expiryTime,
-        };
-        if (profileSession.titleUpdateTimer) {
-            clearInterval(profileSession.titleUpdateTimer);
-        }
-        profileSession.titleUpdateTimer = setInterval(() => {
-            void (async () => {
-                win.setTitle(
-                    await getTitle(
-                        'AWS Console',
-                        profileName,
-                        getTimeLeft(profileName),
-                    ),
-                );
-            })();
-        }, 1000);
-        win.webContents.send('open-tab', openTabArguments);
-
-        const view = new BrowserView({
-            webPreferences: {
-                partition: ['persist', profileName].join(':'),
-            },
-        });
-        view.setBounds(getBrowserViewBounds(win));
-        void view.webContents.loadURL(urlToOpen);
-        view.webContents.setWindowOpenHandler((details) => {
-            openTab(details.url);
-            return { action: 'deny' };
-        });
-        view.webContents.on('page-title-updated', () => {
-            win.webContents.send(
-                'update-tab-title',
-                { tabNumber, title: view.webContents.getTitle() },
-            );
-        });
-        win.setBrowserView(view);
-        profileSession.browserViews[tabNumber] = view;
-        profileSession.currentView = tabNumber;
-
-        contextMenu({
-            window: view.webContents,
-            prepend: (
-                _defaultActions,
-                parameters,
-            ) => [
-                {
-                    label: 'Open in new tab',
-                    click: () => {
-                        openTab(parameters.linkURL);
-                    },
-                    // Only show it when right-clicking links
-                    visible: parameters.linkURL !== '',
-                },
-                {
-                    label: 'Copy Page URL to clipboard',
-                    click: () => {
-                        clipboard.writeText(view.webContents.getURL());
-                    },
-                    // Don't show it when right-clicking links
-                    visible: parameters.linkURL === '',
-                },
-                {
-                    label: 'Back',
-                    click: () => view.webContents.goBack(),
-                    visible: view.webContents.canGoBack(),
-                },
-                {
-                    label: 'Forwards',
-                    click: () => view.webContents.goForward(),
-                    visible: view.webContents.canGoForward(),
-                },
-            ],
-        });
-
-        const setNewZoomLevel = (newZoomLevel: number, save?: boolean) => {
-            [win.webContents, view.webContents].forEach((contents1) => {
-                contents1.setZoomLevel(newZoomLevel);
-            });
-            if (save) {
-                void settings.set(`zoomLevels.${profileName}`, newZoomLevel);
-            }
-        };
-
-        [win.webContents, view.webContents].forEach((contents) => {
-            contents.on('zoom-changed', (__event, direction) => {
-                let newZoomLevel = contents.getZoomLevel();
-                if (direction === 'in') {
-                    newZoomLevel += 1;
-                } else {
-                    newZoomLevel -= 1;
-                }
-                setNewZoomLevel(newZoomLevel, true);
-            });
-
-            contents.on('before-input-event', (__event, input) => {
-                if (input.control
-                && input.type === 'keyUp'
-                && (input.key === '+' || input.key === '-')) {
-                    setNewZoomLevel(contents.getZoomLevel(), true);
-                }
-            });
-        });
-
-        void settings.get(
-            `zoomLevels.${profileName}`,
-        ).then((zoomLevel: number) => {
-            [win.webContents, view.webContents].forEach((contents) => {
-                contents.setZoomLevel(zoomLevel || 0);
-            });
-        });
-    };
-
+}: LaunchConsoleArguments) {
     const profileSession = state.windows[profileName];
     if (profileSession) {
         // we already have a window open for this session, reuse it.
-        win = profileSession.window;
+        const win = profileSession.window;
         profileSession.expiryTime = expiryTime;
-        openTab(consoleUrl);
+        openTab(consoleUrl, profileName, state, win);
     } else {
-        // we do not have a window open for this session; need to open one
-        const profileBounds = (await settings.get(`bounds.${profileName}`)) as BoundsPreference;
-        const bounds = profileBounds ? profileBounds.bounds : {} as BoundsPreference;
-
-        const windowOptions = {
-            width: 1280,
-            height: 1024,
-            title: await getTitle('AWS Console', profileName, ''),
-            webPreferences: {
-                partition: ['persist', profileName].join(':'),
-                nodeIntegration: false,
-                preload: path.join(__dirname, 'preload.js'),
-                contextIsolation: true,
-            },
-            show: false,
-            ...bounds,
-        };
-        win = new BrowserWindow(windowOptions);
-
-        // save details of this profile's window
-        state.windows[profileName] = {
-            window: win,
-            browserViews: {},
-            expiryTime,
-        };
-        win.loadURL(
-            getWindowURL("tabs", profileName)
-        ).catch((e) => {
-            console.log(e);
-        }).finally(() => { /* no action */ });
-        win.webContents.on('did-finish-load', () => {
-            if (dev) {
-                win.webContents.openDevTools();
-            }
-            openTab(consoleUrl);
-        });
-
-        win.on('close', () => {
-            // delete the window state from the app when it is closed
-            if (state.windows[profileName].titleUpdateTimer) {
-                clearInterval(state.windows[profileName].titleUpdateTimer);
-            }
-            delete state.windows[profileName];
-        });
-
-        win.on('ready-to-show', () => {
-            if (!state.windows[profileName].boundsChangedHandlerBound) {
-                const boundsChangedFunction = debounce(
-                    () => windowBoundsChanged({ window: win, profileName }),
-                    100,
-                );
-
-                const resizeFunction = debounce(() => {
-                    windowBoundsChanged({ window: win, profileName });
-                    Object.values(state.windows[profileName].browserViews).forEach((view) => {
-                        view.setBounds(getBrowserViewBounds(win));
-                    });
-                }, 100);
-
-                if (bounds) {
-                    if (profileBounds && profileBounds.maximised) {
-                        win.maximize();
-                    }
-                }
-                win.show();
-
-                // ugh,
-                win.on('move', boundsChangedFunction);
-                win.on('restore', resizeFunction);
-                win.on('maximize', resizeFunction);
-                win.on('unmaximize', resizeFunction);
-                win.on('resize', resizeFunction);
-
-                state.windows[profileName].boundsChangedHandlerBound = true;
-            }
-        });
+        void openConsoleWindow(profileName, state, expiryTime, consoleUrl);
     }
 }
 

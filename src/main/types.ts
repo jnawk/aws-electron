@@ -145,11 +145,8 @@ export interface MfaRowsArguments {
     mfaRowGenerator: {(args: MfaRowArguments): React.ReactElement}
 }
 
-export interface OpenTabArguments {
-    url: string,
-    profile: string,
+export interface OpenTabArguments { //TODO kill this - we don't need interfaces with single props.
     tabNumber: string,
-    expiryTime: number
 }
 
 export interface ProfileRowArguments {
