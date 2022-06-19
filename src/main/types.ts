@@ -220,6 +220,7 @@ export interface WindowBoundsChangedArguments {
     profileName: string
 }
 
+export type AppPath = "mfaCache" | "tabs" | "settings" | "keyRotation"
 export type AwsAction = 'RETAIN' | 'DISABLE' | 'DELETE'
 
 export type ConfigType = 'awsConfig' | 'vaultConfig'

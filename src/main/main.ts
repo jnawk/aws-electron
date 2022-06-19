@@ -31,6 +31,7 @@ import {
 import { getConsoleUrl } from './getConsoleURL';
 import {
     ApplicationState,
+    AppPath,
     BoundsPreference,
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
@@ -79,12 +80,7 @@ const state: ApplicationState = {
 
             state.preferencesWindow = new BrowserWindow(options);
             void state.preferencesWindow.loadURL(
-                url.format({
-                    pathname: path.join(__dirname, './index.html'),
-                    protocol: 'file:',
-                    hash: '/settings',
-                    slashes: true,
-                }),
+                getURL("settings")
             );
             state.preferencesWindow.on('close', () => {
                 delete state.preferencesWindow;
@@ -106,12 +102,7 @@ const state: ApplicationState = {
 
             state.keyRotationWindow = new BrowserWindow(options);
             void state.keyRotationWindow.loadURL(
-                url.format({
-                    pathname: path.join(__dirname, './index.html'),
-                    protocol: 'file:',
-                    hash: '/keyRotation',
-                    slashes: true,
-                }),
+                getURL("keyRotation")
             );
             state.keyRotationWindow.on('close', () => {
                 delete state.keyRotationWindow;
@@ -134,12 +125,7 @@ const state: ApplicationState = {
             state.mfaCacheWindow = new BrowserWindow(options);
 
             void state.mfaCacheWindow.loadURL(
-                url.format({
-                    pathname: path.join(__dirname, './index.html'),
-                    protocol: 'file:',
-                    hash: '/mfaCache',
-                    slashes: true,
-                }),
+                getURL("mfaCache")
             );
             state.mfaCacheWindow.on('close', () => {
                 delete state.mfaCacheWindow;
@@ -147,6 +133,21 @@ const state: ApplicationState = {
         }
     },
 };
+
+function getURL(appPath?: AppPath, profileName?: string): string {
+    const pathVariables = {
+        file: path.join(__dirname, './index.html'),
+        appPath,
+        profileName
+    }
+    if (!appPath) {
+        return sprintf.sprintf("file://%(file)s", pathVariables)
+    }
+    if (profileName) {
+        return sprintf.sprintf("file://%(file)s#/%(appPath)s/%(profileName)s", pathVariables)
+    }
+    return sprintf.sprintf("file://%(file)s#/%(appPath)s", pathVariables)
+}
 
 function createWindow(): void {
     Menu.setApplicationMenu(buildAppMenu(state));
@@ -170,11 +171,7 @@ function createWindow(): void {
 
     mainWindow = new BrowserWindow(options);
     void mainWindow.loadURL(
-        url.format({
-            pathname: path.join(__dirname, './index.html'),
-            protocol: 'file:',
-            slashes: true,
-        }),
+        getURL()
     );
 
     // win.toggleDevTools();
@@ -503,12 +500,7 @@ async function launchConsole({
             expiryTime,
         };
         win.loadURL(
-            url.format({ // TODO replace this
-                pathname: path.join(__dirname, './index.html'),
-                protocol: 'file:',
-                hash: `/tabs/${profileName}`,
-                slashes: true,
-            }),
+            getURL("tabs", profileName)
         ).catch((e) => {
             console.log(e);
         }).finally(() => { /* no action */ });
