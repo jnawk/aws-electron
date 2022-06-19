@@ -1,5 +1,4 @@
 import * as contextMenu from 'electron-context-menu';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as sprintf from 'sprintf-js';
 
@@ -35,7 +34,6 @@ import {
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
     GetUsableProfilesArguments,
-    HasVersion,
     LaunchConsoleArguments,
     OpenTabArguments,
     Preference,
@@ -48,18 +46,10 @@ import {
 import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
 import timeRemainingMessage from './timeRemaining';
+import { getApplicationVersion } from './getApplicationVersion';
 
 let mainWindow: Electron.BrowserWindow | null;
 let nextTabNumber = 0;
-
-function getApplicationVersion(): string {
-    const readFileOptions = {
-        encoding: 'utf-8' as const, flag: 'r' as const,
-    };
-    const packageJsonFile = fs.readFileSync(path.join(app.getAppPath(), 'package.json'), readFileOptions);
-    const packageJson = JSON.parse(packageJsonFile) as HasVersion;
-    return packageJson.version;
-}
 
 const state: ApplicationState = {
     windows: {},
