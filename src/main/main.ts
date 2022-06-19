@@ -603,7 +603,7 @@ ipcMain.handle(
                 { profileName, consoleUrl, expiryTime },
             ),
         ).catch((error: Error) => {
-            if (error.name === 'InvalidClientTokenId') {
+            if (['InvalidClientTokenId', 'ExpiredToken'].includes(error.name)) {
                 return error.name;
             }
             console.error(error, error.stack);
