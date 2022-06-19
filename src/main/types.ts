@@ -145,7 +145,7 @@ export interface MfaRowsArguments {
     mfaRowGenerator: {(args: MfaRowArguments): React.ReactElement}
 }
 
-export interface OpenTabArguments { //TODO kill this - we don't need interfaces with single props.
+export interface OpenTabArguments { // TODO kill this - we don't need interfaces with single props.
     tabNumber: string,
 }
 
