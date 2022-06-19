@@ -73,7 +73,6 @@ const state: ApplicationState = {
                 title: `AWS Console (v${state.version}) - Preferences`,
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    // worldSafeExecuteJavaScript: true,
                     contextIsolation: true,
                 },
             };
@@ -101,7 +100,6 @@ const state: ApplicationState = {
                 title: `AWS Console (v${state.version}) - Key Rotation`,
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    // worldSafeExecuteJavaScript: true,
                     contextIsolation: true,
                 },
             };
@@ -129,7 +127,6 @@ const state: ApplicationState = {
                 title: `AWS Console (v${state.version}) - MFA Cache`,
                 webPreferences: {
                     preload: path.join(__dirname, 'preload.js'),
-                    // worldSafeExecuteJavaScript: true,
                     contextIsolation: true,
                 },
             };
@@ -166,7 +163,6 @@ function createWindow(): void {
             devTools: process.env.NODE_ENV !== 'production',
             preload: path.join(__dirname, 'preload.js'),
             webSecurity: false,
-            // worldSafeExecuteJavaScript: true, // TODO from old
         },
         show: false,
         ...launchWindowBoundsSetting.bounds,
@@ -493,7 +489,6 @@ async function launchConsole({
                 partition: ['persist', profileName].join(':'),
                 nodeIntegration: false,
                 preload: path.join(__dirname, 'preload.js'),
-                // worldSafeExecuteJavaScript: true,
                 contextIsolation: true,
             },
             show: false,
