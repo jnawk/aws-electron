@@ -10,9 +10,7 @@ export default function buildAppMenu(state: ApplicationState): Menu {
     const handleReload = (browserWindow: BrowserWindow, force: boolean) => {
         let thingToReload: WebContents = browserWindow.webContents;
 
-        const currentProfileName = Object.keys(state.windows).find((profileName) => {
-            return browserWindow === state.windows[profileName].window;
-        });
+        const currentProfileName = Object.keys(state.windows).find((profileName) => browserWindow === state.windows[profileName].window);
         if (currentProfileName) {
             const windowDetails = state.windows[currentProfileName];
             if (windowDetails.currentView) {
