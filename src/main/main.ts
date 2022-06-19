@@ -382,7 +382,7 @@ async function launchConsole({
 
         const view = new BrowserView({
             webPreferences: {
-                partition: profileName,
+                partition: ['persist', profileName].join(':'),
             },
         });
         view.setBounds(getBrowserViewBounds(win));
@@ -490,7 +490,7 @@ async function launchConsole({
             height: 1024,
             title: await getTitle('AWS Console', profileName, ''),
             webPreferences: {
-                partition: profileName,
+                partition: ['persist', profileName].join(':'),
                 nodeIntegration: false,
                 preload: path.join(__dirname, 'preload.js'),
                 // worldSafeExecuteJavaScript: true,
