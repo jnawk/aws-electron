@@ -1,6 +1,6 @@
 import * as chai from 'chai';
 
-import timeRemainingMessage from '_/main/timeRemaining';
+import {timeRemainingMessage} from '_/main/timeRemaining';
 
 // seems a bit yick.  modifies Object.prototype
 // is needed once, can be invoked more than once
