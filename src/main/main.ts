@@ -29,7 +29,6 @@ import {
 import { getConsoleUrl } from './getConsoleURL';
 import {
     ApplicationState,
-    AppPath,
     BoundsPreference,
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
@@ -47,6 +46,7 @@ import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
 import timeRemainingMessage from './timeRemaining';
 import { getApplicationVersion } from './getApplicationVersion';
+import { getWindowURL } from './getWindowURL';
 
 let mainWindow: Electron.BrowserWindow | null;
 let nextTabNumber = 0;
@@ -69,7 +69,7 @@ const state: ApplicationState = {
 
             state.preferencesWindow = new BrowserWindow(options);
             void state.preferencesWindow.loadURL(
-                getURL("settings")
+                getWindowURL("settings")
             );
             state.preferencesWindow.on('close', () => {
                 delete state.preferencesWindow;
@@ -91,7 +91,7 @@ const state: ApplicationState = {
 
             state.keyRotationWindow = new BrowserWindow(options);
             void state.keyRotationWindow.loadURL(
-                getURL("keyRotation")
+                getWindowURL("keyRotation")
             );
             state.keyRotationWindow.on('close', () => {
                 delete state.keyRotationWindow;
@@ -114,7 +114,7 @@ const state: ApplicationState = {
             state.mfaCacheWindow = new BrowserWindow(options);
 
             void state.mfaCacheWindow.loadURL(
-                getURL("mfaCache")
+                getWindowURL("mfaCache")
             );
             state.mfaCacheWindow.on('close', () => {
                 delete state.mfaCacheWindow;
@@ -122,21 +122,6 @@ const state: ApplicationState = {
         }
     },
 };
-
-function getURL(appPath?: AppPath, profileName?: string): string {
-    const pathVariables = {
-        file: path.join(__dirname, './index.html'),
-        appPath,
-        profileName
-    }
-    if (!appPath) {
-        return sprintf.sprintf("file://%(file)s", pathVariables)
-    }
-    if (profileName) {
-        return sprintf.sprintf("file://%(file)s#/%(appPath)s/%(profileName)s", pathVariables)
-    }
-    return sprintf.sprintf("file://%(file)s#/%(appPath)s", pathVariables)
-}
 
 function createWindow(): void {
     Menu.setApplicationMenu(buildAppMenu(state));
@@ -160,7 +145,7 @@ function createWindow(): void {
 
     mainWindow = new BrowserWindow(options);
     void mainWindow.loadURL(
-        getURL()
+        getWindowURL()
     );
 
     // win.toggleDevTools();
@@ -489,7 +474,7 @@ async function launchConsole({
             expiryTime,
         };
         win.loadURL(
-            getURL("tabs", profileName)
+            getWindowURL("tabs", profileName)
         ).catch((e) => {
             console.log(e);
         }).finally(() => { /* no action */ });
