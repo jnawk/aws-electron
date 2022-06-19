@@ -224,7 +224,7 @@ export default class AWSConsole extends React.Component<Record<string, never>, A
             mfaCode,
             expiredCredentialsProfiles,
             clearMfaCode: () => this.setState({ mfaCode: '' }),
-            launchConsole: backend.launchConsole,
+            launchConsole: (args) => backend.launchConsole(args),
             launchButtonGenerator,
             profileRowGenerator: profileRow,
             onError: (credentialsProfileName) => { this.launchFailure(credentialsProfileName); },
