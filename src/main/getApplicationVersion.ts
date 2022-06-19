@@ -3,7 +3,7 @@ import * as path from 'path';
 import { app } from 'electron';
 import { HasVersion } from './types';
 
-export function getApplicationVersion(): string {
+export default function getApplicationVersion(): string {
     const readFileOptions = {
         encoding: 'utf-8' as const, flag: 'r' as const,
     };

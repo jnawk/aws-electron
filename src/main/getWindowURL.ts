@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as sprintf from 'sprintf-js';
 import { AppPath } from './types';
 
-export function getWindowURL(appPath?: AppPath, profileName?: string): string {
+export default function getWindowURL(appPath?: AppPath, profileName?: string): string {
     const pathVariables = {
         file: path.join(__dirname, './index.html'),
         appPath,
