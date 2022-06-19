@@ -34,6 +34,7 @@ class Backend {
         });
     }
 
+    // these things have to be properties, as functions they don't work.
     doMfa = (args: DoMfaArguments) => ipcRenderer.send('do-mfa', args);
 
     getAWSConfig = () => ipcRenderer.invoke('get-aws-config') as Promise<Configs>;
