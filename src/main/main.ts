@@ -45,7 +45,7 @@ import rotateKey from './rotateKey';
 import buildAppMenu from './menu';
 import timeRemainingMessage from './timeRemaining';
 import { getApplicationVersion } from './getApplicationVersion';
-import { getWindowURL } from './getWindowURL';
+import getWindowURL from './getWindowURL';
 import getPreferences from './getPreferences';
 import ApplicationState from './applicationState';
 
