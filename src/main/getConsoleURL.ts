@@ -29,8 +29,9 @@ function getConsoleUrlForRegion(region: string): string {
     return `https://${region}.console.aws.amazon.com`;
 }
 
-export async function getHttpAgent({ url, ca }: GetHttpAgentArguments): Promise<https.Agent> {
-    let proxy = await session.defaultSession.resolveProxy(url);
+export async function getHttpAgent({ url, ca, sessionDriver }: GetHttpAgentArguments): Promise<https.Agent> {
+    const driver = (sessionDriver || session).defaultSession
+    let proxy = await driver.resolveProxy(url);
 
     if (proxy === 'DIRECT') {
         return new https.Agent({

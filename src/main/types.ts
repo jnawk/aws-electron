@@ -76,9 +76,16 @@ export interface GetFederationUrlArguments {
     Session?: string,
 }
 
+export interface MinimalSessionDriver {
+    defaultSession: {
+        resolveProxy: {(url: string): Promise<string>}
+    }
+}
+
 export interface GetHttpAgentArguments {
     url: string,
     ca?: string | Buffer | Array<string | Buffer>
+    sessionDriver?: MinimalSessionDriver // for testing
 }
 
 export interface GetMfaProfilesArguments {
