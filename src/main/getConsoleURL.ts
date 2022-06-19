@@ -30,7 +30,7 @@ function getConsoleUrlForRegion(region: string): string {
 }
 
 export async function getHttpAgent({ url, ca, sessionDriver }: GetHttpAgentArguments): Promise<https.Agent> {
-    const driver = (sessionDriver || session).defaultSession
+    const driver = (sessionDriver || session).defaultSession;
     let proxy = await driver.resolveProxy(url);
 
     if (proxy === 'DIRECT') {

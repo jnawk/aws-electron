@@ -74,7 +74,7 @@ function createWindow(): void {
 
     mainWindow = new BrowserWindow(options);
     void mainWindow.loadURL(
-        getWindowURL()
+        getWindowURL(),
     );
 
     // win.toggleDevTools();

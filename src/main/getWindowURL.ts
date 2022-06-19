@@ -6,13 +6,13 @@ export function getWindowURL(appPath?: AppPath, profileName?: string): string {
     const pathVariables = {
         file: path.join(__dirname, './index.html'),
         appPath,
-        profileName
+        profileName,
     };
     if (!appPath) {
-        return sprintf.sprintf("file://%(file)s", pathVariables);
+        return sprintf.sprintf('file://%(file)s', pathVariables);
     }
     if (profileName) {
-        return sprintf.sprintf("file://%(file)s#/%(appPath)s/%(profileName)s", pathVariables);
+        return sprintf.sprintf('file://%(file)s#/%(appPath)s/%(profileName)s', pathVariables);
     }
-    return sprintf.sprintf("file://%(file)s#/%(appPath)s", pathVariables);
+    return sprintf.sprintf('file://%(file)s#/%(appPath)s', pathVariables);
 }
