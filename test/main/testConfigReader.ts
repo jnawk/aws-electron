@@ -15,7 +15,7 @@ import { profileRows } from '_renderer/getRoleData';
 // is needed once, can be invoked more than once
 const should = chai.should();
 
-const { expect } = chai;
+import { expect } from 'chai';
 
 const awsConfigFile1 = path.join(__dirname, 'awsConfig1');
 const awsConfigFile2 = path.join(__dirname, 'awsConfig2');

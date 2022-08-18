@@ -7,7 +7,7 @@ import { getProfileList, getAWSConfig } from '_/main/AWSConfigReader';
 // is needed once, can be invoked more than once
 chai.should();
 
-const { expect } = chai;
+import { expect } from 'chai';
 
 const awsConfigFile1 = path.join(__dirname, 'awsConfig1');
 

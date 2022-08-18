@@ -1,5 +1,4 @@
 import * as chai from 'chai';
-// const expect = chai.expect
 import * as https from 'https';
 import * as http from 'http';
 import * as ProxyAgent from 'proxy-agent';
