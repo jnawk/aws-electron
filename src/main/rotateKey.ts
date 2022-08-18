@@ -58,24 +58,21 @@ export default async function rotateKey({
     const log = ['Getting user'];
     try {
         const userResult = await iam.send(new GetUserCommand({}));
-        if (userResult === undefined) {
-            throw new Error('Who are you?');
-        }
-        const user = userResult.User;
+
+        const user = userResult?.User
         if (user === undefined) {
             throw new Error('Who are you?');
         }
 
         log.push('Creating new access key');
+
         const newKey = await iam.send(
             new CreateAccessKeyCommand({ UserName: user.UserName }),
         );
-        if (newKey === undefined) {
-            throw new Error("Can't make new key");
-        }
-        const accessKey = newKey.AccessKey;
+
+        const accessKey = newKey?.AccessKey
         if (accessKey === undefined) {
-            throw new Error('AWS gave bullshit');
+            throw new Error("Can't make new key");
         }
 
         if (local === 'BACKUP') {
