@@ -48,11 +48,22 @@ async function getAWSCredentials({
 export default async function rotateKey({
     awsCredentialsFile, profile, aws, local,
 }: RotateKeyArguments): Promise<Array<string>> {
+    /* Recognizes that credentials profiles named foo::source-profile are the
+    long term credentials associated with the foo profile, and uses the short
+    term credentials found in the foo profile to rotate the key found in the
+    foo::source-profile credentials profile.  If the credentials profile
+    doesn't end in ::source-profile, then just does the default thing. */
+
+    let workProfile = profile
+    if (profile.endsWith("::source-profile")) {
+        workProfile = profile.replace(new RegExp("::source-profile$"), "")
+    }
+
     const credentials = await getAWSCredentials({ awsCredentialsFile });
     const existingKeyId = credentials[profile].aws_access_key_id;
 
     let iam = new IAMClient({
-        credentials: fromIni({ profile }),
+        credentials: fromIni({ profile: workProfile }),
     });
 
     const log = ['Getting user'];
@@ -95,10 +106,11 @@ export default async function rotateKey({
             return ['Success'];
         }
 
-        iam = new IAMClient({
-            credentials: fromIni({ profile }),
-        });
-
+        if (profile != workProfile) {
+            iam = new IAMClient({
+                credentials: fromIni({ profile: workProfile }),
+            });
+        }
         log.push('Deactivating old Access Key');
         await iam.send(new UpdateAccessKeyCommand({
             AccessKeyId: existingKeyId,
