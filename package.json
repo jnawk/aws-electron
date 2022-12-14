@@ -76,7 +76,7 @@
     "debounce": "^1.2.1",
     "electron-context-menu": "^3",
     "electron-settings": "^4.0.2",
-    "ini": "^3.0.0",
+    "ini": "^3.0.1",
     "proxy-agent": "<5",
     "query-string": "^7",
     "react": "^17",
