@@ -1,4 +1,4 @@
-import * as ProxyAgent from 'proxy-agent';
+import { ProxyAgent } from 'proxy-agent';
 import * as QueryString from 'query-string';
 import * as https from 'https';
 import * as splitCa from 'split-ca';
@@ -43,10 +43,13 @@ export async function getHttpAgent({ url, ca, sessionDriver }: GetHttpAgentArgum
 
     proxy = proxy.replace(/PROXY ([^;]+);?/, '$1');
     const hasScheme = proxy.match(/^(https?):\/\//i);
-    if (!hasScheme) {
-        proxy = `http://${proxy}`;
+    if (hasScheme) {
+        proxy = proxy.replace(/https?:\/\//i, '');
     }
-    return new ProxyAgent(proxy);
+    const host = proxy.replace(/:\d+/, '');
+    const port = parseInt(proxy.replace(/.*:(\d+)$/, '$1'), 10);
+
+    return new ProxyAgent({ host, port });
 }
 
 async function configureProxy( // TODO rename

@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import * as https from 'https';
 import * as http from 'http';
-import * as ProxyAgent from 'proxy-agent';
+import { ProxyAgent } from 'proxy-agent';
 
 import { getHttpAgent } from '_/main/getConsoleURL';
 import { MinimalSessionDriver } from '_/main/types';
