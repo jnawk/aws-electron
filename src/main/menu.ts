@@ -52,7 +52,10 @@ export default function buildAppMenu(state: ApplicationState): Menu {
                     { role: 'unhide' },
                     { type: 'separator' },
                 ] : []) as Electron.MenuItemConstructorOptions[],
-                { role: 'close' },
+                {
+                    role: 'close',
+                    accelerator: 'Alt+F4',
+                },
                 { role: 'quit' },
             ],
         },
