@@ -54,9 +54,9 @@ export default async function rotateKey({
     foo::source-profile credentials profile.  If the credentials profile
     doesn't end in ::source-profile, then just does the default thing. */
 
-    let workProfile = profile
-    if (profile.endsWith("::source-profile")) {
-        workProfile = profile.replace(new RegExp("::source-profile$"), "")
+    let workProfile = profile;
+    if (profile.endsWith('::source-profile')) {
+        workProfile = profile.replace(/::source-profile$/, '');
     }
 
     const credentials = await getAWSCredentials({ awsCredentialsFile });
@@ -69,8 +69,7 @@ export default async function rotateKey({
     const log = ['Getting user'];
     try {
         const userResult = await iam.send(new GetUserCommand({}));
-
-        const user = userResult?.User
+        const user = userResult?.User;
         if (user === undefined) {
             throw new Error('Who are you?');
         }
@@ -81,7 +80,7 @@ export default async function rotateKey({
             new CreateAccessKeyCommand({ UserName: user.UserName }),
         );
 
-        const accessKey = newKey?.AccessKey
+        const accessKey = newKey?.AccessKey;
         if (accessKey === undefined) {
             throw new Error("Can't make new key");
         }
@@ -106,7 +105,7 @@ export default async function rotateKey({
             return ['Success'];
         }
 
-        if (profile != workProfile) {
+        if (profile !== workProfile) {
             iam = new IAMClient({
                 credentials: fromIni({ profile: workProfile }),
             });

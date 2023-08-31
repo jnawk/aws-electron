@@ -3,11 +3,11 @@ import * as path from 'path';
 
 import { getProfileList, getAWSConfig } from '_/main/AWSConfigReader';
 
+import { expect } from 'chai';
+
 // seems a bit yick.  modifies Object.prototype
 // is needed once, can be invoked more than once
 chai.should();
-
-import { expect } from 'chai';
 
 const awsConfigFile1 = path.join(__dirname, 'awsConfig1');
 

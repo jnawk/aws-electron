@@ -11,11 +11,11 @@ import {
 
 import { profileRows } from '_renderer/getRoleData';
 
+import { expect } from 'chai';
+
 // seems a bit yick.  modifies Object.prototype
 // is needed once, can be invoked more than once
 const should = chai.should();
-
-import { expect } from 'chai';
 
 const awsConfigFile1 = path.join(__dirname, 'awsConfig1');
 const awsConfigFile2 = path.join(__dirname, 'awsConfig2');
