@@ -202,7 +202,7 @@ export interface WindowDetails {
     browserViews: {[key: string]: BrowserView}
     currentView?: string
     expiryTime: number,
-    titleUpdateTimer?: NodeJS.Timer
+    titleUpdateTimer?: NodeJS.Timeout
 }
 
 export interface WindowBoundsChangedArguments {

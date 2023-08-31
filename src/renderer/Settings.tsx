@@ -17,7 +17,7 @@ interface SettingsState {
     preferences?: Preferences
     title: string | null
     seconds: string,
-    interval?: NodeJS.Timer
+    interval?: NodeJS.Timeout
 }
 
 const getSeconds = () => (59 - new Date().getSeconds()).toString().padStart(2, '0');
