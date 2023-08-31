@@ -21,7 +21,8 @@
     "productName": "AWS Console",
     "directories": {
       "app": "./dist/",
-      "output": "./out/"
+      "output": "./out/",
+      "buildResources": "build"
     },
     "mac": {
       "target": "zip"
