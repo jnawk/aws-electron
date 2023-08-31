@@ -8,9 +8,10 @@ import {
     STSClient,
     Credentials as AwsCredentials,
 } from '@aws-sdk/client-sts';
+import { fromIni } from '@aws-sdk/credential-providers';
 import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
 import { session } from 'electron';
-import { getAwsCredentialsProfile, getProfileList } from './AWSConfigReader';
+import { getProfileList } from './AWSConfigReader';
 import {
     AssumeRoleParams,
     AwsConfigFile,
@@ -69,95 +70,72 @@ async function getRoleCredentials(
     // set the long-term credentials
     let profile: string;
     if (profileList.length === 1) {
-    // the profile has a role to assume _and_ credentials to use.
-    // (it needs a role, we can't work with it otherwise)
+        // the profile has a role to assume _and_ credentials to use.  (it needs a role, we can't work with it otherwise)
         profile = profileName;
     } else {
-    // the first profile in profileList contains the credentials,
-    // (and maybe a role to assume)
+        // the first profile in profileList contains the credentials, (and maybe a role to assume)
         [profile] = profileList;
     }
 
     const httpAgent = await configureProxy(config);
     const requestHandler = new NodeHttpHandler({ httpAgent });
 
-    const iniCredentials = getAwsCredentialsProfile(profile);
-    let credentials: AwsCredentials = {
-        AccessKeyId: iniCredentials.aws_access_key_id,
-        SecretAccessKey: iniCredentials.aws_secret_access_key,
-        SessionToken: iniCredentials.aws_session_token,
-        Expiration: undefined,
-    };
-
-    if (credentials.AccessKeyId === undefined
-    || credentials.SecretAccessKey === undefined) {
-        throw new Error('No credeitnals');
-    }
+    let credentials = await fromIni({ profile })();
 
     let sts = new STSClient({
-        credentials: {
-            accessKeyId: credentials.AccessKeyId,
-            secretAccessKey: credentials.SecretAccessKey,
-            sessionToken: credentials.SessionToken,
-        },
+        credentials,
         requestHandler,
     });
 
     for (let profileNumber = 0; profileNumber < profileList.length; profileNumber += 1) {
         profile = profileList[profileNumber];
         const profileConfig = config[profile];
-        if (profileConfig !== undefined && profileConfig.role_arn) {
-            // assume the role
-            const assumeRoleParams: AssumeRoleParams = {
-                RoleArn: profileConfig.role_arn,
-                RoleSessionName: `${profileName}${new Date().getTime()}`,
-            };
-            if (profileConfig.mfa_serial) {
-                // this better only be on the first assume role profile in the chain!
-                assumeRoleParams.SerialNumber = profileConfig.mfa_serial;
-                assumeRoleParams.TokenCode = tokenCode;
-            }
-            if (profileConfig.duration_seconds) {
-                assumeRoleParams.DurationSeconds = profileConfig.duration_seconds;
-            }
-
-            // eslint-disable-next-line no-await-in-loop
-            const assumedRole = await sts.send(
-                new AssumeRoleCommand(assumeRoleParams),
-            );
-            if (assumedRole === undefined
-        || assumedRole.Credentials === undefined) {
-                throw new Error('Shit went wrong');
-            }
-
-            credentials = assumedRole.Credentials;
-            if (credentials === undefined) {
-                throw new Error('What is going on');
-            }
-            const accessKeyId = credentials.AccessKeyId;
-            const secretAccessKey = credentials.SecretAccessKey;
-            const sessionToken = credentials.SessionToken;
-            if (accessKeyId === undefined
-        || secretAccessKey === undefined
-        || sessionToken === undefined) {
-                throw new Error('What is going on');
-            }
-
-            // update the credentials
-            sts = new STSClient({
-                credentials: {
-                    accessKeyId,
-                    secretAccessKey,
-                    sessionToken,
-                },
-                requestHandler,
-            });
-        } else {
+        if (profileConfig === undefined || !profileConfig.role_arn) {
             // this must be profile 0, and only credentials,
             // skip to the next
+            continue;
         }
+
+        // assume the role
+        const assumeRoleParams: AssumeRoleParams = {
+            RoleArn: profileConfig.role_arn,
+            RoleSessionName: `${profileName}${new Date().getTime()}`,
+        };
+        if (profileConfig.mfa_serial) {
+            // this better only be on the first assume role profile in the chain!
+            assumeRoleParams.SerialNumber = profileConfig.mfa_serial;
+            assumeRoleParams.TokenCode = tokenCode;
+        }
+        if (profileConfig.duration_seconds) {
+            assumeRoleParams.DurationSeconds = profileConfig.duration_seconds;
+        }
+
+        const assumedRole = await sts.send(
+            new AssumeRoleCommand(assumeRoleParams),
+        );
+        if (assumedRole === undefined || assumedRole.Credentials === undefined || assumedRole.Credentials.AccessKeyId === undefined || assumedRole.Credentials.SecretAccessKey === undefined || assumedRole.Credentials.SessionToken === undefined) {
+            throw new Error('Shit went wrong');
+        }
+
+        credentials = {
+            accessKeyId: assumedRole.Credentials.AccessKeyId,
+            secretAccessKey: assumedRole.Credentials.SecretAccessKey,
+            sessionToken: assumedRole.Credentials.SessionToken,
+            expiration: assumedRole.Credentials.Expiration,
+        };
+
+        // update the credentials
+        sts = new STSClient({
+            credentials,
+            requestHandler,
+        });
     }
-    return credentials;
+    return {
+        AccessKeyId: credentials.accessKeyId,
+        SecretAccessKey: credentials.secretAccessKey,
+        SessionToken: credentials.sessionToken,
+        Expiration: credentials.expiration,
+    };
 }
 
 function getFederationUrl(
