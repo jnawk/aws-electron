@@ -130,6 +130,6 @@
     "tsconfig-paths": "^4",
     "typescript": "^5.2.2",
     "webpack": "^5",
-    "webpack-cli": "^5.0.1"
+    "webpack-cli": "^5.1.4"
   }
 }
