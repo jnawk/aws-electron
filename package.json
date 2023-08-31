@@ -87,7 +87,7 @@
     "reactstrap": "^9",
     "split-ca": "^1.0.1",
     "sprintf-js": "^1.1.2",
-    "urllib": "==2.37.3"
+    "urllib": "^2.41.0"
   },
   "devDependencies": {
     "@types/chai": "^4",
@@ -131,5 +131,10 @@
     "typescript": "^5.2.2",
     "webpack": "^5",
     "webpack-cli": "^5.1.4"
+  },
+  "overrides": {
+    "urllib": {
+      "proxy-agent": "^6.3.0"
+    }
   }
 }

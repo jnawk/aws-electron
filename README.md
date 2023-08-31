@@ -5,8 +5,7 @@ Access the AWS Console using Access Keys and assumed roles.
 ### Old dependency versions
 1. `react`, `react-dom`, `@types/react` and `@types/react-dom` don't seem to
     want to go newer than 17.x
-1.  `urllib` doesn't seem to be able to go newer than 2.37.3 (loses support for
-    specifying a custom agent & upgrades proxy-agent)
+1.  `urllib` doesn't seem to be able to go newer than 2.X (loses support for specifying a custom agent & upgrades proxy-agent)
 1.  `query-string` goes to ESM in 8.x.  Since we are an electron app, we can't upgrade yet.
 
 ### TODOs
