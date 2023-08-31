@@ -123,7 +123,6 @@
     "mocha": "^10.2.0",
     "rimraf": "^5.0.1",
     "source-map-loader": "^4",
-    "spectron": "^19.0.0",
     "style-loader": "^3",
     "ts-loader": "^9",
     "ts-node": "^10",
