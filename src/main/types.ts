@@ -198,6 +198,7 @@ export interface UpdateTabTitleArguments {
 export interface WindowDetails {
     window: BrowserWindow,
     boundsChangedHandlerBound?: boolean,
+    zoomHandlerBound?: boolean,
     browserViews: {[key: string]: BrowserView}
     currentView?: string
     expiryTime: number,

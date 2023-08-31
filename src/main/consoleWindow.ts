@@ -3,7 +3,7 @@ import * as debounce from 'debounce';
 import * as settings from 'electron-settings';
 
 import {
-    BrowserWindow, Rectangle, BrowserView, clipboard,
+    BrowserWindow, Rectangle, BrowserView, clipboard, WebContents,
 } from 'electron';
 import * as path from 'path';
 import * as contextMenu from 'electron-context-menu';
@@ -148,7 +148,14 @@ export function openTab(
         }
     };
 
-    [win.webContents, view.webContents].forEach((contents) => {
+    let contentses: Array<WebContents> = [win.webContents, view.webContents];
+    if (profileSession.zoomHandlerBound === true) {
+        contentses = [view.webContents];
+    } else {
+        profileSession.zoomHandlerBound = true;
+    }
+
+    contentses.forEach((contents) => {
         contents.on('zoom-changed', (__event, direction) => {
             let newZoomLevel = contents.getZoomLevel();
             if (direction === 'in') {
