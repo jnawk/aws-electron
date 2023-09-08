@@ -83,7 +83,7 @@ async function getRoleCredentials(
     const httpAgent = await configureProxy(config);
     const requestHandler = new NodeHttpHandler({ httpAgent });
 
-    let credentials = await fromIni({ profile })();
+    let credentials = await fromIni({ profile, ignoreCache: true })();
 
     let sts = new STSClient({
         credentials,
