@@ -63,7 +63,7 @@ export default async function rotateKey({
     const existingKeyId = credentials[profile].aws_access_key_id;
 
     let iam = new IAMClient({
-        credentials: fromIni({ profile: workProfile }),
+        credentials: fromIni({ profile: workProfile, ignoreCache: true }),
     });
 
     const log = ['Getting user'];
@@ -107,7 +107,7 @@ export default async function rotateKey({
 
         if (profile !== workProfile) {
             iam = new IAMClient({
-                credentials: fromIni({ profile: workProfile }),
+                credentials: fromIni({ profile: workProfile, ignoreCache: true }),
             });
         }
         log.push('Deactivating old Access Key');
