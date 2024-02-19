@@ -9,7 +9,7 @@ import {
     Credentials as AwsCredentials,
 } from '@aws-sdk/client-sts';
 import { fromIni } from '@aws-sdk/credential-providers';
-import { NodeHttpHandler } from '@aws-sdk/node-http-handler';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { session } from 'electron';
 import { getProfileList } from './AWSConfigReader';
 import {
