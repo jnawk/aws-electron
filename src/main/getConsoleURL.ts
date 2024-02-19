@@ -1,5 +1,5 @@
 import { ProxyAgent } from 'proxy-agent';
-import * as QueryString from 'query-string';
+import QueryString from 'query-string';
 import * as https from 'https';
 import * as splitCa from 'split-ca';
 import * as urllib from 'urllib';
