@@ -9,6 +9,7 @@ Access the AWS Console using Access Keys and assumed roles.
    specifying a custom agent & upgrades `proxy-agent`)
 1. `query-string` goes to ESM in 8.x.  We can't upgrade yet because `mocha` /
    `chai` don't like it, & upgrading to `ts-jest` is not straight forward.
+1. `chai` itself doesn't seem to want to upgrade beyond 4.x
 
 ### TODOs
 1.  `url.format` is depricated, but the alternative is rather shitty.
