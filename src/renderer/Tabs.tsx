@@ -6,7 +6,7 @@ import {
 } from 'reactstrap';
 
 import classnames from 'classnames';
-import { OpenTabArguments, UpdateTabTitleArguments } from '_/main/types';
+import { NavigateDirection, OpenTabArguments, UpdateTabTitleArguments } from '_/main/types';
 import './tabs.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -82,11 +82,38 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
     backend.closeTab({ profile, tab });
   }
 
+  navigate(direction: NavigateDirection) {
+    const { profile } = this.props;
+    const { activeTab } = this.state;
+
+    backend.navigate({ direction, profile, tab: activeTab! });
+  }
+
   render(): React.ReactElement {
     const { activeTab, tabs } = this.state;
 
     return (
       <Nav tabs>
+        <NavItem>
+          <NavLink
+            className="tab"
+            onClick={() => {
+              this.navigate('backwards');
+            }}
+          >
+            ◀
+          </NavLink>
+        </NavItem>
+        <NavItem>
+          <NavLink
+            className="tab"
+            onClick={() => {
+              this.navigate('forwards');
+            }}
+          >
+            ▶
+          </NavLink>
+        </NavItem>
         {tabs.map((tab) => (
           <NavItem key={tab.tabNumber} className={classnames('tab')}>
             <NavLink
@@ -101,6 +128,7 @@ export default class Tabs extends React.Component<TabsProps, TabsState> {
                 tabIndex={-1}
                 onKeyDown={(event) => {
                   if (event.ctrlKey && event.key === 'w') {
+                    event.preventDefault();
                     if (tab.tabNumber === activeTab) {
                       this.close(tab.tabNumber);
                     }

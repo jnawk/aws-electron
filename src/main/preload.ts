@@ -6,6 +6,7 @@ import {
     FrontendLaunchConsoleArguments,
     GetMfaProfilesArguments,
     GetUsableProfilesArguments,
+    NavigateArguments,
     OpenTabArguments,
     Preference,
     Preferences,
@@ -68,6 +69,8 @@ class Backend {
     switchTab = (args: SwitchTabArguments) => ipcRenderer.send('switch-tab', args);
 
     closeTab = (args: SwitchTabArguments) => ipcRenderer.send('close-tab', args);
+
+    navigate = (args: NavigateArguments) => ipcRenderer.send('navigate', args);
 }
 
 contextBridge.exposeInMainWorld('backend', new Backend());

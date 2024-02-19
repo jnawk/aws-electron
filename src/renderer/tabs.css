@@ -15,6 +15,7 @@
 .tabClose {
     padding-left: 5px;
     font-size: x-large;
+    line-height: 0.1rem;
 }
 
 a.tab, a.tab:hover {

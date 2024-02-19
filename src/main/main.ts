@@ -29,6 +29,7 @@ import {
     GetMfaProfilesArguments,
     GetUsableProfilesArguments,
     LaunchConsoleArguments,
+    NavigateArguments,
     Preference,
     RotateKeyArguments,
     SwitchTabArguments,
@@ -233,6 +234,20 @@ ipcMain.handle(
             console.error(error, error.stack);
             return undefined;
         });
+    },
+);
+
+ipcMain.on(
+    'navigate',
+    (_event, {
+        direction, profile, tab,
+    }: NavigateArguments) => {
+        const windowDetails = state.windows[profile];
+        if (direction === 'forwards') {
+            windowDetails.browserViews[tab].webContents.goForward();
+        } else {
+            windowDetails.browserViews[tab].webContents.goBack();
+        }
     },
 );
 

@@ -241,3 +241,11 @@ export type VaultPreference = {
 export interface SplitCa {
     (filepath: number | fs.PathLike, split?: string, encoding?: string): Array<string>
 }
+
+export type NavigateDirection = 'forwards' | 'backwards'
+
+export interface NavigateArguments {
+    direction: NavigateDirection
+    profile: string
+    tab: string
+}
