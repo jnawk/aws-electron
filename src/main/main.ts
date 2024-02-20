@@ -51,8 +51,10 @@ function createWindow(): void {
     console.log(`settings file: ${settings.file()}`);
     const launchWindowBoundsSetting = (settings.getSync('launchWindowBounds') || {}) as BoundsPreference;
 
+    const icon = path.join(path.dirname(path.dirname(__dirname)), 'aws-console.png');
+
     const options: Electron.BrowserWindowConstructorOptions = {
-        icon: 'icon.png',
+        icon,
         width: 1280,
         height: 1024,
         title: `AWS Console (v${state.version})`,
