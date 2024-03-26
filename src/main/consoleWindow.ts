@@ -52,7 +52,7 @@ function getBrowserViewBounds(win: BrowserWindow): Rectangle {
         x: 0,
         y: tabHeight,
         width: windowBounds.width - (dev ? devToolsWidth : 0),
-        height: windowBounds.height - (tabHeight + 25),
+        height: windowBounds.height - (tabHeight + 25) - (process.platform === 'win32' ? 25 : 0),
     };
 }
 
