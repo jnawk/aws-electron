@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 
 import {
     BrowserWindow,
@@ -124,7 +125,12 @@ function createWindow(): void {
     });
 }
 
-const useGPU = settings.getSync('preferences.useGPUPreference');
+let useGPU: boolean | undefined;
+try {
+    useGPU = settings.getSync('preferences.useGPUPreference') as boolean;
+} catch (error) {
+    fs.rmSync(settings.file());
+}
 if (useGPU !== undefined && useGPU === false) {
     console.log('disabling hardware accelaration');
     app.disableHardwareAcceleration();
