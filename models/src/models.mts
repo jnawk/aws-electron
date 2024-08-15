@@ -79,3 +79,11 @@ export const SsoTokenSchema = z.object({
 })
 
 export type SsoToken = z.infer<typeof SsoTokenSchema>
+
+export const SsoProfileSchema = z.object({
+  accountId: z.string(),
+  accountName: z.string(),
+  roleName: z.string(),
+})
+
+export type SsoProfile = z.infer<typeof SsoProfileSchema>

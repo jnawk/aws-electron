@@ -1,4 +1,4 @@
-import { Config, ConfigSchema } from "models"
+import { Config, ConfigSchema, SsoProfile, SsoProfileSchema } from "models"
 
 interface HasOptionalConfig {
   config?: Config
@@ -31,7 +31,7 @@ interface HasOptionalActiveProfileTab {
 }
 
 interface HasOptionalSsoRoles {
-  ssoRoles?: Record<string, Array<unknown>> // TODO model
+  ssoRoles?: Record<string, Array<SsoProfile>>
 }
 
 interface SetConfig {
@@ -90,7 +90,7 @@ interface SetSsoRoles {
   type: "set-sso-roles"
   payload: {
     profileName: string
-    ssoRoles: Array<unknown> // TODO model
+    ssoRoles: Array<SsoProfile>
   }
 }
 
@@ -170,7 +170,15 @@ export function setSsoRoles(
   (ssoRoles: Array<unknown>): void
 } {
   return (ssoRoles: Array<unknown>) =>
-    dispatch({ type: "set-sso-roles", payload: { profileName, ssoRoles } })
+    dispatch({
+      type: "set-sso-roles",
+      payload: {
+        profileName,
+        ssoRoles: ssoRoles.map(
+          (ssoRole: unknown): SsoProfile => SsoProfileSchema.parse(ssoRole),
+        ),
+      },
+    })
 }
 
 export function setActiveProfileTab(dispatch: React.Dispatch<RendererEvent>): {

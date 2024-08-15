@@ -8,6 +8,7 @@ import {
 import ProfileAccordion from "./ProfileAccordion"
 import { useEffect, useReducer } from "react"
 const { api } = window
+import { SsoProfile } from "models"
 
 interface SsoProfilesProps {
   profileName: string
@@ -40,7 +41,7 @@ function SsoProfiles({ profileName }: SsoProfilesProps): JSX.Element {
   }
   return (
     <>
-      {ssoRoles[profileName].map((role: unknown, index: number) => (
+      {ssoRoles[profileName].map((role: SsoProfile, index: number) => (
         <ProfileAccordion
           key={index}
           profileName={`${role.accountName}-${role.roleName}`}
