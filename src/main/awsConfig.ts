@@ -25,6 +25,7 @@ interface GetConfigArgs {
 }
 interface GetSsoConfigArgs extends GetConfigArgs {
   profileName: string
+  receiver: { (profiles?: Array<models.SsoProfile>): void }
 }
 
 interface GetProfilesArgs {
@@ -354,11 +355,12 @@ export async function getAccessToken(
 export async function getSsoConfig({
   profileName,
   configPath = path.join(os.homedir(), ".aws"),
-}: GetSsoConfigArgs): Promise<Array<sso.RoleInfo> | undefined> {
+  receiver,
+}: GetSsoConfigArgs): Promise<void> {
   const configFile = await getConfig({ configPath })
   const ssoSession = configFile.ssoSessions?.[profileName]
   if (ssoSession === undefined) {
-    return undefined
+    return
   }
   let accessToken: models.SsoToken
   try {
@@ -368,7 +370,7 @@ export async function getSsoConfig({
     })
   } catch (e) {
     console.log(e)
-    return undefined
+    return
   }
 
   const ssoClient = new sso.SSOClient({
@@ -380,7 +382,6 @@ export async function getSsoConfig({
     { client: ssoClient, pageSize: 100 },
     { accessToken: accessToken.accessToken },
   )
-  const roleList: Array<sso.RoleInfo & { accountName?: string }> = []
   // TODO this needs to stream back rather than this long pause to collect..
   for await (const page of listAccountsPaginator) {
     for (const account of page.accountList!) {
@@ -393,12 +394,14 @@ export async function getSsoConfig({
         },
       )
       for await (const page of listAccountRolesPaginator) {
-        page.roleList?.forEach((role) =>
-          roleList.push({ ...role, accountName: account.accountName }),
+        receiver(
+          page.roleList?.map((role) => ({
+            roleName: role.roleName!,
+            accountId: role.accountId!,
+            accountName: account.accountName!,
+          })),
         )
       }
     }
   }
-
-  return roleList
 }

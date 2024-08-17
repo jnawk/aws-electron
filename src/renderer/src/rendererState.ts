@@ -149,8 +149,8 @@ export function dispatcher(
       return {
         ...state,
         ssoRoles: {
-          ...(state.ssoRoles || {}),
-          [event.payload.profileName]: event.payload.ssoRoles,
+          ...state.ssoRoles,
+          [event.payload.profileName]: event.payload.profiles,
         },
       }
   }
@@ -174,8 +174,9 @@ export function setSsoRoles(
       type: "set-sso-roles",
       payload: {
         profileName,
-        ssoRoles: ssoRoles.map(
-          (ssoRole: unknown): SsoProfile => SsoProfileSchema.parse(ssoRole),
+        profiles: ssoRoles.map(
+          (ssoRole: unknown): models.SsoProfile =>
+            models.SsoProfileSchema.parse(ssoRole),
         ),
       },
     })

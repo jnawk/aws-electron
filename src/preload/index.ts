@@ -15,6 +15,13 @@ const api = {
   }): { (): void } =>
     registerListener("new-config", (_, payload): void => callback(payload)),
 
+  registerSsoProfileListener: (callback: {
+    (payload: Record<string, Array<unknown>>): void
+  }): { (): void } =>
+    registerListener("sso-profiles-updated", (_, payload): void =>
+      callback(payload),
+    ),
+
   registerProfileNameListener: (callback: {
     (profileName: string): void
   }): { (): void } =>

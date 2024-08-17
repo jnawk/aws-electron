@@ -430,6 +430,23 @@ function setActiveProfileTab(profileTab: number): void {
   settings.set("activeProfileTab", profileTab)
 }
 
+function getSsoConfig(profileName: string): void {
+  awsConfig.getSsoConfig({
+    profileName,
+    receiver: (profiles) => {
+      if (!profiles) {
+        return
+      }
+      dispatch({ type: "add-sso-profiles", payload: { profileName, profiles } })
+      // console.log(state.ssoProfiles)
+      state.mainWindow!.webContents.send(
+        "sso-profiles-updated",
+        state.ssoProfiles,
+      )
+    },
+  })
+}
+
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 }
@@ -463,7 +480,7 @@ app.whenReady().then(() => {
   ipcMain.handle("getConfig", () => awsConfig.getConfig())
 
   ipcMain.handle("getSsoConfig", (_, profileName: string) =>
-    getSsoConfig({ profileName }),
+    getSsoConfig(profileName),
   )
 
   ipcMain.handle("getVersion", app.getVersion)

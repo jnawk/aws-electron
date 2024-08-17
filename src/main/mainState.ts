@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto"
 import { WebContentsView, BrowserWindow } from "electron"
+import * as models from "models"
+
 interface LauncherWindowCreated {
   type: "launcher-window-created"
   payload: { window: Electron.BrowserWindow }
@@ -64,6 +66,14 @@ interface CloseTab {
   }
 }
 
+interface AddSsoProfiles {
+  type: "add-sso-profiles"
+  payload: {
+    profileName: string
+    profiles: Array<models.SsoProfile>
+  }
+}
+
 export type MainEvent =
   | LauncherWindowCreated
   | LauncherWindowClosed
@@ -75,6 +85,7 @@ export type MainEvent =
   | SetTop
   | ActivateTab
   | CloseTab
+  | AddSsoProfiles
 
 interface WindowDetails {
   // TODO how much of this is fluff?
@@ -92,6 +103,7 @@ export interface MainState {
   mainWindow?: Electron.BrowserWindow
   preferencesWindow?: Electron.BrowserWindow
   windows: Record<string, WindowDetails>
+  ssoProfiles?: Record<string, Array<models.SsoProfile>>
 }
 
 export function reducer(state: MainState, event: MainEvent): MainState {
@@ -229,6 +241,26 @@ export function reducer(state: MainState, event: MainEvent): MainState {
         ),
       }
     }
+
+    case "add-sso-profiles":
+      return {
+        ...state,
+        ssoProfiles: {
+          ...state.ssoProfiles,
+          [event.payload.profileName]: [
+            ...new Set(
+              [
+                ...((state.ssoProfiles || {})[event.payload.profileName] || []),
+                ...event.payload.profiles,
+              ]
+                .map((x) =>
+                  JSON.stringify(x, ["accountName", "accountId", "roleName"]),
+                )
+                .sort(),
+            ),
+          ].map((x) => models.SsoProfileSchema.parse(JSON.parse(x))),
+        },
+      }
   }
 }
 

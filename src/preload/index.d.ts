@@ -7,6 +7,11 @@ declare global {
       registerConfigChangeListener: {
         (callback: { (payload: unknown): void }): { (): void }
       }
+      registerSsoProfileListener: {
+        (callback: { (payload: Record<string, Array<unknown>>): void }): {
+          (): void
+        }
+      }
       registerProfileNameListener: {
         (callback: { (profileName: string): void }): { (): void }
       }
