@@ -1,7 +1,7 @@
-import { Config, ConfigSchema, SsoProfile, SsoProfileSchema } from "models"
+import * as models from "models"
 
 interface HasOptionalConfig {
-  config?: Config
+  config?: models.Config
 }
 
 interface HasMfaCode {
@@ -31,12 +31,12 @@ interface HasOptionalActiveProfileTab {
 }
 
 interface HasOptionalSsoRoles {
-  ssoRoles?: Record<string, Array<SsoProfile>>
+  ssoRoles?: Record<string, Array<models.SsoProfile>>
 }
 
 interface SetConfig {
   type: "set-config"
-  payload: Config
+  payload: models.Config
 }
 
 interface SetMfaCode {
@@ -90,7 +90,7 @@ interface SetSsoRoles {
   type: "set-sso-roles"
   payload: {
     profileName: string
-    ssoRoles: Array<SsoProfile>
+    profiles: Array<models.SsoProfile>
   }
 }
 
@@ -160,7 +160,7 @@ export function setConfig(dispatch: React.Dispatch<RendererEvent>): {
   (config: unknown): void
 } {
   return (config: unknown) =>
-    dispatch({ type: "set-config", payload: ConfigSchema.parse(config) })
+    dispatch({ type: "set-config", payload: models.ConfigSchema.parse(config) })
 }
 
 export function setSsoRoles(

@@ -9,7 +9,7 @@ import {
 import { join } from "path"
 import { electronApp, optimizer, is } from "@electron-toolkit/utils"
 import icon from "../../resources/icon.png?asset"
-import { getConfig, watchConfigFile, getSsoConfig } from "./awsConfig"
+import * as awsConfig from "./awsConfig"
 import { createReducer, initialState, reducer } from "./mainState"
 import { Config } from "models"
 import buildAppMenu from "./menu"
@@ -157,7 +157,7 @@ async function launchConsole(
 ): Promise<void> {
   const url = await getConsoleUrl({
     type: "standard",
-    config: await getConfig(),
+    config: await awsConfig.getConfig(),
     tokenCode: mfaCode,
     profileName,
   })
@@ -232,7 +232,7 @@ async function launchSsoConsole(
   // TODO reunify
   const url = await getConsoleUrl({
     type: "sso",
-    config: await getConfig(),
+    config: await awsConfig.getConfig(),
     accountId,
     roleName,
     profileName,
@@ -460,7 +460,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  ipcMain.handle("getConfig", () => getConfig())
+  ipcMain.handle("getConfig", () => awsConfig.getConfig())
 
   ipcMain.handle("getSsoConfig", (_, profileName: string) =>
     getSsoConfig({ profileName }),
@@ -510,7 +510,7 @@ app.whenReady().then(() => {
 
   createLauncherWindow()
 
-  watchConfigFile((newConfig: Config) =>
+  awsConfig.watchConfigFile((newConfig: Config) =>
     state.mainWindow!.webContents.send("new-config", newConfig),
   )
 

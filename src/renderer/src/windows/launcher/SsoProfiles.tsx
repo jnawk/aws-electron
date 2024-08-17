@@ -8,7 +8,7 @@ import {
 import ProfileAccordion from "./ProfileAccordion"
 import { useEffect, useReducer } from "react"
 const { api } = window
-import { SsoProfile } from "models"
+import * as models from "models"
 
 interface SsoProfilesProps {
   profileName: string
