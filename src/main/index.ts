@@ -18,6 +18,23 @@ import debounce from "debounce"
 import settings from "electron-settings"
 import * as fs from "fs/promises"
 
+interface LaunchConsoleArgs {
+  profileName: string
+  consoleUrl: string
+}
+
+interface LaunchConsoleSsoArgs {
+  accountName?: string // TODO add this in and make non-optional
+  accountId: string
+  roleName: string
+  ssoProfileName: string
+}
+
+interface LaunchConsoleStandardArgs {
+  mfaCode?: string
+  profileName: string
+}
+
 const [state, dispatch] = createReducer(reducer, initialState)
 
 function loadWindowContent(window: BrowserWindow, contentName: string): void {
@@ -151,17 +168,10 @@ function zoomChange(
   }, 100)
 }
 
-async function launchConsole(
-  profileName: string,
-  mfaCode: string,
-): Promise<void> {
-  const url = await getConsoleUrl({
-    type: "standard",
-    config: await awsConfig.getConfig(),
-    tokenCode: mfaCode,
-    profileName,
-  })
-
+async function launchConsole({
+  profileName,
+  consoleUrl,
+}: LaunchConsoleArgs): Promise<void> {
   // Create the browser window.
   const { windows } = state
   const windowDetails = windows[profileName]
@@ -190,7 +200,6 @@ async function launchConsole(
       tabsWindow.show()
       tabsWindow.webContents.openDevTools()
       tabsWindow.webContents.send("set-profile-name", profileName)
-      tabsWindow.webContents.send("open-tab", url) // TODO necessary?
     })
 
     tabsWindow.on("close", () => {
@@ -220,90 +229,49 @@ async function launchConsole(
 
     loadWindowContent(tabsWindow, "tabs")
   }
-  openTab(profileName, url)
-  tabsWindow.webContents.send("open-tab", url)
+  openTab(profileName, consoleUrl)
+  tabsWindow.webContents.send("open-tab", consoleUrl)
 }
 
-async function launchSsoConsole(
-  profileName: string,
-  accountId: string,
-  roleName: string,
-): Promise<void> {
+async function launchStandardConsole({
+  profileName,
+  mfaCode,
+}: LaunchConsoleStandardArgs): Promise<void> {
+  const url = await getConsoleUrl({
+    type: "standard",
+    config: await awsConfig.getConfig(),
+    tokenCode: mfaCode,
+    profileName,
+  })
+  launchConsole({ profileName, consoleUrl: url })
+}
+
+async function launchSsoConsole({
+  ssoProfileName,
+  accountId,
+  roleName,
+}: LaunchConsoleSsoArgs): Promise<void> {
   // TODO reunify
   const url = await getConsoleUrl({
     type: "sso",
     config: await awsConfig.getConfig(),
     accountId,
     roleName,
-    profileName,
+    profileName: ssoProfileName,
   })
 
   // Create the browser window.
-  const { windows, ssoProfiles } = state
-  const ssoProfile = ssoProfiles![profileName].find(
+  const { ssoProfiles } = state
+  const ssoProfile = ssoProfiles![ssoProfileName].find(
     (profile) =>
       profile.accountId === accountId && profile.roleName === roleName,
   )
 
-  const profileKey = [profileName, ssoProfile!.accountName, roleName].join("-")
-  const windowDetails = windows[profileKey]
+  const profileKey = [ssoProfileName, ssoProfile!.accountName, roleName].join(
+    "-",
+  )
 
-  const tabsWindow =
-    windowDetails?.window ||
-    new BrowserWindow({
-      width: 900,
-      height: 670,
-      show: false,
-      ...(process.platform === "linux" ? { icon } : {}),
-      webPreferences: {
-        preload: join(__dirname, "../preload/index.js"),
-        sandbox: true,
-        partition: ["persist", profileKey].join(":"),
-      },
-    })
-
-  if (!windowDetails) {
-    dispatch({
-      type: "open-window",
-      payload: { profileName: profileKey, window: tabsWindow },
-    })
-
-    tabsWindow.on("ready-to-show", () => {
-      tabsWindow.show()
-      tabsWindow.webContents.openDevTools()
-      tabsWindow.webContents.send("set-profile-name", profileKey)
-      tabsWindow.webContents.send("open-tab", url)
-    })
-
-    tabsWindow.on("close", () => {
-      dispatch({ type: "close-window", payload: profileKey })
-    })
-
-    tabsWindow.on(
-      "resize",
-      debounce(() => {
-        tabsWindow.contentView.children.forEach((view) => {
-          const { top } = state.windows[profileKey]
-          const bounds = {
-            ...tabsWindow.getContentBounds(),
-            x: 0,
-            y: parseInt((top * tabsWindow.webContents.zoomFactor).toFixed(0)),
-          }
-          bounds.height = bounds.height - top
-          view.setBounds(bounds)
-        })
-      }, 100),
-    )
-
-    tabsWindow.webContents.on(
-      "zoom-changed",
-      zoomChange(tabsWindow, profileKey),
-    )
-
-    loadWindowContent(tabsWindow, "tabs")
-  }
-  openTab(profileKey, url)
-  tabsWindow.webContents.send("open-tab", url)
+  launchConsole({ profileName: profileKey, consoleUrl: url })
 }
 
 function setTop(profileName: string, top: number): void {
@@ -500,13 +468,13 @@ app.whenReady().then(() => {
   ipcMain.on("openMfaCache", () => createMfaCacheWindow())
 
   ipcMain.on("launchConsole", (_, profileName: string, mfaCode: string) =>
-    launchConsole(profileName, mfaCode),
+    launchStandardConsole({ profileName, mfaCode }),
   )
 
   ipcMain.on(
     "launchSsoConsole",
     (_, profileName: string, accountId: string, roleName: string) =>
-      launchSsoConsole(profileName, accountId, roleName),
+      launchSsoConsole({ ssoProfileName: profileName, accountId, roleName }),
   )
 
   ipcMain.on("setTop", (_, profileName: string, top: number): void =>
