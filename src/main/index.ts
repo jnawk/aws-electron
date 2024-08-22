@@ -239,10 +239,13 @@ async function launchSsoConsole(
   })
 
   // Create the browser window.
-  const { windows } = state
+  const { windows, ssoProfiles } = state
+  const ssoProfile = ssoProfiles![profileName].find(
+    (profile) =>
+      profile.accountId === accountId && profile.roleName === roleName,
+  )
 
-  // TODO use the account name?
-  const profileKey = [profileName, accountId, roleName].join("-")
+  const profileKey = [profileName, ssoProfile!.accountName, roleName].join("-")
   const windowDetails = windows[profileKey]
 
   const tabsWindow =
