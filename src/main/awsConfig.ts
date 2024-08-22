@@ -23,6 +23,7 @@ interface GetOidcClientArgs {
 interface GetConfigArgs {
   configPath?: string
 }
+
 interface GetSsoConfigArgs extends GetConfigArgs {
   profileName: string
   receiver: { (profiles?: Array<models.SsoProfile>): void }
@@ -404,4 +405,5 @@ export async function getSsoConfig({
       }
     }
   }
+  receiver([])
 }

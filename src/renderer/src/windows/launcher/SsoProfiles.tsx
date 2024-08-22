@@ -27,8 +27,8 @@ function SsoProfiles({
   useEffect(
     () =>
       api.registerSsoProfileListener(
-        (ssoRoles: Record<string, Array<unknown>>) => {
-          Object.entries(ssoRoles).forEach(([profileName, profile]) => {
+        (ssoRoleList: Record<string, Array<unknown>>) => {
+          Object.entries(ssoRoleList).forEach(([profileName, profile]) => {
             if (profileName === tabProfileName) {
               setSsoProfiles(profile)
             }
@@ -39,6 +39,7 @@ function SsoProfiles({
   )
 
   useEffect(() => {
+    console.log(ssoProfiles)
     if (ssoProfiles) {
       return undefined
     }
@@ -52,35 +53,42 @@ function SsoProfiles({
     }
   }, [ssoProfiles])
 
-  if (!ssoRoles || ssoRoles[tabProfileName] === undefined) {
-    return <>Fetching roles for SSO Profile {tabProfileName}</>
-  }
-
   return (
     <>
-      {[...ssoRoles[tabProfileName]].map(
-        (role: models.SsoProfile, index: number) => (
-          <ProfileAccordion
-            key={index}
-            profileName={`${role.accountName}-${role.roleName}`}
-            profile={{
-              entryType: "sso-session",
-              order: index,
-              source_profile: tabProfileName,
-              sso_account_id: role.accountId,
-              sso_role_name: role.roleName,
-            }}
-            launchAction={() => {
-              api.launchSsoConsole(
-                tabProfileName,
-                role.accountId,
-                role.roleName,
-              )
-              dispatch({ type: "launch-console" })
-            }}
-          />
-        ),
+      {(!ssoProfiles ||
+        ssoProfiles[tabProfileName] === undefined ||
+        ssoProfiles[tabProfileName].fetching === true) && (
+        <>Fetching roles for SSO Profile {tabProfileName}</>
       )}
+      {ssoProfiles &&
+        ssoProfiles[tabProfileName] !== undefined &&
+        ssoProfiles[tabProfileName].profiles && (
+          <>
+            {[...ssoProfiles[tabProfileName].profiles].map(
+              (role: models.SsoProfile, index: number) => (
+                <ProfileAccordion
+                  key={index}
+                  profileName={`${role.accountName}-${role.roleName}`}
+                  profile={{
+                    entryType: "sso-session",
+                    order: index,
+                    source_profile: tabProfileName,
+                    sso_account_id: role.accountId,
+                    sso_role_name: role.roleName,
+                  }}
+                  launchAction={() => {
+                    api.launchSsoConsole(
+                      tabProfileName,
+                      role.accountId,
+                      role.roleName,
+                    )
+                    dispatch({ type: "launch-console" })
+                  }}
+                />
+              ),
+            )}
+          </>
+        )}
     </>
   )
 }

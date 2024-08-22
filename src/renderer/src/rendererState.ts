@@ -30,6 +30,11 @@ interface HasOptionalActiveProfileTab {
   activeProfileTab?: number
 }
 
+interface SsoProfileList {
+  fetching: boolean
+  profiles: Array<models.SsoProfile>
+}
+
 interface HasOptionalSsoProfiles {
   ssoProfiles?: Record<string, SsoProfileList>
 }
@@ -146,11 +151,27 @@ export function dispatcher(
     case "set-active-profile-tab":
       return { ...state, activeProfileTab: event.payload }
     case "set-sso-profiles":
+      if (event.payload.profiles.length == 0) {
+        return {
+          ...state,
+          ssoProfiles: {
+            ...state.ssoProfiles,
+            [event.payload.profileName]: {
+              ...(state.ssoProfiles || {})[event.payload.profileName],
+              fetching: false,
+            },
+          },
+        }
+      }
       return {
         ...state,
         ssoProfiles: {
           ...state.ssoProfiles,
-          [event.payload.profileName]: event.payload.profiles,
+          [event.payload.profileName]: {
+            ...(state.ssoProfiles || {})[event.payload.profileName],
+            profiles: event.payload.profiles,
+            fetching: true,
+          },
         },
       }
   }

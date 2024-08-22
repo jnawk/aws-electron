@@ -434,11 +434,14 @@ function getSsoConfig(profileName: string): void {
   awsConfig.getSsoConfig({
     profileName,
     receiver: (profiles) => {
-      if (!profiles) {
+      if (!profiles || profiles.length === 0) {
+        state.mainWindow!.webContents.send("sso-profiles-updated", {
+          ...state.ssoProfiles,
+          [profileName]: [],
+        })
         return
       }
       dispatch({ type: "add-sso-profiles", payload: { profileName, profiles } })
-      // console.log(state.ssoProfiles)
       state.mainWindow!.webContents.send(
         "sso-profiles-updated",
         state.ssoProfiles,
