@@ -3,7 +3,7 @@ import "../../assets/main.css"
 import {
   dispatcher,
   initialState,
-  setSsoRoles as _setSsoRoles,
+  setSsoProfiles as _setSsoProfiles,
 } from "@renderer/rendererState"
 import ProfileAccordion from "./ProfileAccordion"
 import { useEffect, useReducer } from "react"
@@ -17,12 +17,12 @@ interface SsoProfilesProps {
 function SsoProfiles({
   profileName: tabProfileName,
 }: SsoProfilesProps): JSX.Element {
-  const [{ ssoRoles }, dispatch] = useReducer(
+  const [{ ssoProfiles }, dispatch] = useReducer(
     dispatcher,
     undefined,
     initialState,
   )
-  const setSsoRoles = _setSsoRoles(dispatch, tabProfileName)
+  const setSsoProfiles = _setSsoProfiles(dispatch, tabProfileName)
 
   useEffect(
     () =>
@@ -30,7 +30,7 @@ function SsoProfiles({
         (ssoRoles: Record<string, Array<unknown>>) => {
           Object.entries(ssoRoles).forEach(([profileName, profile]) => {
             if (profileName === tabProfileName) {
-              setSsoRoles(profile)
+              setSsoProfiles(profile)
             }
           })
         },
@@ -39,7 +39,7 @@ function SsoProfiles({
   )
 
   useEffect(() => {
-    if (ssoRoles) {
+    if (ssoProfiles) {
       return undefined
     }
     const timeoutNumber = setTimeout(() => {
@@ -50,7 +50,7 @@ function SsoProfiles({
     return (): void => {
       clearTimeout(timeoutNumber)
     }
-  }, [ssoRoles])
+  }, [ssoProfiles])
 
   if (!ssoRoles || ssoRoles[tabProfileName] === undefined) {
     return <>Fetching roles for SSO Profile {tabProfileName}</>

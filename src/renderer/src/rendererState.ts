@@ -30,8 +30,8 @@ interface HasOptionalActiveProfileTab {
   activeProfileTab?: number
 }
 
-interface HasOptionalSsoRoles {
-  ssoRoles?: Record<string, Array<models.SsoProfile>>
+interface HasOptionalSsoProfiles {
+  ssoProfiles?: Record<string, SsoProfileList>
 }
 
 interface SetConfig {
@@ -86,8 +86,8 @@ interface SetActiveProfileTab {
   payload: number
 }
 
-interface SetSsoRoles {
-  type: "set-sso-roles"
+interface SetSsoProfiles {
+  type: "set-sso-profiles"
   payload: {
     profileName: string
     profiles: Array<models.SsoProfile>
@@ -105,7 +105,7 @@ export type RendererEvent =
   | SetTitleFormat
   | SetVersion
   | SetActiveProfileTab
-  | SetSsoRoles
+  | SetSsoProfiles
 
 type RendererState = HasOptionalConfig &
   HasMfaCode &
@@ -114,7 +114,7 @@ type RendererState = HasOptionalConfig &
   HasOptionalTitleFormat &
   HasOptionalVersion &
   HasOptionalActiveProfileTab &
-  HasOptionalSsoRoles
+  HasOptionalSsoProfiles
 
 export function dispatcher(
   state: RendererState,
@@ -145,11 +145,11 @@ export function dispatcher(
       return { ...state, version: event.payload }
     case "set-active-profile-tab":
       return { ...state, activeProfileTab: event.payload }
-    case "set-sso-roles":
+    case "set-sso-profiles":
       return {
         ...state,
-        ssoRoles: {
-          ...state.ssoRoles,
+        ssoProfiles: {
+          ...state.ssoProfiles,
           [event.payload.profileName]: event.payload.profiles,
         },
       }
@@ -163,7 +163,7 @@ export function setConfig(dispatch: React.Dispatch<RendererEvent>): {
     dispatch({ type: "set-config", payload: models.ConfigSchema.parse(config) })
 }
 
-export function setSsoRoles(
+export function setSsoProfiles(
   dispatch: React.Dispatch<RendererEvent>,
   profileName: string,
 ): {
@@ -171,7 +171,7 @@ export function setSsoRoles(
 } {
   return (ssoRoles: Array<unknown>) =>
     dispatch({
-      type: "set-sso-roles",
+      type: "set-sso-profiles",
       payload: {
         profileName,
         profiles: ssoRoles.map(
