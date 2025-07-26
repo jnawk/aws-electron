@@ -353,6 +353,7 @@ function openTab(profileName: string, url: string): void {
   const bounds = { ...window.getContentBounds(), x: 0, y: top }
   bounds.height = bounds.height - top
   view.setBounds(bounds)
+  // view.webContents.openDevTools({mode: "undocked"})
 
   const { webContents: viewWebContents } = view
   viewWebContents.loadURL(url)
