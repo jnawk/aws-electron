@@ -34,7 +34,7 @@
   "dependencies": {
     "@coreui/coreui": "^5.1.1",
     "@coreui/react": "^5.3.0",
-    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^3.0.0",
     "models": "file:models"
   },
@@ -61,7 +61,7 @@
     "electron-vite": "^2.3.0",
     "eslint-plugin-react": "^7.35.0",
     "ini": "^4.1.3",
-    "prettier": "^3.3.3",
+    "prettier": "^3.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sprintf-js": "^1.1.3",
