@@ -35,7 +35,7 @@
     "@coreui/coreui": "^5.4.1",
     "@coreui/react": "^5.7.1",
     "@electron-toolkit/preload": "^3.0.2",
-    "@electron-toolkit/utils": "^3.0.0",
+    "@electron-toolkit/utils": "^4.0.0",
     "models": "file:models"
   },
   "devDependencies": {
@@ -54,8 +54,8 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@vitejs/plugin-react": "^4.7.0",
     "debounce": "^2.2.0",
-    "electron": "^31.3.1",
-    "electron-builder": "^24.9.1",
+    "electron": "^37.2.4",
+    "electron-builder": "^26.0.12",
     "electron-settings": "^4.0.4",
     "electron-updater": "^6.6.2",
     "electron-vite": "^4.0.0",
