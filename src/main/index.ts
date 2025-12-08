@@ -331,11 +331,19 @@ function reloadWindow(window: BrowserWindow, force: boolean): void {
   }
 }
 
+function trimTitle(title: string): string {
+  console.log(title)
+  if (title.length > 50) {
+    return `${title.substring(0, 15)}...${title.substring(title.length - 15)}`
+  }
+  return title
+}
+
 function sendTabs(profileName: string): void {
   const { window, tabs, activeTab } = state.windows[profileName]
   window.webContents.send(
     "set-tabs",
-    tabs.map((view) => view.webContents.getTitle()),
+    tabs.map((view) => trimTitle(view.webContents.getTitle())),
     activeTab,
   )
 }
